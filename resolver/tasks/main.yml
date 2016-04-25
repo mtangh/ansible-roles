@@ -1,0 +1,28 @@
+---
+# tasks file for resolver
+
+- block:
+
+  - name: resolver | Set facts platform.
+    set_fact:
+      platform_allow_os_families: [ "RedHat", "Test" ]
+      platform_allow_distributions:
+
+  - name: resolver | Check the platform.
+    include: "platform.yml"
+
+  tags:
+  - always
+  - resolver-os-family
+
+- name: resolver| Updating /etc/resolv.conf
+  template:
+    src: "etc/resolv.conf.j2"
+    dest: "{{ prefix_dir|d('') }}/etc/resolv.conf"
+    owner: "{{ test_owner|d('root') }}"
+    group: "{{ test_group|d('root') }}"
+    mode: "0644"
+    backup: yes
+  tags:
+  - resolver
+

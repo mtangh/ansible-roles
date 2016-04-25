@@ -1,0 +1,14 @@
+---
+# test-setup tasks file
+
+- name: test-setup | create directories for test
+  command:
+    mkdir -p "{{ prefix_dir|d('') }}{{ item }}"
+    creates={{ prefix_dir|d('') }}{{ item }}
+  with_items:
+  - /etc
+  when: test_run is defined
+        and prefix_dir is defined
+  tags:
+  - '[test-setup]'
+

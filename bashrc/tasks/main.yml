@@ -1,0 +1,156 @@
+---
+# tasks file for bashrc
+
+- block:
+
+  - name: bashrc | Set facts platform.
+    set_fact:
+      platform_allow_os_families: [ "Darwin", "RedHat", "Test" ]
+      platform_allow_distributions:
+
+  - name: bashrc | Check the platform.
+    include: "platform.yml"
+
+  tags:
+  - always
+  - bashrc-os-family
+
+- name: bashrc | Create a directory for backup.
+  file:
+    path: "{{ prefix_dir|d('') }}/etc/._bashrc-origin"
+    state: directory
+    owner: "{{ test_owner|d('root') }}"
+    group: "{{ test_group|d('root') }}"
+    mode: 0755
+  register: backup_dir_mkdir
+  tags:
+  - bashrc-backup-origin-mkdir
+  - bachrc-backup-origin
+- name: bashrc | Stat backup directory.
+  stat: path="{{ prefix_dir|d('') }}/etc/._bashrc-origin"
+  register: backup_dir_stat
+  when: backup_dir_mkdir|changed
+  tags:
+  - bashrc-backup-origin-stat
+- name: bashrc | Backup the original files.
+  copy:
+    src: "{{ prefix_dir|d('') }}/etc/{{ item }}"
+    dest: "{{ prefix_dir|d('') }}/etc/._bashrc-origin/{{ item }}"
+    remote_src: true
+  ignore_errors: true
+  with_items: 
+  - bashrc
+  - profile
+  - bash.bashrc
+  - bash.profile
+  when: backup_dir_stat is defined
+        and backup_dir_stat.isdir == true
+  tags:
+  - bashrc-backup-origin
+    
+- name: bashrc | Create a 'bash.bashrc.d' directory.
+  file:
+    path: "{{ prefix_dir|d('') }}/etc/bash.bashrc.d/"
+    state: directory
+    owner: "{{ test_owner|d('root') }}"
+    group: "{{ test_group|d('root') }}"
+    mode: 0755
+  tags:
+  - install-bash-bashrc-dir-mkdir
+  - install-bash-bashrc-dir
+- name: bashrc | Stat 'bash.bashrc.d' directory.
+  stat: path="{{ prefix_dir|d('') }}/etc/bash.bashrc.d/"
+  register: bash_bashrc_d_stat
+  tags:
+  - install-bash-bashrc-dir-stat
+  - install-bash-bashrc-dir
+- name: bashrc | Install bash.bashrc.d files
+  synchronize:
+    src: etc/bash.bashrc.d/
+    dest: "{{ prefix_dir|d('') }}/etc/bash.bashrc.d/"
+    checksum: yes
+    compress: yes
+    delete: yes
+    links: yes
+    recursive: yes
+  register: instsll_bashrc_dir_files
+  when: bash_bashrc_d_stat is defined
+        and bash_bashrc_d_stat.isdir == true
+  tags:
+  - install-bash-bashrc-dir
+
+- name: bashrc | Find shell files under the /etc/bash.bashrc.d
+  find:
+    paths: "{{ prefix_dir|d('') }}/etc/bash.bashrc.d"
+    patterns: "*.sh*"
+    recurse: yes
+  register: find_sh
+  when: instsll_bashrc_dir_files|changed 
+  tags: 
+  - change-mode-shells-find
+  - change-mode-shells
+  - change-mode-files
+- name: bashrc | Change mode all shell files
+  file:
+    path: "{{ item.path }}"
+    state: touch
+    owner: "{{ test_owner|d('root') }}"
+    group: "{{ test_group|d('root') }}"
+    mode: 0755
+  with_items: "{{ find_sh.files if find_sh.files is defined else [] }}"
+  when: instsll_bashrc_dir_files|changed 
+  tags:
+  - change-mode-shells
+  - change-mode-files
+- name: bashrc | Find shell files under the /etc/bash.bashrc.d/bin
+  find:
+    paths: "{{ prefix_dir|d('') }}/etc/bash.bashrc.d/bin"
+    file_type: file
+    recurse: yes
+  register: find_bin
+  when: instsll_bashrc_dir_files|changed 
+  tags: 
+  - change-mode-bin-files-find
+  - change-mode-bin-files
+  - change-mode-files
+- name: bashrc | Change mode scripts under the /etc/bash.bashrc.d/bin
+  file:
+    path: "{{ item.path }}"
+    state: touch
+    owner: "{{ test_owner|d('root') }}"
+    group: "{{ test_group|d('root') }}"
+    mode: 0755
+  with_items: "{{ find_bin.files if find_bin.files is defined else [] }}"
+  when: instsll_bashrc_dir_files|changed 
+  tags:
+  - change-mode-bin-files
+  - change-mode-files
+
+- name: bashrc | Install rc files
+  template:
+    src: "etc/{{ item }}.j2"
+    dest: "{{ prefix_dir|d('') }}/etc/{{ item }}"
+    owner: "{{ test_owner|d('root') }}"
+    group: "{{ test_group|d('root') }}"
+    mode: 0644
+  register: install_rc_files
+  with_items:
+  - bash.bashrc
+  - bash.profile
+  tags:
+  - install-rc-files
+  - symlink-bash-files
+
+- name: bashrc | Symlinks rc files
+  file:
+    src: "{{ prefix_dir|d('') }}/etc/{{ item.src }}"
+    dest: "{{ prefix_dir|d('') }}/etc/{{ item.dest }}"
+    state: link
+    force: yes
+  with_items:
+  - { src: bash.bashrc, dest: bashrc }
+  - { src: bash.profile, dest: profile }
+  when: install_rc_files|changed
+  tags:
+  - symlink-bash-files
+

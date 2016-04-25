@@ -1,0 +1,17 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+
+  tags:
+    default
+
+  vars:
+    httpd_handle_service: false
+    httpd_httpd_conf_validate_command:
+
+  roles:
+  - test-setup
+  - { role: ../.. }
+  - test-teardown
+

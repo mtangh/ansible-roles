@@ -1,0 +1,88 @@
+---
+# tasks file for httpd "main_config"
+
+#-
+#- Update httpd.conf
+#-
+- block:
+
+  - name: "httpd-main-config | {{ __httpd_conf_path|basename }} | Disabling directives"
+    lineinfile:
+      dest: "{{ prefix_dir|d('') ~ __httpd_conf_path }}"
+      state: present
+      create: false
+      regexp: "^([ \t]*)({{ item.k }}[ \t]+.*)$"
+      line: '#\1\2'
+      backrefs: yes
+      validate: "{{ __httpd_validate_command }}"
+    with_items: "{{ __httpd_dvps if __httpd_dvps is defined else [] }}"
+    when: item.k is not none
+          and item.v is none
+          and item.e == false
+
+  - name: "httpd-main-config | {{ __httpd_conf_path|basename }} | Disabling directives and values"
+    lineinfile:
+      dest: "{{ prefix_dir|d('') ~ __httpd_conf_path }}"
+      state: present
+      create: false
+      regexp: "^([ \t]*)({{ item.k }}[ \t]+{{ item.v }}([ \t].*|))$"
+      line: '#\1\2'
+      backrefs: yes
+      validate: "{{ __httpd_validate_command }}"
+    with_items: "{{ __httpd_dvps if __httpd_dvps is defined else [] }}"
+    when: item.k is not none
+          and item.v is not none
+          and item.e == false
+
+  - name: "httpd-main-config | {{ __httpd_conf_path|basename }} | Overwrite match directives"
+    lineinfile:
+      dest: "{{ prefix_dir|d('') ~ __httpd_conf_path }}"
+      state: present
+      create: false
+      regexp: "^(#|)([ \t]*)({{ item.k }})[ \t]+({{ item.p if item.p is not none else '[^ \t].*' }})[ \t]*$"
+      line: |
+        \2{{ '%s %s'|format(item.k,item.v) }}
+      backrefs: yes
+      validate: "{{ __httpd_validate_command }}"
+    with_items: "{{ __httpd_dvps if __httpd_dvps is defined else [] }}"
+    when: item.k is not none
+          and item.v is not none
+          and item.o == true
+          and item.e == true
+
+  - name: "httpd-main-config | {{ __httpd_conf_path|basename }} | Insert After directives"
+    lineinfile:
+      dest: "{{ prefix_dir|d('') ~ __httpd_conf_path }}"
+      state: present
+      create: false
+      insertafter: "{{ item.a }}"
+      line: "{{ '%s %s'|format(item.k,item.v) }}"
+      validate: "{{ __httpd_validate_command }}"
+    with_items: "{{ __httpd_dvps|reverse|list if __httpd_dvps is defined else [] }}"
+    when: item.k is not none
+          and item.v is not none
+          and (item.a is not none or (item.a is none and item.b is none))
+          and item.o == false
+          and item.e == true
+
+  - name: "httpd-main-config | {{ __httpd_conf_path|basename }} | Insert Before directives"
+    lineinfile:
+      dest: "{{ prefix_dir|d('') ~ __httpd_conf_path }}"
+      state: present
+      create: false
+      insertbefore: "{{ item.b }}"
+      line: "{{ '%s %s'|format(item.k,item.v) }}"
+      validate: "{{ __httpd_validate_command }}"
+    with_items: "{{ __httpd_dvps if __httpd_dvps is defined else [] }}"
+    when: item.k is not none
+          and item.v is not none
+          and item.b is not none
+          and item.o == false
+          and item.e == true
+
+  when: __httpd_dvps is defined
+        and __httpd_dvps is not none
+  tags:
+  - httpd
+  - httpd-httpd-conf
+

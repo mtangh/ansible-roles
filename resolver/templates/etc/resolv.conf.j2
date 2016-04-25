@@ -1,0 +1,28 @@
+# resolv.conf
+# {{ ansible_managed }}
+
+{%  if resolver_domain is defined
+    and resolver_domain is string %}
+domain {{ resolver_domain|trim }}
+{%  endif %}
+{%  if resolver_serach is defined
+    and resolver_search is string %}
+search {{ resolver_search|trim }}
+{%  endif %}
+{%  if resolver_nameservers is defined %}
+
+{%    for nameserver in resolver_nameservers|sort %}
+nameserver {{ nameserver|trim }}
+{%    endfor %}
+{%  endif %}
+{%  if resolver_sortlist is defined %}
+
+sortlist {{ resolver_sortlist if resolver_sortlist is string else resolver_sortlist|join(' ') }}
+{%  endif %}
+{%  if resolver_options is defined %}
+
+{%    for option in resolver_options %}
+options {{ (option if option is string else option|join(' '))|trim }}
+{%    endfor %}
+{%  endif %}
+

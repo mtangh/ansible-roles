@@ -1,0 +1,73 @@
+---
+# tasks file for epel
+
+- block:
+
+  - name: epel | Set facts platform.
+    set_fact:
+      platform_allow_os_families: [ "RedHat", "Test" ]
+      platform_allow_distributions: [ "CentOS", "Test" ]
+
+  - name: epel | Check the platform.
+    include: "platform.yml"
+
+  tags:
+  - always
+  - epel-os-family
+
+- name: epel | Include distribution specific variables.
+  include_vars: "{{ __distribution }}.yml"
+  when: __distribution|d(none) is not none
+  tags:
+  - epel
+  - epel-include-vars
+
+- name: epel | Install the epel.
+  include: "{{ __distribution }}.yml"
+  when: __distribution|d(none) is not none
+  tags:
+  - epel
+  - epel-install
+
+- block:
+
+  - name: epel | Set fact - repo config
+    set_fact:
+      _repo_id: "epel-testing.repo"
+      _repos: "{{ epel_epel_repos }}"
+
+  - name: epel | Create epel.repo file.
+    template:
+      src: yum.repos.conf.j2
+      dest: "{{ prefix_dir|d('') }}/etc/yum.repos.d/epel.repo"
+      owner: "{{ test_owner|d('root') }}"
+      group: "{{ test_group|d('root') }}"
+      mode: "0644"
+      backup: yes
+
+  when: epel_epel_repos|d([])|length > 0
+  tags:
+  - epel
+  - epel-repo
+
+- block:
+
+  - name: epel | Set fact - repo config for testing
+    set_fact:
+      _repo_id: "epel-testing.repo"
+      _repos: "{{ epel_epel_testing_repos }}"
+
+  - name: epel | Create epel-testing.repo file.
+    template:
+      src: yum.repos.conf.j2
+      dest: "{{ prefix_dir|d('') }}/etc/yum.repos.d/epel-testing.repo"
+      owner: "{{ test_owner|d('root') }}"
+      group: "{{ test_group|d('root') }}"
+      mode: "0644"
+      backup: yes
+
+  when: epel_epel_testing_repos|d([])|length > 0
+  tags:
+  - epel
+  - epel-repo-testing
+

@@ -1,0 +1,6 @@
+---
+# tasks file for httpd "test"
+
+- name: httpd-setup-test | Include setup
+  debug: msg="{{ httpd_install_packages if httpd_install_packages is defined else [] }}"
+

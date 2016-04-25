@@ -1,0 +1,37 @@
+---
+# tasks file for syslog
+
+- block:
+
+  - name: syslog | Set facts platform.
+    set_fact:
+      platform_allow_os_families: [ "RedHat", "Test" ]
+      platform_allow_distributions:
+
+  - name: syslog | Check the platform.
+    include: "platform.yml"
+
+  tags:
+  - always
+  - syslog-os-family
+
+- name: "syslog | Install package"
+  include: "{{ __os_family }}-setup.yml"
+  tags:
+  - syslog
+  - syslog-syslog-install
+
+- name: "syslog | Updating {{ syslog_syslog_conf }}"
+  template:
+    src: "etc/{{ syslog_syslog_type }}.conf.j2"
+    dest: "{{ prefix_dir|d('') }}{{ syslog_syslog_conf|d('/etc/syslog.conf') }}"
+    owner: "{{ test_owner|d('root') }}"
+    group: "{{ test_group|d('root') }}"
+    mode: "0644"
+    backup: yes
+  notify:
+  - syslog-start-syslog
+  tags:
+  - syslog
+  - syslog-syslog-conf
+

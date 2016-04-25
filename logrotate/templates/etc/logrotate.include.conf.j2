@@ -1,0 +1,3 @@
+# {{ ansible_managed }}
+{%  import 'macros.logrotate.j2' as m_logrotate with context %}
+{{  m_logrotate.logrotate_file(logrotate_file_parameters) }}

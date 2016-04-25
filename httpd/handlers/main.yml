@@ -1,0 +1,27 @@
+---
+# handlers file for httpd
+
+- name: httpd-enable-service
+  service:
+    name: "{{ httpd_httpd_service_name|d('httpd') }}"
+    enabled: yes
+  when: httpd_handle_service|d(true)
+
+- name: httpd-start-httpd
+  service:
+    name: "{{ httpd_httpd_service_name|d('httpd') }}"
+    state: started
+  when: httpd_handle_service is undefined
+
+- name: httpd-stop-httpd
+  service:
+    name: "{{ httpd_httpd_service_name|d('httpd') }}"
+    state: stoped
+  when: httpd_handle_service is undefined
+
+- name: httpd-restart-httpd
+  service:
+    name: "{{ httpd_httpd_service_name|d('httpd') }}"
+    state: restarted
+  when: httpd_handle_service is undefined
+

@@ -1,0 +1,44 @@
+---
+# defaults file for etc-hosts
+
+## Enable/Disable Hostname
+etc_hosts_using_ip_by_hostname: true
+
+## Enable/Disable IPv4 hosts
+etc_hosts_using_ipv4: true
+
+## Enable/Disable IPv6 hosts
+etc_hosts_using_ipv6: true
+
+## Enable/Disable "hosts.allow"
+etc_hosts_using_hosts_allow: true
+
+## Enable/Disable "hosts.deny"
+etc_hosts_using_hosts_deny: true
+
+## IPv4 Hosts entries
+etc_hosts_ipv4:
+# - <ipaddr>: name[ name...]
+
+## IPv6 Hosts entries
+etc_hosts_ipv6:
+# - <ipaddr>: name[ name...]
+
+## IPv6 Hosts Allow
+etc_hosts_allow:
+- ALL: 
+  - 127.0.0.1
+- sshd: ALL
+
+## IPv6 Hosts Deny
+etc_hosts_deny:
+- ALL: ALL
+
+## Extra variables
+etc_hosts_extras:
+#  "group_or_host_name":  
+#    etc_hosts_ipv4:
+#    etc_hosts_ipv6:
+#    etc_hosts_allow:
+#    etc_hosts_deny:
+

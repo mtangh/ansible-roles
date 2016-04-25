@@ -1,0 +1,21 @@
+---
+# handlers file for syslog
+
+- name: syslog-enable-syslog
+  service:
+    name: "{{ syslog_syslog_type }}"
+    enabled: yes
+  when: syslog_syslog_type is defined
+
+- name: syslog-start-syslog 
+  service:
+    name: "{{ syslog_syslog_type }}"
+    state: started
+  when: syslog_syslog_type is defined
+
+- name: syslog-restart-syslog
+  service:
+    name: "{{ syslog_syslog_type }}"
+    state: restarted
+  when: syslog_syslog_type is defined
+

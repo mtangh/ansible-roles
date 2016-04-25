@@ -1,0 +1,184 @@
+---
+# tasks file for httpd
+
+- block:
+
+  - name: httpd-main | Set facts platform.
+    set_fact:
+      platform_allow_os_families: [ "RedHat", "Test" ]
+      platform_allow_distributions:
+
+  - name: httpd-main | Check the platform.
+    include: "platform.yml"
+
+  tags:
+  - always
+  - httpd-os-family
+
+- name: httpd-main | Include OS-specific variables.
+  include_vars: "{{ __os_family }}.yml"
+  tags:
+  - always
+  - httpd-include-vars
+
+- block:
+
+  - name: "httpd-main | Set facts 'httpd_httpd_conf_directives' | in"
+    set_fact:
+      _httpd_httpd_conf_dvps_in: "{{ httpd_httpd_conf_directives|d({}) }}"
+ 
+  - name: "httpd-main | Set facts 'httpd_httpd_conf_directives' | dict to list"
+    include: "main_httpd-conf-dvps.yml"
+
+  - name: "httpd-main | Set facts 'httpd_httpd_conf_directives' | out"
+    set_fact:
+      _httpd_directives_values: "{{ _httpd_httpd_conf_dvps_out|d([]) }}"
+    when: _httpd_httpd_conf_dvps_out is defined
+          and _httpd_httpd_conf_dvps_out is not none
+ 
+  tags:
+  - always
+  - httpd-set-facts
+  - httpd-set-facts-dvp-global
+
+- block:
+
+  - name: "httpd-main | Set facts 'httpd_httpd_ssl_directives' | in"
+    set_fact:
+      _httpd_httpd_conf_dvps_in: "{{ httpd_httpd_ssl_directives|d({}) }}"
+ 
+  - name: "httpd-main | Set facts 'httpd_httpd_ssl_directives' | dict to list"
+    include: "main_httpd-conf-dvps.yml"
+
+  - name: "httpd-main | Set facts 'httpd_httpd_ssl_directives' | out"
+    set_fact:
+      _httpd_ssl_directives_values: "{{ _httpd_httpd_conf_dvps_out|d([]) }}"
+ 
+  when: httpd_httpd_ssl_directives is defined
+        and httpd_httpd_ssl_directives is not none
+  tags:
+  - always
+  - httpd-set-facts
+  - httpd-set-facts-dvp-ssl
+
+- block:
+
+  - name: httpd-main | Install the httpd
+    include: "{{ __os_family }}-setup.yml"
+  
+  tags:
+  - httpd
+  - httpd-install
+
+- block:
+
+  - name: "httpd-main | Stat '{{ httpd_httpd_conf_path|basename }}'"
+    stat: path="{{ prefix_dir|d('') ~ httpd_httpd_conf_path }}"
+    register: httpd_httpd_conf_file
+
+  - name: "httpd-main | Stat '{{ httpd_httpd_conf_path|basename }}' origin"
+    stat: path="{{ prefix_dir|d('') ~ httpd_httpd_conf_path }}.ORIG"
+    register: httpd_httpd_conf_file_origin
+
+  - name: "httpd-main | File '{{ httpd_httpd_conf_path|basename }}' Not Exist"
+    fail: msg="'{{ prefix_dir|d('') ~ httpd_httpd_conf_path|basename }}' no such file or directory."
+    when: httpd_httpd_conf_file.stat.exists is undefined
+          or httpd_httpd_conf_file.stat.exists == false
+
+  - name: "httpd-main | Backup '{{ httpd_httpd_conf_path|basename }}'"
+    copy:
+      src: "{{ prefix_dir|d('') ~ httpd_httpd_conf_path }}"
+      dest: "{{ prefix_dir|d('') ~ httpd_httpd_conf_path }}.ORIG"
+      remote_src: yes
+    when: httpd_httpd_conf_file.stat.exists is defined
+          and httpd_httpd_conf_file.stat.exists == true
+          and ( httpd_httpd_conf_file_origin.stat.exists is undefined
+              or httpd_httpd_conf_file_origin.stat.exists == false )
+
+  - name: "httpd-main | Set facts for '{{ httpd_httpd_conf_path|basename }}'"
+    set_fact:
+      __httpd_conf_path: "{{ httpd_httpd_conf_path }}"
+      __httpd_dvps: "{{ _httpd_directives_values }}"
+      __httpd_validate_command: "{{ httpd_httpd_conf_validate_command if test_run|d(false) == false else none }}"
+
+  - name: "httpd-main | Configure '{{ httpd_httpd_conf_path|basename }}'"
+    include: "main_configure.yml"
+
+  tags:
+  - httpd
+  - httpd-conf
+
+- block:
+
+  - name: "httpd-main | Stat '{{ httpd_httpd_ssl_conf_path|basename }}'"
+    stat: path="{{ prefix_dir|d('') ~ httpd_httpd_ssl_conf_path }}"
+    register: httpd_httpd_ssl_conf_file
+
+  - name: "httpd-main | Stat '{{ httpd_httpd_ssl_conf_path|basename }}' origin"
+    stat: path="{{ prefix_dir|d('') ~ httpd_httpd_ssl_conf_path }}.ORIG"
+    register: httpd_httpd_ssl_conf_file_origin
+
+  - name: "httpd-main | File '{{ httpd_httpd_ssl_conf_path|basename }}' Not Exist"
+    fail: msg="'{{ httpd_httpd_ssl_conf_path|basename }}' no such file or directory."
+    when: httpd_httpd_ssl_conf_file.stat.exists is undefined
+          or httpd_httpd_ssl_conf_file.stat.exists == false
+
+  - name: "httpd-main | Backup '{{ httpd_httpd_ssl_conf_path|basename }}'"
+    copy:
+      src: "{{ prefix_dir|d('') ~ httpd_httpd_ssl_conf_path }}"
+      dest: "{{ prefix_dir|d('') ~ httpd_httpd_ssl_conf_path }}.ORIG"
+      remote_src: yes
+    when: httpd_httpd_ssl_conf_file.stat.exists is defined
+          and httpd_httpd_ssl_conf_file.stat.exists == true
+          and ( httpd_httpd_ssl_conf_file_origin.stat.exists is undefined
+              or httpd_httpd_ssl_conf_file_origin.stat.exists == false )
+
+  - name: "httpd-main | Set facts for '{{ httpd_httpd_ssl_conf_path|basename }}'"
+    set_fact:
+      __httpd_conf_path: "{{ httpd_httpd_ssl_conf_path }}"
+      __httpd_dvps: "{{ _httpd_ssl_directives_values }}"
+      __httpd_validate_command: "{{ httpd_httpd_conf_validate_command if test_run|d(false) == false else none }}"
+
+  - name: "httpd-main | Configure '{{ httpd_httpd_ssl_conf_path|basename }}'"
+    include: "main_configure.yml"
+
+  when: httpd_httpd_conf_path is defined
+        and httpd_httpd_conf_path is not none
+  tags:
+  - httpd
+  - httpd-conf
+  - httpd-conf-ssl
+
+- block:
+
+  - name: "httpd-main | Configure for OS:{{ __os_family }}"
+    include: "{{ __os_family }}-configure.yml"
+
+  tags:
+  - httpd
+  - httpd-conf
+  - httpd-conf-os-family
+
+- block:
+
+  - name: "httpd-main | Handle service - Enabled '{{ httpd_httpd_service_enabled }}'"
+    service:
+      name: "{{ httpd_httpd_service_name }}"
+      enabled: yes
+    ignore_errors: true
+    when: httpd_httpd_service_enabled is defined
+          and httpd_httpd_service_enabled is not none
+
+  - name: "httpd-main | Handle service - Initial state {{ httpd_httpd_initial_state|d('none') }}"
+    service:
+      name: "{{ httpd_httpd_service_name }}"
+      state: "{{ httpd_httpd_startup_state }}"
+    ignore_errors: true
+    when: httpd_httpd_initial_state is defined
+          and httpd_httpd_initial_state|lower|trim|match('^(started|stoped)$')
+
+  when: httpd_handle_service|d('false')
+  tags:
+  - httpd
+  - httpd-service-setup
+

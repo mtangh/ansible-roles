@@ -1,0 +1,49 @@
+---
+# tasks file for logrotate
+
+- block:
+
+  - name: logrotate | Set facts platform.
+    set_fact:
+      platform_allow_os_families: [ "RedHat", "Test" ]
+      platform_allow_distributions:
+
+  - name: logrotate | Check the platform.
+    include: "platform.yml"
+
+  tags:
+  - always
+  - logrotate-os-family
+
+- name: logrotate | Install the logrotate
+  include: "{{ __os_family }}-setup.yml"
+  tags:
+  - logrotate
+  - logrotate-install
+
+- name: logrotate | Updating /etc/logrotate.conf
+  template:
+    src: "etc/logrotate.conf.j2"
+    dest: "{{ prefix_dir|d('') }}/etc/logrotate.conf"
+    owner: "{{ test_owner|d('root') }}"
+    group: "{{ test_group|d('root') }}"
+    mode: "0644"
+    backup: yes
+  tags:
+  - logrotate
+  - logrotate-conf
+
+- name: logrotate | logrotate.d | Updating /etc/logrotate.d files
+  template:
+    src: "etc/logrotate.include.conf.j2"
+    dest: "{{ prefix_dir|d('') }}{{ logrotate_include_dir }}/{{ item.name }}"
+    owner: "{{ test_owner|d('root') }}"
+    group: "{{ test_group|d('root') }}"
+    mode: "0644"
+  with_items: "{{ logrotate_conf_include_files }}"
+  when: (item.name is defined and item.name is not none)
+        and (item.logfiles is defined and item.logfiles is not none)
+  tags:
+  - logrotate
+  - logrotate-include-files
+

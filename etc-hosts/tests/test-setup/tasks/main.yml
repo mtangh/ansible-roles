@@ -1,0 +1,27 @@
+---
+# ut-setup tasks file
+- name: ut | create directories for test
+  command:
+    mkdir -p "{{ prefix_dir|d('') }}{{ item }}"
+    creates={{ prefix_dir|d('') }}{{ item }}
+  with_items:
+    - /etc
+  when: test_run is defined
+        and prefix_dir is defined
+  tags: [unit_test_setup]
+
+- name: ut | create hosts file for test
+  file:
+    path: "{{ prefix_dir|d('') }}/etc/{{ item }}"
+    state: touch
+    owner: "{{ test_owner|d('root') }}"
+    group: "{{ test_group|d('root') }}"
+    mode: 0644
+  with_items:
+    - hosts
+    - hosts.allow
+    - hosts.deny
+  when: test_run is defined
+        and prefix_dir is defined
+  tags: [unit_test_setup]
+

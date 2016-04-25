@@ -1,0 +1,9 @@
+---
+# tasks file for httpd "test"
+
+- name: httpd-config-test | Include configure for test
+  debug:
+    msg: |
+      {{ { 'httpd_httpd_conf_path':httpd_httpd_conf_path,
+           'httpd_httpd_ssl_conf_path':httpd_httpd_ssl_conf_path } }}
+

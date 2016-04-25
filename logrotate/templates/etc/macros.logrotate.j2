@@ -1,0 +1,184 @@
+{#----------------------------------------------------------------------
+ #  name: macros.logrotateh.j2
+ #---------------------------------------------------------------------#}
+
+{%  macro logrotate_file( parameters ) -%}
+{%    set p = parameters
+          if parameters is not none else none %}
+{%    set p_paths = p.logfiles 
+          if (p is defined and p is not none)
+          and p.logfiles is defined and p.logfiles is not none
+          else none %}
+{%    if p is not none and p_paths is not none %}
+{%      if p.name is defined and p.name is not none %}
+# {{ p.name|trim }}i
+{%      endif %}
+{%      set p_paths = p_paths
+            if p_paths is iterable and p_paths is not string
+            else [ p.logfiles|string|trim ] %}
+{%      for p_path in p_paths if p_path is not none %}
+{{ p_path }}
+{%      endfor -%}{{ "{" }}
+{%      set p_cycle = p.cycle
+            if p.cycle is defined
+            and p.cycle|lower|trim|match('^(dai|week|month|year)ly$')
+            else none %}
+{%      if p_cycle is not none %}
+  {{ p.cycle|lower|trim }}
+{%      endif %}
+{%      set p_size = p.size
+            if p.size is defined
+            and p.size|trim|match('^[1-9][0-9]*([Kk]|[Mm]|[Gg]|)$')
+            else none %}
+{%      if p_size is not none %}
+  size {{ p.size }}
+{%      endif %}
+{%      set p_minsize = p.minsize
+            if p.minsize is defined
+            and p.minsize|trim|match('^[1-9][0-9]*([Kk]|[Mm]|[Gg]|)$')
+            else none %}
+{%      if p_minsize is not none %}
+  minsize {{ p_minsize }}
+{%      endif %}
+{%      if p.rotate is defined and p.rotate is number %}
+  rotate {{ p.rotate }}
+{%      endif %}
+{%      if p.start is defined and p.start is number %}
+  start {{ p.start }}
+{%      endif %}
+{%      if p.extension is defined and p.extension|string|trim|match('^\..+$') %}
+  extension {{ p.extension }}
+{%      endif %}
+{%      if p.dateext is defined
+        and p.dateext|string|lower|trim|match('^(yes|no|true|false)$') %}
+  {{ 'no' if p.dateext|string|lower|trim|match('^(no|false)$') else '' }}dateext
+{%        if p.dateformat is defined and p.dateformat is not none %}
+  dateformat {{ p.dateformat|trim }}
+{%        endif %}
+{%      endif %}
+{%      if p.olddir is defined
+        and (p.olddir is string or p.olddir|string|lower|trim|match('^(no|false)$')) %}
+{%        set p_olddir = '%solddir %s'|format(
+              ('no' if p.olddir|string|lower|trim|match('^(no|false)$') else ''),
+              p.olddir)|trim %}
+  {{ p_olddir }}
+{%      endif %}
+{%      set cre_m,cre_o,cre_g = (
+            (p.create.mode if p.create.mode is defined else none),
+            (p.create.owner if p.create.owner is defined else none),
+            (p.create.group if p.create.group is defined else none)) %}
+{%      if cre_m is not none or cre_o is not none or cre_g is not none %}
+  create {{ cre_m|d('0644') }} {{ cre_o|d('root') }} {{ cre_g|d('root') }}
+{%      elif p.create is defined
+        and p.create|string|lower|trim|match('^(yes|no|true|false)$') %}
+  {{ 'no' if p.create|string|lower|trim|match('^(no|false)$') else '' }}create
+{%      endif %}
+{%      if p.copy is defined
+        and p.copy|string|lower|trim|match('^(yes|no|true|false)$') %}
+  {{ 'no' if p.copy|string|lower|trim|match('^(no|false)$') else '' }}copy
+{%      endif %}
+{%      if p.copytruncate is defined
+        and p.copytruncate|string|lower|trim|match('^(yes|no|true|false)$') %}
+  {{ 'no' if p.copytruncate|string|lower|trim|match('^(no|false)$') else '' }}copytruncate
+{%      endif %}
+{%      if p.shred is defined
+        and p.shred|string|lower|trim|match('^(yes|no|true|false)$') %}
+  {{ 'no' if p.shred|string|lower|trim|match('^(no|false)$') else '' }}shred
+{%        if p.shredcycles is defined and p.shredcycles is number %}
+  shredcycles {{ p.shredcycles }}
+{%        endif %}
+{%      endif %}
+{%      if p.compress is defined and p.compress|string|lower|trim|match('^(yes|no|true|false)$') %}
+  {{ 'no' if p.compress|string|lower|trim|match('^(no|false)$') else '' }}compress
+{%        if p.compresscmd is defined and p.compresscmd is not none %}
+  compresscmd {{ p.compresscmd }}
+{%        endif %}
+{%        if p.uncompresscmd is defined and p.uncompresscmd is not none %}
+  uncompresscmd {{ p.uncompresscmd }}
+{%        endif %}
+{%        if p.compressoptions is defined and p.compressoptions is not none %}
+  compressoptions {{ p.compressoptions }}
+{%        endif %}
+{%        if p.compressext is defined and p.compressext is not none %}
+  compressext {{ p.compressext }}
+{%        endif %}
+{%        if p.delaycompress is defined
+          and p.delaycompress|string|lower|trim|match('^(yes|no|true|false)$') %}
+  {{ 'no' if p.delaycompress|string|lower|trim|match('^(no|false)$') else '' }}delaycompress
+{%        endif %}
+{%      endif %}
+{%      if p.missingok is defined
+        and p.missingok|string|lower|trim|match('^(yes|no|true|false)$') %}
+  {{ 'no' if p.missingok|string|lower|trim|match('^(no|false)$') else '' }}missingok
+{%      endif %}
+{%      if p.ifempty is defined
+        and p.ifempty|string|lower|trim|match('^(yes|no|true|false)$') %}
+  {{ 'not' if p.ifempty|string|lower|trim|match('^(no|false)$') else '' }}ifempty
+{%      endif %}
+{%      if p.mail is defined
+        and (p.mail is string or p.mail|string|lower|trim|match('^(no|false)$')) %}
+{%        set p_mail = '%smail %s'|format(
+              ('no' if p.mail|string|lower|trim|match('^(no|false)$') else ''),
+              p.mail)|trim %}
+  {{ p_mail }}
+{%        if p.mailfirst is defined
+          and p.mailfirst|string|lower|trim|match('^(yes|true)$') %}
+  mailfirst
+{%        endif %}
+{%        if p.maillast is defined
+          and p.maillast|string|lower|trim|match('^(yes|true)$') %}
+  maillast
+{%        endif %}
+{%      endif %}
+{%      if p.maxage is defined and p.maxage is number %}
+  maxage {{ p.maxage }}
+{%      endif %}
+{%      if p.sharedscripts is defined
+        and p.sharedscripts|string|lower|trim|match('^(yes|no|true|false)$') %}
+  {{ 'no' if p.sharedscripts|string|lower|trim|match('^(no|false)$') else '' }}sharedscripts
+{%      endif %}
+{%      if p.firstaction is defined and p.firstaction is not none %}
+{%        set p_scripts = p.firstaction   
+              if p.firstaction is iterable and p.firstaction is not string
+              else [ p.firstaction|string ] %}
+  firstaction
+{%        for script in p_scripts if script is not none %}
+    {{ script|trim }}
+{%        endfor %}
+  endscript
+{%      endif %}
+{%      if p.lastaction is defined and p.lastaction is not none %}
+{%        set p_scripts = p.lastaction   
+              if p.lastaction is iterable and p.lastaction is not string
+              else [ p.lastaction|string ] %}
+  lastaction
+{%        for script in p_scripts if script is not none %}
+    {{ script|trim }}
+{%        endfor %}
+  endscript
+{%      endif %}
+{%      if p.prerotate is defined and p.prerotate is not none %}
+{%        set p_scripts = p.prerotate   
+              if p.prerotate is iterable and p.prerotate is not string
+              else [ p.prerotate|string ] %}
+  prerotate
+{%        for script in p_scripts if script is not none %}
+    {{ script|trim }}
+{%        endfor %}
+  endscript
+{%      endif %}
+{%      if p.postrotate is defined and p.postrotate is not none %}
+{%        set p_scripts = p.postrotate   
+              if p.postrotate is iterable and p.postrotate is not string
+              else [ p.postrotate|string ] %}
+  postrotate
+{%        for script in p_scripts if script is not none %}
+    {{ script|trim }}
+{%        endfor %}
+  endscript
+{%      endif %}
+{{ "}" }} {% if p.name is defined %}# {{ p.name }}{% endif %}
+
+{%  endif %}
+{%  endmacro -%}
+

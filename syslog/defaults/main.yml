@@ -1,0 +1,114 @@
+---
+# defaults file for syslog
+
+## syslog type
+syslog_syslog_type: syslog
+
+## syslog conf
+syslog_syslog_conf: /etc/syslog.conf
+
+## syslog rules
+syslog_conf_rules:
+  - selectors: "kern.*"
+    destination: "/var/log/kern.log"
+    comment: |
+      Log all kernel messages to the console.
+      Logging much else clutters up the screen.
+    enabled: false
+  - selectors:
+    - "kern.*"
+    - "kern.!=debug"
+    destination: "/var/log/kern.log"
+    comment: |
+      Log all kernel messages.
+  - selectors: "*.emerg"
+    destination: "*"
+    comment: Everybody gets emergency messages.
+  - selectors:
+    - "*.info"
+    - "authpriv,cron,daemon,mail.none"
+    destination: "-/var/log/messages"
+    comment: |
+      Log anything (except mail) of level info or higher.
+      Don't log private authentication messages!
+  - selectors: "authpriv.*"
+    destination: "-/var/log/secure"
+    comment: "The authpriv file has restricted access."
+  - selectors: "cron.*"
+    destination: "-/var/log/cron"
+    comment: "Log cron stuff"
+  - selectors: "daemon.*"
+    destination: "-/var/log/daemon.log"
+    comment: "daemon"
+  - selectors: "mail.*"
+    destination: "-/var/log/maillog"
+    comment: "Log all the mail messages in one place."
+  - selectors: "uucp,news.crit"
+    destination: "-/var/log/spooler"
+    comment: "Save news errors of level crit and higher in a special file."
+  - selectors: "local7.*"
+    destination: "-/var/log/boot.log"
+    comment: "Save boot messages also to boot.log."
+
+## Rsyslog modules
+syslog_rsyslog_modules:
+  - imuxsock.so:
+    comment: provides support for local system logging (e.g. via logger command)
+  - imklog.so:
+    comment: provides kernel logging support (previously done by rklogd)
+  - immark.so:
+    comment: provides --MARK-- message capability
+    enabled: false
+  - imudp.so:
+    comment: Provides UDP syslog reception
+    enabled: false
+  - imtcp.so:
+    comment: Provides TCP syslog reception
+    enabled: false
+
+## Rsyslog directives
+syslog_rsyslog_directives:
+  - $ActionFileDefaultTemplate: RSYSLOG_TraditionalFileFormat
+    comment: Use default timestamp format
+    enabled: true
+  - $ActionFileEnableSync: on
+    comment: |
+      File syncing capability is disabled by default.
+      This feature is usually not required,
+      not useful and an extreme performance hit
+    enabled: false
+  - $UDPServerRun: 514
+    comment: Provides UDP syslog reception
+    enabled: false
+  - $UDPServerRun: 514
+    comment: Provides TCP syslog reception
+    enabled: false
+
+## Rsyslog Queue settings
+syslog_rsyslog_queue_settings:
+  - $WorkDirectory: /var/spool/rsyslog
+    comment: where to place spool files
+    enabled: false
+  - $ruleQueueFileName: fwdRule1
+    comment: unique name prefix for spool files
+    enabled: false
+  - $ruleQueueMaxDiskSpace: 1g
+    comment: 1gb space limit (use as much as possible)
+    enabled: false
+  - $ruleQueueSaveOnShutdown: on
+    comment: save messages to disk on shutdown
+    enabled: false
+  - $ruleQueueType: LinkedList
+    comment: run asynchronously
+    enabled: false
+  - $ruleResumeRetryCount: -1
+    comment: infinite retries if host is down
+    enabled: false
+
+## Rsyslog forwarding rules
+syslog_rsyslog_forwarding_rules:
+  - selectors: "*.*"
+    destination: "@@remote-host:514"
+    comment:
+    enabled: false
+

@@ -1,0 +1,30 @@
+---
+# tasks file for epel "CentOS"
+
+- name: epel-CentOS | Set fact CentOS major verson and EPEL Package Url.
+  set_fact:
+    _epel_centos_major_version: "{{ ansible_distribution_major_version }}"
+    _epel_package_url: "{{ epel_centos_epel_urls[ansible_distribution_major_version]|trim }}"
+  when: epel_centos_epel_urls|d(none) is not none
+        and epel_centos_epel_urls is iterable
+        and epel_centos_epel_urls is not string
+  tags:
+  - always
+
+- name: epel-CentOS | Check the CentOS major verson and EPEL Package Url.
+  fail:
+    msg: "EPEL Package url is not specified. ansible_distribution_major_version={{ ansible_distribution_major_version }}"
+  when: _epel_package_url|d('-') == '-'
+  tags:
+  - always
+
+- name: epel-CentOS | Install EPEL package
+  yum:
+    name: "{{ _epel_package_url }}"
+    state: present
+  when: _epel_package_url|d('-') != '-'
+  tags:
+  - epel
+  - epel-centos
+  - epel-centos-install
+

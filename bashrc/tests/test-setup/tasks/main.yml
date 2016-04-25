@@ -1,0 +1,30 @@
+---
+# ut-setup tasks file
+
+- name: ut | create directories for test
+  command:
+    mkdir -p "{{ prefix_dir|d('') }}{{ item }}"
+    creates={{ prefix_dir|d('') }}{{ item }}
+  ignore_errors: true
+  with_items:
+    - /etc
+    - /etc/profile.d
+  when: test_run is defined
+        and prefix_dir is defined
+  tags: [unit_test_setup]
+
+- name: ut | create bashrc files for test
+  file:
+    path: "{{ prefix_dir|d('') }}/etc/{{ item }}"
+    state: touch
+    owner: "{{ test_owner|d('root') }}"
+    group: "{{ test_group|d('root') }}"
+    mode: 0644
+  ignore_errors: true
+  with_items:
+    - bashrc
+    - profile
+  when: test_run is defined
+        and prefix_dir is defined
+  tags: [unit_test_setup]
+

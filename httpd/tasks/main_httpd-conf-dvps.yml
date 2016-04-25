@@ -1,0 +1,67 @@
+---
+# tasks file for httpd "httpd-conf-dvps"
+
+- name: "httpd-conf-dvps | Directives and values dict to list"
+  set_fact:
+    _httpd_httpd_conf_dvps_out: |
+      {%  set s = _httpd_httpd_conf_dvps_in
+              if _httpd_httpd_conf_dvps_in is not none else {} %}
+      {%  set o = [] %}
+      {%  for p_key,p_value in s.iteritems() %}
+      {%    set _pv = p_value if p_value is not none else [{}] %}
+      {%    if (_pv is string or _pv is number)
+            or _pv.value is defined or _pv.pre_value is defined
+            or _pv.before is defined or _pv.after is defined
+            or _pv.overwrite is defined or _pv.enabled is defined %}
+      {%      set _vv = _pv.value|string
+                  if _pv.value is defined and _pv.value is not none
+                  else (_pv|string if _pv is not none else none) %}
+      {%      set _vp = _pv.pre_value|string
+                  if _pv.pre_value is defined and _pv.pre_value is not none
+                  else none %}
+      {%      set _vb = _pv.before|string
+                  if _pv.before is defined and _pv.before is not none
+                  else none %}
+      {%      set _va = _pv.after|string
+                  if _pv.after is defined and _pv.after is not none
+                  else none %}
+      {%      set _vo = _pv.overwrite|bool
+                  if _pv.overwrite is defined and _pv.overwrite is not none
+                  else true %}
+      {%      set _ve = _pv.enabled|bool
+                  if _pv.enabled is defined and _pv.enabled is not none
+                  else true %}
+      {%      set _pv = [{
+                  'value':_vv, 'pre_value':_vp, 'before':_vb, 'after':_va,
+                  'overwrite':_vo, 'enabled':_ve }] %}
+      {%    endif %}
+      {%    for _vl in _pv if _vl is not none %}
+      {%      set _vv = _vl.value|string
+                  if _vl.value is defined and _vl.value is not none
+                  else (_vl if _vl is string else none) %}
+      {%      set _vp = _vl.pre_value|string
+                  if _vl.pre_value is defined and _vl.pre_value is not none
+                  else none %}
+      {%      set _vb = _vl.before|string
+                  if _vl.before is defined and _vl.before is not none
+                  else none %}
+      {%      set _va = _vl.after|string
+                  if _vl.after is defined and _vl.after is not none
+                  else none %}
+      {%      set _vo = _vl.overwrite|bool
+                  if _vl.overwrite is defined and _vl.overwrite is not none
+                  else true %}
+      {%      set _ve = _vl.enabled|bool
+                  if _vl.enabled is defined and _vl.enabled is not none
+                  else true %}
+      {%      set _ = o.append({
+                 'k':p_key|string|trim,
+                 'v':_vv, 'p':_vp, 'b':_vb, 'a':_va, 'o':_vo, 'e':_ve }) %}
+      {%    endfor %}
+      {%  endfor %}
+      {{ o }}
+  when: _httpd_httpd_conf_dvps_in is defined
+        and _httpd_httpd_conf_dvps_in is not none
+  tags:
+  - always
+

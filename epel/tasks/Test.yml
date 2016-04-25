@@ -1,0 +1,28 @@
+---
+# tasks file for epel "Test"
+
+- block:
+
+  - name: epel-Test | distribution major version.
+    set_fact:
+      _epel_centos_major_version: "6"
+      _epel_package_url: "{{ epel_centos_epel_urls[6]|trim }}"
+    when: epel_centos_major_version is undefined
+
+  - name: epel-Test | platform.
+    debug:
+      msg: "OS-Family={{ __os_family }} distribution={{ __distribution }}" 
+
+  - name: epel-Test | epel package urls.
+    debug:
+      msg: "CentOS{{ item }}: {{ epel_centos_epel_urls[item] }}" 
+    with_items:
+    - 5
+    - 6
+    - 7
+
+  tags:
+  - epel
+  - epel-test
+  - epel-test-install
+

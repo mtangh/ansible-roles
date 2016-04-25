@@ -1,0 +1,27 @@
+---
+# tasks file for sudo "RedHat"
+
+- name: sudo-RedHat | Check the OS Family.
+  fail: msg="You can not perform the task in this OS family '{{ ansible_os_family }}'."
+  when: ansible_os_family != "RedHat"
+  tags:
+  - always
+
+- name: sudo-RedHat | Set fact Packages
+  set_fact:
+    sudo_install_packages: [ 'sudo' ]
+  when: sudo_install_packages|d(none) is none
+  tags:
+  - always
+
+- name: sudo-RedHat | Install the sudo
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items: "{{ sudo_install_packages }}"
+  tags:
+  - sudo
+  - sudo-install
+  - sudo-RedHat
+  - sudo-RedHat-install
+

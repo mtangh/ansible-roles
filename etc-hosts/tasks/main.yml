@@ -1,0 +1,56 @@
+---
+# tasks file for etc-hosts
+
+- block:
+
+  - name: bashrc | Set facts platform.
+    set_fact:
+      platform_allow_os_families: [ "RedHat", "Test" ]
+      platform_allow_distributions:
+
+  - name: bashrc | Check the platform.
+    include: "platform.yml"
+
+  tags:
+  - always
+  - bashrc-os-family
+
+- name: etc-hosts | Updating /etc/hosts
+  template:
+    src: "etc/hosts.j2"
+    dest: "{{ prefix_dir|d('') }}/etc/hosts"
+    owner: "{{ test_owner|d('root') }}"
+    group: "{{ test_group|d('root') }}"
+    mode: "0644"
+    backup: yes
+  when: (etc_hosts_using_ipv4 is defined and etc_hosts_using_ipv4 == true)
+        or (etc_hosts_using_ipv6 is defined and etc_hosts_using_ipv6 == true)
+  tags:
+  - etc-hosts
+
+- name: etc-hosts | Updating /etc/hosts.allow
+  template:
+    src: "etc/hosts.allow.j2"
+    dest: "{{ prefix_dir|d('') }}/etc/hosts.allow"
+    owner: "{{ test_owner|d('root') }}"
+    group: "{{ test_group|d('root') }}"
+    mode: "0644"
+    backup: yes
+  when: etc_hosts_using_hosts_allow is defined
+        and etc_hosts_using_hosts_allow == true
+  tags:
+  - etc-hosts.allow
+
+- name: etc-hosts | Updating /etc/hosts.deny
+  template:
+    src: "etc/hosts.deny.j2"
+    dest: "{{ prefix_dir|d('') }}/etc/hosts.deny"
+    owner: "{{ test_owner|d('root') }}"
+    group: "{{ test_group|d('root') }}"
+    mode: "0644"
+    backup: yes
+  when: etc_hosts_using_hosts_deny is defined
+        and etc_hosts_using_hosts_deny == true
+  tags:
+  - etc-hosts.deny
+

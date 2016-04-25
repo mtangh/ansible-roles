@@ -1,0 +1,27 @@
+---
+# tasks file for logrotate "RedHat"
+
+- name: logrotate-RedHat-setup | Check the OS Family.
+  fail: msg="You can not perform the task in this OS family '{{ ansible_os_family }}'."
+  when: ansible_os_family != "RedHat"
+  tags:
+  - always
+
+- name: logrotate-RedHat-setup | Set fact Packages
+  set_fact:
+    logrotate_install_packages: [ 'logrotate' ]
+  when: logrotate_install_packages|d(none) is none
+  tags:
+  - always
+
+- name: logrotate-RedHat-setup | Install the logrotate
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items: "{{ logrotate_install_packages }}"
+  tags:
+  - logrotate
+  - logrotate-install
+  - logrotate-RedHat
+  - logrotate-RedHat-install
+

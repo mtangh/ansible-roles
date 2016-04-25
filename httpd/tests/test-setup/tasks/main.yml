@@ -1,0 +1,38 @@
+---
+# ut-setup tasks file
+
+- name: ut-setup | create directories for test
+  command:
+    mkdir -p "{{ prefix_dir|d('') }}{{ item }}"
+    creates={{ prefix_dir|d('') }}{{ item }}
+  with_items:
+  - /etc/httpd/conf
+  - /etc/httpd/conf.d
+  when: test_run is defined
+        and prefix_dir is defined
+  tags:
+  - '[unit_test_setup]'
+
+- name: ut-setup | copy files to httpd/conf
+  copy:
+    src: "{{ item }}"
+    dest: "{{ prefix_dir|d('') }}/etc/httpd/conf/"
+  with_items:
+  - httpd.conf
+  when: test_run is defined
+        and prefix_dir is defined
+  tags:
+  - '[unit_test_setup]'
+
+- name: ut-setup | copy files to httpd/conf.d
+  copy:
+    src: "{{ item }}"
+    dest: "{{ prefix_dir|d('') }}/etc/httpd/conf.d/"
+  with_items:
+  - ssl.conf
+  - welcome.conf
+  when: test_run is defined
+        and prefix_dir is defined
+  tags:
+  - '[unit_test_setup]'
+

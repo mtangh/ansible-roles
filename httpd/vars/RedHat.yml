@@ -1,0 +1,109 @@
+---
+# vars file for httpd "RedHat"
+
+## httpd service name
+httpd_httpd_service_name: httpd
+
+## Set the service enabled/disable
+httpd_httpd_service_enabled: false
+
+## Set startup httpd state.
+httpd_httpd_startup_state: stopped
+
+## httpd server root
+httpd_httpd_server_root: /etc/httpd
+
+## httpd.conf path
+httpd_httpd_conf_path: "{{ httpd_httpd_server_root }}/conf/httpd.conf"
+
+## httpd conf.d path
+httpd_httpd_include_dir: "{{ httpd_httpd_server_root }}/conf.d"
+
+## ssl.conf path
+httpd_httpd_ssl_conf_path: "{{ httpd_httpd_server_root }}/conf.d/ssl.conf"
+
+## httpd conf validater
+httpd_httpd_conf_validate_command: /usr/sbin/httpd -t
+
+## Install packages
+httpd_install_packages:
+  - httpd
+  - httpd-devel
+# - mod_auth_cas
+# - mod_auth_kerb
+# - mod_auth_mellon
+# - mod_auth_mysql
+# - mod_auth_ntlm_winbind
+# - mod_auth_openid
+# - mod_auth_pgsql
+# - mod_auth_shadow
+# - mod_auth_token
+# - mod_auth_xradius
+# - mod_authnz_external
+# - mod_authnz_pam
+# - mod_authz_ldap
+# - mod_autoindex_mb
+# - mod_bw
+# - mod_cluster
+# - mod_dav_svn
+# - mod_dnssd
+# - mod_evasive
+# - mod_extract_forwarded
+# - mod_fcgid
+# - mod_flvx
+# - mod_form
+# - mod_form-devel
+# - mod_geoip
+# - mod_intercept_form_submit
+# - mod_limitipconn
+# - mod_log_post
+# - mod_lookup_identity
+# - mod_mirrorbrain
+# - mod_nss
+# - mod_perl
+# - mod_perl-devel
+# - mod_proxy_fcgi
+# - mod_proxy_html
+# - mod_proxy_uwsgi
+# - mod_python
+# - mod_qos
+# - mod_revocator
+# - mod_ruid2
+# - mod_security
+# - mod_security_crs
+# - mod_security_crs-extras
+# - mod_speedycgi
+# - mod_ssl
+# - mod_wsgi
+# - mod_xsendfile
+
+## httpd.conf parameters
+httpd_httpd_conf_directives:
+  ServerName:
+    enabled: false
+  ServerAdmin:
+  ServerSignature: "Off"
+  User: apache
+  Group: apache
+  UseCanonicalName: "Off"
+  HostnameLookups: "Off"
+  Timeout: 120
+  KeepAlive: "Off"
+  MaxKeepAliveRequests: 100
+  KeepAliveTimeout: 15
+  ExtendedStatus:
+    enabled: false
+  DefaultType: text/plain
+  AddDefaultCharset: UTF-8
+  
+## ssl.conf parameters
+httpd_httpd_ssl_directives:
+  SSLPassPhraseDialog: builtin 
+  SSLProtocol: "all -SSLv2 -SSLv3"
+  SSLCertificateFile: /etc/pki/tls/certs/localhost.crt
+  SSLCertificateKeyFile: /etc/pki/tls/private/localhost.key
+
+## Disabling conf.d files
+httpd_httpd_conf_disabled:
+  - welcome.conf
+

@@ -1,0 +1,58 @@
+# /etc/hosts.deny
+# {{ ansible_managed }}
+#
+# hosts.deny
+#       This file contains access rules which are used to
+#       deny connections to network services that either use
+#       the tcp_wrappers library or that have been
+#       started through a tcp_wrappers-enabled xinetd.
+#
+#       The rules in this file can also be set up in
+#       /etc/hosts.allow with a 'deny' option instead.
+#
+#       See 'man 5 hosts_options' and 'man 5 hosts_access'
+#       for information on rule syntax.
+#       See 'man tcpd' for information on tcp_wrappers
+#
+{%  import 'macros.hosts.j2' as m_hosts with context %}
+{%  if etc_hosts_extras is defined
+    and etc_hosts_extras is mapping %}
+{%    set etc_hosts_extra_deny = etc_hosts_extras[ansible_hostname]['etc_hosts_deny']
+          if ansible_hostname is defined
+          and ansible_hostname != "localhost"
+          and etc_hosts_extras[ansible_hostname] is defined
+          and etc_hosts_extras[ansible_hostname] is mapping 
+          and etc_hosts_extras[ansible_hostname]['etc_hosts_deny'] is defined
+          else none %}
+{%    if etc_hosts_extra_deny is not none
+      and etc_hosts_extra_deny is not string
+      and etc_hosts_extra_deny is iterable %}   
+
+{{ '#*%s*'|format(ansible_hostname)|trim }}
+{{  m_hosts.dump_acls( etc_hosts_extra_deny ) }}
+{%-   endif %}
+{%    for gname in group_names|sort
+          if group_names is defined
+          and etc_hosts_extras[gname] is defined
+          and etc_hosts_extras[gname] is mapping 
+          and etc_hosts_extras[gname]['etc_hosts_deny'] is defined %}
+{%      set etc_hosts_extra_deny = etc_hosts_extras[gname]['etc_hosts_deny'] %}
+{%      if etc_hosts_extra_deny is not none
+        and etc_hosts_extra_deny is not string
+        and etc_hosts_extra_deny is iterable %}   
+
+{{ '#*%s*'|format(gname)|trim }}
+{{  m_hosts.dump_acls( etc_hosts_extra_deny ) }}
+{%-     endif %}
+{%    endfor %}
+{%  endif %}
+{%  if etc_hosts_for_host is defined
+    and etc_hosts_for_host is mapping
+    and etc_hosts_for_host.etc_hosts_deny is defined
+    and etc_hosts_for_host.etc_hosts_deny is not none
+    and etc_hosts_for_host.etc_hosts_deny is not string
+    and etc_hosts_for_host.etc_hosts_deny is iterable %}
+
+{{  m_hosts.dump_acls( etc_hosts_for_host.etc_hosts_deny ) }}
+{%- endif %}
+

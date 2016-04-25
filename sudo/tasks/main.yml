@@ -1,0 +1,43 @@
+---
+# tasks file for sudo
+
+- block:
+
+  - name: "sudo | Set facts platform."
+    set_fact:
+      platform_allow_os_families: [ "RedHat", "Darwin", "Test" ]
+      platform_allow_distributions:
+
+  - name: "sudo | Check the platform."
+    include: "platform.yml"
+
+  tags:
+  - always
+  - sudo-os-family
+
+- name: "sudo | Include vars."
+  include_vars: "{{ __os_family }}.yml"
+  tags:
+  - always
+  - sudo
+  - sudo-include-vars
+
+- name: "sudo | Install the sudo."
+  include: "{{ __os_family }}.yml"
+  tags:
+  - sudo
+  - sudo-install
+
+- name: "sudo | Updating /etc/sudoers"
+  template:
+    src: "etc/sudoers.j2"
+    dest: "{{ prefix_dir|d('') }}/etc/sudoers"
+    owner: "{{ test_owner|d('root') }}"
+    group: "{{ test_group|d('wheel') }}"
+    mode: "0440"
+    backup: yes
+    validate: "visudo -c -f %s"
+  tags:
+  - sudo
+  - sudo-sudores
+
