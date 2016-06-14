@@ -7,6 +7,11 @@
     default
 
   vars:
+    os_spec_os_family: redhat
+    os_spec_os_distribution: centos
+    os_spec_os_version: "6.7"
+    os_spec_os_major_version: 6
+
     httpd_handle_service: false
     httpd_httpd_conf_validate_command:
 

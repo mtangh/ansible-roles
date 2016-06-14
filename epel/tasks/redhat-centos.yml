@@ -1,0 +1,34 @@
+---
+# tasks file for epel of "centos"
+
+- name: epel-centos | Set fact centos major verson and EPEL Package Url.
+  set_fact:
+    _epel_package_url: "
+      {% if epel_vars.epel_centos_epel_urls|d(none) is not none
+         and epel_vars.epel_centos_epel_urls is iterable
+         and epel_vars.epel_centos_epel_urls is not string %}{{
+        epel_vars.epel_centos_epel_urls[os_spec_os_major_version|int]|trim
+      }}{% else %}{{ '-' }}{% endif %}"
+  when: epel_vars.epel_centos_epel_urls|d(none) is iterable
+        and epel_vars.epel_centos_epel_urls|d(none) is not string
+  tags:
+  - always
+
+- name: epel-centos | Check the centos major verson and EPEL Package Url.
+  fail:
+    msg: "EPEL Package url is not specified. OS major version '{{ os_spec_os_major_version }}'."
+  when: _epel_package_url|d('-') == '-'
+  tags:
+  - always
+
+- name: epel-centos | Install EPEL package
+  yum:
+    name: "{{ _epel_package_url }}"
+    state: present
+  when: test_run|d(none) is none
+        and _epel_package_url|d('-') != '-'
+  tags:
+  - epel
+  - epel-centos
+  - epel-centos-install
+

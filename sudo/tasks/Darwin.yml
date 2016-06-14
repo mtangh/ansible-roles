@@ -1,9 +1,3 @@
 ---
-# tasks file for sudo "Darwin"
-
-- name: sudo-Darwin | Check the OS Family.
-  fail: msg="You can not perform the task in this OS family '{{ ansible_os_family }}'."
-  when: ansible_os_family != "Darwin"
-  tags:
-  - always
+# tasks file for sudo of "darwin"
 

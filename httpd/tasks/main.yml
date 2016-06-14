@@ -1,25 +1,10 @@
 ---
 # tasks file for httpd
 
-- block:
-
-  - name: httpd-main | Set facts platform.
-    set_fact:
-      platform_allow_os_families: [ "RedHat", "Test" ]
-      platform_allow_distributions:
-
-  - name: httpd-main | Check the platform.
-    include: "platform.yml"
-
-  tags:
-  - always
-  - httpd-os-family
-
 - name: httpd-main | Include OS-specific variables.
-  include_vars: "{{ __os_family }}.yml"
+  include_vars: "{{ os_spec_os_family }}.yml"
   tags:
   - always
-  - httpd-include-vars
 
 - block:
 
@@ -64,7 +49,7 @@
 - block:
 
   - name: httpd-main | Install the httpd
-    include: "{{ __os_family }}-setup.yml"
+    include: "{{ os_spec_os_family }}-setup.yml"
   
   tags:
   - httpd
@@ -151,8 +136,8 @@
 
 - block:
 
-  - name: "httpd-main | Configure for OS:{{ __os_family }}"
-    include: "{{ __os_family }}-configure.yml"
+  - name: "httpd-main | Configure for OS:{{ os_spec_os_family|d('N/A') }}"
+    include: "{{ os_spec_os_family }}-configure.yml"
 
   tags:
   - httpd

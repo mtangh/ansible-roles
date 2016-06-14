@@ -1,0 +1,22 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+
+  tags:
+    default
+
+  vars_files:
+  - vars-default.yml
+
+  vars:
+    os_spec_os_family: redhat
+    os_spec_os_distribution: centos
+    os_spec_os_version: "6.7"
+    os_spec_os_major_version: 6
+
+  roles:
+  - test-setup
+  - { role: ../.. }
+  - test-teardown
+

@@ -1,12 +1,6 @@
 ---
 # tasks file for httpd "RedHat"
 
-- name: httpd-RedHat-setup | Check the OS Family.
-  fail: msg="You can not perform the task in this OS family '{{ ansible_os_family }}'."
-  when: ansible_os_family != "RedHat"
-  tags:
-  - always
-
 - name: httpd-RedHat-setup | Set facts Packages
   set_fact:
     httpd_install_packages: [ 'httpd' ]
@@ -19,6 +13,7 @@
     name: "{{ item }}"
     state: latest
   with_items: "{{ httpd_install_packages }}"
+  when: test_run|d(false) == false
   tags:
   - httpd
   - httpd-install

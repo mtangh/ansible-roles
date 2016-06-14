@@ -1,0 +1,46 @@
+---
+# defaults file for rsyslog
+
+# Includes OS Spec defaults
+rsyslog_vars: |
+  {{ lookup('file','./defaults/%s.yml'|
+     format(os_spec_os_family|d('default')))|from_yaml }}
+
+# Rsyslog install packages
+rsyslog_install_packages: |
+  {% if rsyslog_vars.rsyslog_install_packages|d(none) is not none %}{{
+    rsyslog_vars.rsyslog_install_packages
+  }}{% else %}{{
+    [ 'rsyslog' ]
+  }}{% endif %}
+
+# Rsyslog service name
+rsyslog_service_name: "{{ rsyslog_vars.rsyslog_service_name|d('rsyslog') }}"
+
+# Rsyslog conf
+rsyslog_rsyslog_conf: "{{ rsyslog_vars.rsyslog_rsyslog_conf|d('/etc/rsyslog.conf') }}"
+
+# Rsyslog modules
+rsyslog_conf_modules: |
+  {% if rsyslog_vars.rsyslog_conf_modules|d(none) is not none %}{{
+    rsyslog_vars.rsyslog_conf_modules
+  }}{% else %}{{ 
+    []
+  }}{% endif %}
+
+# Rsyslog directives
+rsyslog_conf_directives: |
+  {% if rsyslog_vars.rsyslog_conf_directives|d(none) is not none %}{{
+    rsyslog_vars.rsyslog_conf_directives
+  }}{% else %}{{ 
+    []
+  }}{% endif %}
+
+# Rsyslog rules
+rsyslog_conf_rules: |
+  {% if rsyslog_vars.rsyslog_conf_rules|d(none) is not none %}{{
+    rsyslog_vars.rsyslog_conf_rules
+  }}{% else %}{{ 
+    []
+  }}{% endif %}
+

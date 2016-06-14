@@ -3,19 +3,19 @@
 
 - name: syslog-enable-syslog
   service:
-    name: "{{ syslog_syslog_type }}"
+    name: syslog
     enabled: yes
-  when: syslog_syslog_type is defined
+  when: test_run|d(none) is none
 
 - name: syslog-start-syslog 
   service:
-    name: "{{ syslog_syslog_type }}"
+    name: syslog
     state: started
-  when: syslog_syslog_type is defined
+  when: test_run|d(none) is none
 
 - name: syslog-restart-syslog
   service:
-    name: "{{ syslog_syslog_type }}"
+    name: syslog
     state: restarted
-  when: syslog_syslog_type is defined
+  when: test_run|d(none) is none
 

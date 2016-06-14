@@ -1,0 +1,7 @@
+---
+# tasks file for os
+
+- include: "os-spec.yml"
+  tags:
+  - os-spec-verify
+

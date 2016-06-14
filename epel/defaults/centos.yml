@@ -1,0 +1,83 @@
+---
+# defaults file for epel of "centos"
+
+epel_centos_epel_urls:
+  - "-"
+  - "-"
+  - "-"
+  - "-"
+  - "-"
+  - "-"
+  - "http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm"
+  - "http://download.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm"
+
+epel_epel_repos:
+
+  - id: "epel"
+    name: "Extra Packages for Enterprise Linux {{ os_spec_os_major_version }} - $basearch"
+    baseurl:
+      url: "http://download.fedoraproject.org/pub/epel/{{ os_spec_os_major_version }}/$basearch"
+      enabled: no
+    mirrorlist: "https://mirrors.fedoraproject.org/metalink?repo=epel-{{ os_spec_os_major_version }}&arch=$basearch"
+    failovermethod: "priority"
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-{{ os_spec_os_major_version }}"
+
+  - id: "epel-debuginfo"
+    name: "Extra Packages for Enterprise Linux {{ os_spec_os_major_version }} - $basearch - Debug"
+    baseurl:
+      url: "http://download.fedoraproject.org/pub/epel/{{ os_spec_os_major_version }}/$basearch/debug"
+      enabled: no
+    mirrorlist: "https://mirrors.fedoraproject.org/metalink?repo=epel-debug-{{ os_spec_os_major_version }}&arch=$basearch"
+    failovermethod: "priority"
+    enabled: no
+    gpgcheck: yes
+    gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-{{ os_spec_os_major_version }}"
+
+  - id: "epel-source"
+    name: "Extra Packages for Enterprise Linux {{ os_spec_os_major_version }} - $basearch - Source"
+    baseurl:
+      url: "http://download.fedoraproject.org/pub/epel/{{ os_spec_os_major_version }}/SRPMS"
+      enabled: no
+    mirrorlist: "https://mirrors.fedoraproject.org/metalink?repo=epel-source-{{ os_spec_os_major_version }}&arch=$basearch"
+    failovermethod: "priority"
+    enabled: no
+    gpgcheck: yes
+    gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-{{ os_spec_os_major_version }}"
+
+epel_epel_testing_repos:
+
+  - id: "epel-testing"
+    name: "Extra Packages for Enterprise Linux {{ os_spec_os_major_version }} - Testing - $basearch"
+    baseurl:
+      url: "http://download.fedoraproject.org/pub/epel/testing/{{ os_spec_os_major_version }}/$basearch"
+      enabled: no
+    mirrorlist: "https://mirrors.fedoraproject.org/metalink?repo=testing-epel{{ os_spec_os_major_version }}&arch=$basearch"
+    failovermethod: "priority"
+    enabled: no
+    gpgcheck: yes
+    gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-{{ os_spec_os_major_version }}"
+
+  - id: "epel-testing-debuginfo"
+    name: "Extra Packages for Enterprise Linux {{ os_spec_os_major_version }} - Testing - $basearch - Debug"
+    baseurl:
+      url: "http://download.fedoraproject.org/pub/epel/testing/{{ os_spec_os_major_version }}/$basearch/debug"
+      enabled: no
+    mirrorlist: "https://mirrors.fedoraproject.org/metalink?repo=testing-debug-epel{{ os_spec_os_major_version }}&arch=$basearch"
+    failovermethod: "priority"
+    enabled: no
+    gpgcheck: yes
+    gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-{{ os_spec_os_major_version }}"
+
+  - id: "epel-testing-source"
+    name: "Extra Packages for Enterprise Linux {{ os_spec_os_major_version }} - Testing - $basearch - Source"
+    baseurl:
+      url: "http://download.fedoraproject.org/pub/epel/testing/{{ os_spec_os_major_version }}/SRPMS"
+      enabled: no
+    mirrorlist: "https://mirrors.fedoraproject.org/metalink?repo=testing-source-epel{{ os_spec_os_major_version }}&arch=$basearch"
+    failovermethod: "priority"
+    enabled: no
+    gpgcheck: yes
+    gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-{{ os_spec_os_major_version }}"
+

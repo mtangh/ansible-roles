@@ -1,0 +1,110 @@
+{#----------------------------------------------------------------------
+ #  name: macros.rsyslog-conf.j2
+ #---------------------------------------------------------------------#}
+
+{%  macro syslog_rules( parameters )  %}
+{%    set _syslog_rules = parameters
+          if parameters|d(none) is iterable
+          and parameters is not string
+          else [] %}
+{%    for _rule in _syslog_rules if _rule|d(none) is not none %}
+{{      put_syslog_rule( _rule ) }}
+{%    endfor %}
+{%  endmacro %}
+
+{%  macro put_syslog_rule( syslog_rule ) %}
+{%    set _rule = syslog_rule
+          if syslog_rule|d(none) is not none
+          else {} %}
+{%    set _rule_comments = _rule.comment.split('\n')
+          if _rule.comment|d(none) is string
+          else [] %}
+{%    for c in _rule_comments|d([])
+          if c|d(none) is string and c|trim|length > 0 %}
+{{ ('# %s'|format(c if c != '#' else '') if c != '-' else '')|trim }}
+{%    endfor %}
+{%    if _rule.selectors|d(none) is not none
+      and _rule.destination|d(none) is string
+      and _rule.destination|trim|length > 0  %}
+{%      set _rule_s = _rule.selectors|join(',')
+            if _rule.selectors is iterable
+            and _rule.selectors is not string
+            else _rule.selectors|string|trim %}
+{%      set _rule_d = _rule.destination|trim %}
+{%      set _rule_e = _rule.enabled|bool
+            if _rule.enabled|d(none) is not none
+            else true %}
+{%      if _rule_s|length <= 38 %}
+{{ '%s%-40s%s'|format(('' if _rule_e else '#'),_rule_s,_rule_d)|trim }}
+{%      else %}
+{{ '%s%s'|format(('' if _rule_e else '#'),_rule_s)|trim }} \
+{{ '%s%-40s%s'|format(('' if _rule_e else '#'),'',_rule_d) }}
+{%      endif %}
+{%    endif %}
+{%  endmacro %}
+
+{%  macro rsyslog_conf_modules( parameters ) %}
+{%    set rsyslog_modules = parameters
+          if parameters|d(none) is iterable and parameters is not string
+          else [] %}
+{%    for _module in rsyslog_modules if _module|d(none) is not none %}
+{%      set mod_name = none %}
+{%      set mod_cmnt = _module.comment.split('\n')
+            if _module.comment|d(none) is string
+            else ( _module.comment
+                   if _module.comment is iterable
+                   else none ) %}
+{%      set mod_enbl = _module.enabled|bool
+            if _module.enabled|d(none) is not none
+            else true %}
+{%      for k,v in _module.iteritems()
+            if k is not none and v is none
+            and k|lower not in ['comment','enabled'] %}
+{%        if mod_name is none %}
+{%          set mod_name = k|trim %}
+{%          if mod_cmnt|d(none) is iterable %}
+{%            for c in mod_cmnt
+                  if c|d(none) is not none and c|trim|length > 0 %}
+{{ ('# %s'|format(c if c != '#' else '') if c != '-' else '')|trim }}
+{%            endfor %}
+{%          endif %}
+{%          if mod_enbl|d(true) == false %}{{ '#' }}{% endif -%}
+$ModLoad  {{ mod_name|trim }}
+
+{%        endif %}
+{%      endfor %}
+{%    endfor %}
+{%  endmacro  %}
+
+{%  macro rsyslog_conf_directives( parameters ) %}
+{%    set rsyslog_directives = parameters
+          if parameters|d(none) is iterable and parameters is not string
+          else [] %}
+{%    for _directive in rsyslog_directives if _directive|d(none) is not none %}
+{%      set drctv_key = none %}
+{%      set drctv_cmnt = _directive.comment.split('\n')
+            if _directive.comment|d(none) is string
+            else ( _directive.comment
+                   if _directive.comment is iterable
+                   else none ) %}
+{%      set drctv_enbl = _directive.enabled|bool
+            if _directive.enabled|d(none) is not none
+            else true %}
+{%      for k,v in _directive.iteritems()
+            if k is not none and v is not none
+            and k|lower not in ['comment','enabled'] %}
+{%        if drctv_key is none %}
+{%          set drctv_key = k|trim %}
+{%          if drctv_cmnt|d(none) is iterable %}
+{%            for c in drctv_cmnt
+                  if c|d(none) is not none and c|trim|length > 0 %}
+{{ ('# %s'|format(c if c != '#' else '') if c != '-' else '')|trim }}
+{%            endfor %}
+{%          endif %}
+{{ '%s%s %s'|format(('' if drctv_enbl|d(true) else '#'),drctv_key,v|trim)|trim }}
+
+{%        endif %}
+{%      endfor %}
+{%    endfor %}
+{%  endmacro %}
+

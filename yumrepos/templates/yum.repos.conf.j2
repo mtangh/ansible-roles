@@ -1,0 +1,42 @@
+# {{ yumrepos_repo_file.name|d('') }}
+# {{ ansible_managed }}
+{%  set _repos = yumrepos_repo_file.repos
+        if yumrepos_repo_file.repos|d(none) is not none
+        and yumrepos_repo_file.repos is iterable
+        and yumrepos_repo_file.repos is not string
+        else [] %}
+{%  for r in _repos
+        if (_repos|d(none) is not none and _repos is iterable and _repos is not string)
+        and (r.id|d(none) is not none and r.name|d(none) is not none)
+        and (r.baseurl|d(none) is not none or r.mirrorlist|d(none) is not none) %}
+{%    set b = { 'u': (r.baseurl.url
+                   	if r.baseurl.url|d(none) is not none
+                    else r.baseurl|d(none)),
+                'e': r.baseurl.enabled|d(true) } %}
+{%    set m = { 'u': (r.mirrorlist.url
+                	if r.mirrorlist.url|d(none) is not none
+                    else r.mirrorlist|d(none)),
+                'e': r.mirrorlist.enabled|d(true) } %}
+[{{ r.id }}]
+name = {{ r.name }}
+{%    if b.e == false %}#{% endif -%}
+baseurl = {{ b.u }}
+{%    if m.e == false %}#{% endif -%}
+mirrorlist = {{ m.u|trim }}
+{%    if r.proxy is defined %}
+proxy = {{ r.proxy.url|d('') if r.proxy.url is defined else '' }}
+proxy_username = {{ r.proxy.username|d('') if r.proxy.username is defined else '' }}
+proxy_password = {{ r.proxy.password|d('') if r.proxy.password is defined else '' }}
+{%    endif %}
+failovermethod = {{ r.failovermethod|d('priority') }}
+enabled = {{ '1' if r.enabled is defined and r.enabled|bool else '0' }}
+gpgcheck = {{ '1' if r.gpgcheck is defined and r.gpgcheck|bool else '0' }}
+gpgkey = {{ r.gpgkey if r.gpgkey|d(none) is not none else '' }}
+{%    if r.ssl is defined %}
+sslverify = {{ '1' if r.ssl.verify is defined and r.ssl.verify|bool else '0' }}
+sslcacert = {{ r.ssl.cacert if r.ssl.cacert|d(none) is not none else '' }}
+sslclientkey = {{ r.ssl.clientkey if r.ssl.clientkey|d(none) is not none else '' }}
+sslclientcert = {{ r.ssl.clientcert if r.ssl.clientcert|d(none) is not none else '' }}
+{%    endif %}
+
+{%  endfor %}

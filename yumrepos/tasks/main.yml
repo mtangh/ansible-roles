@@ -1,0 +1,19 @@
+---
+# tasks file for yumrepos
+
+- name: yumrepos | SetUp Facts.
+  set_fact:
+
+    yumrepos_tasks:
+      repos_create: "{{ '%s/tasks/yumrepos-repos_create.yml'|format(role_path) }}"
+      repos_create_file: "{{ '%s/tasks/yumrepos-repos_create_file.yml'|format(role_path) }}"
+      repos_template: "{{ '%s/templates/yum.repos.conf.j2'|format(role_path) }}"
+
+    yumrepos_templates:
+      yumreposconf: "{{ '%s/templates/yum.repos.conf.j2'|format(role_path) }}"
+
+  when: yumrepos_tasks|d(none) is none
+        or yumrepos_templates|d(none) is none
+  tags:
+  - always
+

@@ -1,0 +1,10 @@
+# Ansible managed: test
+# yum
+/var/log/yum.log
+{
+  yearly
+  size 30k
+  create 0600 root root
+  missingok
+  notifempty
+} # yum

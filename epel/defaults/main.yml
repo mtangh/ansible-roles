@@ -1,14 +1,19 @@
 ---
 # defaults file for epel
 
-epel_epel_repos:
+# Includes OS Spec defaults
+epel_vars: |
+  {{ lookup('file','./defaults/%s.yml'|
+     format(os_spec_os_distribution|d('default')))|from_yaml }}
+
+#
 # - id: "epel"
 #   name: "Extra Packages for Enterprise Linux {{ ansible_distribution_major_version }} - $basearch"
 #   baseurl:
 #     url: "http://download.fedoraproject.org/pub/epel/{{ ansible_distribution_major_version }}/$basearch"
 #     enabled: no
 #   mirrorlist:
-#     url: "https://mirrors.fedoraproject.org/metalink?repo=epel-{{ ansible_distribution_major_version }}&arch=$basearch"
+#     url: "https://mirrors.fedoraproject.org/metalink?repo=epel{{ ansible_distribution_major_version }}&arch=$basearch"
 #     enabled: yes
 #   proxy:
 #     url:
@@ -23,27 +28,21 @@ epel_epel_repos:
 #     cacert:
 #     clientkey:
 #     clientcert:
+#
 
-epel_epel_testing_repos:
-# - id: "epel-testing"
-#   name: "Extra Packages for Enterprise Linux {{ ansible_distribution_major_version }} - Testing - $basearch"
-#   baseurl:
-#     url: "http://download.fedoraproject.org/pub/epel/testing/{{ ansible_distribution_major_version }}/$basearch"
-#     enabled: no
-#   mirrorlist:
-#     url: "https://mirrors.fedoraproject.org/metalink?repo=testing-epel{{ ansible_distribution_major_version }}&arch=$basearch"
-#     enabled: yes
-#   proxy:
-#     url:
-#     username:
-#     password:
-#   failovermethod: "priority"
-#   enabled: yes
-#   gpgcheck: yes
-#   gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}"
-#   ssl:
-#     verify:
-#     cacert:
-#     clientkey:
-#     clientcert:
+# EPEL repos
+epel_epel_repos: |
+  {% if epel_vars.epel_epel_repos|d(none) is not none %}{{
+    epel_vars.epel_epel_repos
+  }}{% else %}{{
+    []
+  }}{% endif %}
+
+# EPEL Testing
+epel_epel_testing_repos: |
+  {% if epel_vars.epel_epel_testing_repos|d(none) is not none %}{{
+    epel_vars.epel_epel_testing_repos
+  }}{% else %}{{
+    []
+  }}{% endif %}
 

@@ -1,0 +1,45 @@
+{#----------------------------------------------------------------------
+ #  name: macros.syslog-rules.j2
+ #---------------------------------------------------------------------#}
+
+{%  macro syslog_rules( parameters )  %}
+{%    set _syslog_rules = parameters
+          if parameters|d(none) is iterable
+          and parameters is not string
+          else [] %}
+{%    for _rule in _syslog_rules if _rule|d(none) is not none %}
+{{      put_syslog_rule( _rule ) }}
+{%    endfor %}
+{%  endmacro %}
+
+{%  macro put_syslog_rule( syslog_rule ) %}
+{%    set _rule = syslog_rule
+          if syslog_rule|d(none) is not none
+          else {} %}
+{%    set _rule_comments = _rule.comment.split('\n')
+          if _rule.comment|d(none) is string
+          else [] %}
+{%    for c in _rule_comments|d([])
+          if c|d(none) is string and c|trim|length > 0 %}
+{{ ('# %s'|format(c if c != '#' else '') if c != '-' else '')|trim }}
+{%    endfor %}
+{%    if _rule.selectors|d(none) is not none
+      and _rule.destination|d(none) is string
+      and _rule.destination|trim|length > 0  %}
+{%      set _rule_s = _rule.selectors|join(',')
+            if _rule.selectors is iterable
+            and _rule.selectors is not string
+            else _rule.selectors|string|trim %}
+{%      set _rule_d = _rule.destination|trim %}
+{%      set _rule_e = _rule.enabled|bool
+            if _rule.enabled|d(none) is not none
+            else true %}
+{%      if _rule_s|length <= 38 %}
+{{ '%s%-40s%s'|format(('' if _rule_e else '#'),_rule_s,_rule_d)|trim }}
+{%      else %}
+{{ '%s%s'|format(('' if _rule_e else '#'),_rule_s)|trim }} \
+{{ '%s%-40s%s'|format(('' if _rule_e else '#'),'',_rule_d) }}
+{%      endif %}
+{%    endif %}
+{%  endmacro %}
+

@@ -1,0 +1,18 @@
+---
+# tasks file for rsyslog of "redhat"
+
+- name: rsyslog-redhat | Install the rsyslog
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items: "{{ rsyslog_install_packagesi|d([]) }}"
+  when: test_run|d(none) is none
+        and syslog_syslog_type|d(none) is not none
+  notify:
+  - rsyslog-enable-rsyslog
+  tags:
+  - rsyslog
+  - rsyslog-install
+  - rsyslog-redhat
+  - rsyslog-redhat-install
+

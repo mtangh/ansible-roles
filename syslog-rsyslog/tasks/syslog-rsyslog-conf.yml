@@ -1,0 +1,17 @@
+---
+# tasks file for rsyslog/rsyslog-conf
+
+- name: rsyslog-conf | Updating rsyslog.conf
+  template:
+    src: "etc/rsyslog.conf.j2"
+    dest: "{{ '%s%s'|format(prefix_dir|d(''),rsyslog_rsyslog_conf) }}"
+    owner: "{{ test_owner|d(rsyslog_rsyslog_conf_owner|d('root')) }}"
+    group: "{{ test_group|d(rsyslog_rsyslog_conf_group|d('root')) }}"
+    mode: "{{ rsyslog_rsyslog_conf_mode|d('0644') }}"
+    backup: yes
+  notify:
+  - rsyslog-restart-rsyslog
+  tags:
+  - rsyslog
+  - rsyslog-conf
+

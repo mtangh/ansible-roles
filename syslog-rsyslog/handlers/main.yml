@@ -1,0 +1,21 @@
+---
+# handlers file for rsyslog
+
+- name: rsyslog-enable-syslog
+  service:
+    name: "{{ rsyslog_service_name }}"
+    enabled: yes
+  when: test_run|d(none) is none
+
+- name: rsyslog-start-syslog 
+  service:
+    name: "{{ rsyslog_service_name }}"
+    state: started
+  when: test_run|d(none) is none
+
+- name: rsyslog-restart-syslog
+  service:
+    name: "{{ rsyslog_service_name }}"
+    state: restarted
+  when: test_run|d(none) is none
+

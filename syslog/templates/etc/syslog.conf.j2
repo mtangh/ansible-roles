@@ -1,25 +1,6 @@
 # syslog config file
 # {{ ansible_managed }}
+{%  import 'macros.syslog-rules.j2' as m_syslog with context %}
 
-{%  if syslog_conf_rules is defined %}
-{%    for r in syslog_conf_rules
-        if (r.selectors is defined and r.selectors is not none)
-        and (r.destination is defined and r.destination is not none) %}
-
-{%      set rule = { 's':r.selectors, 'd':r.destinatnion,
-                     'c':(r.comment.split('\n') 
-                          if r.comment is defined and r.comment is not none else none),
-                     'e':(r.enabled|bool if r.enabled is defined else true) } %}
-{%      set s = [ rule.s ] if rule.s is string else rule.s %}
-{%      for comment in rule.c if rule.c is not none %}
-{{ '# %s'|format(comment)|trim }}
-{%      endfor %}
-{%      if s|join(',')|trim|length <= 38 %}
-{{ '%s%-40s%s'|format(('' if rule.e else '# '),(s|join(';')|trim),rule.d|trim) }}
-{%      else %}
-{{ '%s%s'|format(('' if rule.e else '#'),(s|join(';')|trim)) }} \
-{{ '%s%40s%s'|format(('' if rule.e else '#'),'',rule.d|trim) }}
-{%      endif %}
-{%    endfor %}
-{%  endif %}
-
+{{  m_syslog.syslog_rules( syslog_conf_rules|d([]) ) -}}
+# *eof*

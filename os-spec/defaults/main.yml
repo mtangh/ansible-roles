@@ -1,0 +1,16 @@
+---
+# defaults file for os-spec
+#
+# os_spec:
+#
+#   RedHat: yes|no
+#
+#   Debian: 
+#     Ubuntu: yes|no
+#
+#   Darwin:
+#     MacOSX: { ver_min: '10.7', ver_max: '10.11' }
+#
+# os_spec_ignore_errors: yes|no
+#
+

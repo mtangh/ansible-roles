@@ -1,7 +1,7 @@
 ---
-# ut-setup tasks file
+# test-setup tasks file
 
-- name: ut-setup | create directories for test
+- name: test-setup | create directories for test
   command:
     mkdir -p "{{ prefix_dir|d('') }}{{ item }}"
     creates={{ prefix_dir|d('') }}{{ item }}
@@ -13,7 +13,7 @@
   tags:
   - '[unit_test_setup]'
 
-- name: ut-setup | copy files to httpd/conf
+- name: test-setup | copy files to httpd/conf
   copy:
     src: "{{ item }}"
     dest: "{{ prefix_dir|d('') }}/etc/httpd/conf/"
@@ -24,7 +24,7 @@
   tags:
   - '[unit_test_setup]'
 
-- name: ut-setup | copy files to httpd/conf.d
+- name: test-setup | copy files to httpd/conf.d
   copy:
     src: "{{ item }}"
     dest: "{{ prefix_dir|d('') }}/etc/httpd/conf.d/"

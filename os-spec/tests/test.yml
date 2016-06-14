@@ -1,0 +1,49 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: yes
+
+  tags:
+  - default
+
+  vars:
+    os_spec_os_family: "{{ 'RedHat'|lower }}"
+    os_spec_os_distribution: "{{ 'CentOS'|lower }}"
+    os_spec_os_version: '6.7'
+
+  roles:
+  - role1
+  - role2
+  - role3
+
+  tasks:
+
+  - name: main | Debug print
+    debug: 
+      msg: |
+        {{ 'OS-Spec: %s:%s-v%s.'|format(
+           os_spec_os_family,os_spec_os_distribution,os_spec_os_version ) }}
+
+- hosts: localhost
+  connection: local
+  gather_facts: yes
+
+  tags:
+  - os-unsupported
+
+  vars:
+    os_spec_os_family: "{{ 'RedHat'|lower }}"
+    os_spec_os_distribution: "{{ 'CentOS'|lower }}"
+    os_spec_os_version: '5.7'
+
+  roles:
+  - role3
+
+  tasks:
+
+  - name: main | Debug print
+    debug: 
+      msg: |
+        {{ 'OS-Spec: %s:%s-v%s.'|format(
+           os_spec_os_family,os_spec_os_distribution,os_spec_os_version ) }}
+

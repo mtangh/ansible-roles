@@ -1,0 +1,10 @@
+---
+dependencies:
+- role: os-spec
+  os_spec:
+    RedHat: yes
+    Darwin: 
+      MacOSX: yes
+  tags:
+  - os-spec-verify
+

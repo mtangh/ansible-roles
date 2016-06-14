@@ -1,49 +1,68 @@
 ---
 # tasks file for logrotate
 
-- block:
-
-  - name: logrotate | Set facts platform.
-    set_fact:
-      platform_allow_os_families: [ "RedHat", "Test" ]
-      platform_allow_distributions:
-
-  - name: logrotate | Check the platform.
-    include: "platform.yml"
-
+- name: logrotate | Include OS/Distribution specific variables.
+  include_vars: "{{ item }}"
+  ignore_errors: yes
+  with_first_found:
+  - "{{ '%s-%s.yml'|format(os_spec_os_family,os_spec_os_distribution) }}"
+  - "{{ '%s.yml'|format(os_spec_os_family) }}"
+  - "default.yml"
   tags:
-  - always
-  - logrotate-os-family
+  - logrotate
+  - logrotate-include-vars
 
-- name: logrotate | Install the logrotate
-  include: "{{ __os_family }}-setup.yml"
+- name: logrotate | Install the logrotate.
+  include: "{{ item }}"
+  with_first_found:
+  - "{{ '%s-%s.yml'|format(os_spec_os_family,os_spec_os_distribution) }}"
+  - "{{ '%s.yml'|format(os_spec_os_family) }}"
+  - "default.yml"
   tags:
   - logrotate
   - logrotate-install
 
-- name: logrotate | Updating /etc/logrotate.conf
+- name: logrotate | Updating logrotate configuration.
   template:
     src: "etc/logrotate.conf.j2"
-    dest: "{{ prefix_dir|d('') }}/etc/logrotate.conf"
-    owner: "{{ test_owner|d('root') }}"
-    group: "{{ test_group|d('root') }}"
-    mode: "0644"
+    dest: "{{ '%s%s'|format(prefix_dir|d(''),logrotate_conf_file|d('/etc/logrotate.conf')) }}"
+    owner: "{{ test_owner|d(logrotate_conf_file_owner|d('root')) }}"
+    group: "{{ test_group|d(logrotate_conf_file_group|d('root')) }}"
+    mode: "{{ logrotate_conf_file_mode|d('0644') }}"
     backup: yes
   tags:
   - logrotate
   - logrotate-conf
 
-- name: logrotate | logrotate.d | Updating /etc/logrotate.d files
-  template:
-    src: "etc/logrotate.include.conf.j2"
-    dest: "{{ prefix_dir|d('') }}{{ logrotate_include_dir }}/{{ item.name }}"
-    owner: "{{ test_owner|d('root') }}"
-    group: "{{ test_group|d('root') }}"
-    mode: "0644"
-  with_items: "{{ logrotate_conf_include_files }}"
-  when: (item.name is defined and item.name is not none)
-        and (item.logfiles is defined and item.logfiles is not none)
+- block:
+
+  - name: logrotate | Create include directory.
+    file:
+      path: "{{ '%s%s'|format(prefix_dir|d(''),logrotate_include_dir) }}"
+      state: directory
+      owner: "{{ test_owner|d(logrotate_include_dir_owner|d('root')) }}"
+      group: "{{ test_group|d(logrotate_include_dir_group|d('root')) }}"
+      mode: "{{ logrotate_include_dir_mode|d('0755') }}"
+    tags:
+    - logrotate
+    - logrotate-logfiles-includes
+
+  - name: logrotate | Updating /etc/logrotate.d files
+    include: logrotate-logfile.yml
+    vars:
+      logrotate_conf_logfile: "{{ item }}"
+    with_items: "{{ logrotate_logfiles_includes|d([])|
+                    union(logrotate_logfiles_appends|d([])) }}"
+    when: item.name|d(none) is not none
+          and item.logfiles|d(none) is not none
+    tags:
+    - logrotate
+    - logrotate-logfiles-includes
+    
+  when: logrotate_include_dir|d(none) is not none
+        and logrotate_include_dir|string|trim|lower|
+            match('^(no|false)$') == false
   tags:
   - logrotate
-  - logrotate-include-files
+  - logrotate-logfiles-includes
 

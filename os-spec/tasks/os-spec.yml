@@ -1,0 +1,148 @@
+---
+# os-spec.yml
+
+- block:
+
+  - name: "os-spec | Check the status of 'gather_facts'."
+    fail:
+      msg: "'gather_facts' is off, Turn on 'gather_facts' to use."
+    when: ansible_os_family|d(none) is none
+          and os_spec_os_family|d(none) is none
+          and os_spec_os_distribution|d(none) is none
+          and os_spec_os_version|d(none) is none
+ 
+  - name: "os-spec | Set Facts - OS Spec."
+    set_fact:
+      os_spec_os_family: "
+        {%- if ansible_os_family|d(none) is not none -%}{{
+          ansible_os_family|trim|lower
+        }}{%- else -%}{{ 'N/A' }}{%- endif -%}"
+      os_spec_os_distribution: "
+        {%- if ansible_distribution|d(none) is not none -%}{{
+          ansible_distribution|trim|lower
+        }}{%- else -%}{{ 'N/A' }}{%- endif -%}"
+      os_spec_os_version: "
+        {%- if ansible_distribution_version|d(none) is not none
+            and ansible_distribution_version|d('')|match(
+              '^[1-9][0-9]*([-._][0-9][0-9]*|).*') -%}{{
+          '%d.%d'|format(
+          ( ansible_distribution_version|regex_replace(
+            '^([1-9][0-9]*)([-._][0-9][0-9]*|).*','0\\1')|int ),
+          ( ansible_distribution_version|regex_replace(
+            '^[1-9][0-9]*[-._]([0-9][0-9]*).*','0\\1')|int )
+          )|string
+        }}{%- else -%}{{ 'N/A' }}{%- endif -%}"
+      os_spec_os_major_version: "
+        {%- if ansible_distribution_major_version|d(none) is not none
+            and ansible_distribution_major_version|d('')|match(
+            '^[1-9][0-9]*$') -%}{{
+          ansible_distribution_major_version 
+        }}{%- elif ansible_distribution_version|d(none) is not none
+              and ansible_distribution_version|d('')|match(
+              '^[1-9][0-9]*([.][0-9][0-9]*|).*') -%}{{
+          '%d'|format(
+          ( ansible_distribution_version|regex_replace(
+            '^([1-9][0-9]*)([.][0-9][0-9]*|).*','0\\1')|int )
+          )|int
+        }}{%- else -%}{{ none }}{%- endif -%}"
+    when: os_spec_os_family|d(none) is none
+          or os_spec_os_distribution|d(none) is none
+          or os_spec_os_version|d(none) is none
+
+  - name: "os-spec | Set Facts - Conditions"
+    set_fact:
+      __os_spec_version_text: "
+        {%- if os_spec_os_version|d(none) is not none
+            and os_spec_os_version|d('')|match(
+              '^[0-9][0-9]*([.][0-9][0-9]*|).*') -%}{{
+          '%03d.%06d'|format(
+          ( os_spec_os_version|regex_replace(
+            '^([0-9][0-9]*)([.][0-9][0-9]*|).*','0\\1')|int ),
+          ( os_spec_os_version|regex_replace(
+            '^[0-9][0-9]*[.]([0-9][0-9]*).*','0\\1')|int )
+          )|string
+        }}{%- else -%}{{ none }}{%- endif -%}"
+      __os_spec_cond: |
+        {%  set o = {} %}
+        {%- for _os_fam, _os_fam_v in (os_spec|d({})).iteritems()
+                if _os_fam_v|d(none) is not none
+                and (_os_fam_v is mapping or _os_fam_v == true) -%}
+        {%    set _os_fam_dist = {} %}
+        {%    set _os_fam_v_dict = _os_fam_v
+                  if _os_fam_v is mapping
+                  else ({ 'all':true } if _os_fam_v == true else none) %}
+        {%-   for _os_dist, _os_dist_v in (_os_fam_v_dict|d({})).iteritems()
+                  if _os_dist_v|d(none) is not none
+                  and (_os_dist_v is mapping or _os_dist_v == true) -%} 
+        {%      set _os_vmin_in = _os_dist_v.ver_min|trim
+                    if _os_dist_v.ver_min|d(none) is not none else none %}
+        {%      set _os_vmax_in = _os_dist_v.ver_max|trim
+                    if _os_dist_v.ver_max|d(none) is not none else none %}
+        {%      set _os_v_major = (_os_vmin_in|regex_replace(
+                    '^([1-9][0-9]*)([.][0-9][0-9]*|).*','0\\1')|int)
+                    if _os_vmin_in|d(none) is not none
+                    and _os_vmin_in|string|match(
+                    '^[1-9][0-9]*([.][0-9][0-9]*|).*')
+                    else 0 %}
+        {%      set _os_v_minor = (_os_vmin_in|regex_replace(
+                    '^[1-9][0-9]*[.]([0-9][0-9]*).*','0\\1'))|int
+                    if _os_vmin_in|d(none) is not none
+                    and _os_vmin_in|string|match(
+                    '^[1-9][0-9]*[.]([0-9][0-9]*).*')
+                    else 0 %}
+        {%      set _os_vmin_out = '%03d.%06d'|format(
+                    _os_v_major|d(0),_os_v_minor|d(0))|string %}
+        {%      set _os_v_major = (_os_vmax_in|regex_replace(
+                    '^([1-9][0-9]*)([.][0-9][0-9]*|).*','0\\1')|int)
+                    if _os_vmax_in|d(none) is not none
+                    and _os_vmax_in|string|match(
+                    '^([1-9][0-9]*)([.][0-9][0-9]*|).*')
+                    else 999 %}
+        {%      set _os_v_minor = (_os_vmax_in|regex_replace(
+                    '^[1-9][0-9]*[.]([0-9][0-9]*).*','0\\1')|int)
+                    if _os_vmax_in|d(none) is not none
+                    and _os_vmax_in|string|match(
+                    '^[1-9][0-9]*[.]([0-9][0-9]*).*')
+                    else 999999 %}
+        {%      set _os_vmax_out = '%03d.%06d'|format(
+                    _os_v_major|d(999),_os_v_minor|d(999999))|string %}
+        {%      set _ = _os_fam_dist.update({ (_os_dist|trim|lower):{
+                    'ver_min':_os_vmin_in, 'ver_max':_os_vmax_in,
+                    '__vmin':_os_vmin_out, '__vmax':_os_vmax_out } }) %}
+        {%-   endfor -%}
+        {%    set _ = o.update({ (_os_fam|trim|lower):_os_fam_dist }) %}
+        {%- endfor -%}
+        {{ o }}
+    when: os_spec_os_family|d('N/A') != 'N/A'
+          and os_spec_os_distribution|d('N/A') != 'N/A'
+
+  - name: "os-spec | Check the OS and Version."
+    fail:
+      msg: |
+        {{ 'Unsupported OS: %s-%sv%s; Not in cond[ %s ].'|format(
+           os_spec_os_family,os_spec_os_distribution,os_spec_os_version|d('N/A'),
+           (os_spec|d({})|string)) }}
+    ignore_errors: "{{ os_spec_ignore_errors|d(false) }}"
+    register: os_spec_supported
+    when: ( os_spec_os_family|d('N/A') != 'N/A'
+            and os_spec_os_distribution|d('N/A') != 'N/A'
+            and __os_spec_cond|d(none) is not none )
+          and
+          ( __os_spec_cond[os_spec_os_family] is undefined
+            or ( __os_spec_cond[os_spec_os_family] is defined
+             and __os_spec_cond[os_spec_os_family]['all'] is undefined
+             and __os_spec_cond[os_spec_os_family][os_spec_os_distribution] is undefined )
+            or ( __os_spec_cond[os_spec_os_family] is defined
+             and __os_spec_cond[os_spec_os_family][os_spec_os_distribution] is defined
+             and __os_spec_cond[os_spec_os_family][os_spec_os_distribution]['__vmin']|d('000.000000')
+                   > __os_spec_version_text|d('000.000000') )
+            or ( __os_spec_cond[os_spec_os_family] is defined
+             and __os_spec_cond[os_spec_os_family][os_spec_os_distribution] is defined
+             and __os_spec_cond[os_spec_os_family][os_spec_os_distribution]['__vmax']|d('999.999999')
+                   < __os_spec_version_text|d('999.999999') )
+          )
+
+  when: os_spec|d(none) is not none
+  tags:
+  - os-spec-verify
+

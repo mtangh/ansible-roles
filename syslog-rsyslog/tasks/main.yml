@@ -1,0 +1,29 @@
+---
+# tasks file for rsyslog
+
+- name: syslog-rsyslog | Include OS/Distribution specific variables.
+  include_vars: "{{ item }}"
+  ignore_errors: yes
+  with_first_found:
+  - "{{ '%s-%s.yml'|format(os_spec_os_family,os_spec_os_distribution) }}"
+  - "{{ '%s.yml'|format(os_spec_os_family) }}"
+  - "default.yml"
+  tags:
+  - syslog-rsyslog
+  - syslog-rsyslog-include-vars
+
+- name: syslog-rsyslog | Install package"
+  include: "{{ item }}"
+  with_first_found:
+  - "{{ '%s-%s.yml'|format(os_spec_os_family,os_spec_os_distribution) }}"
+  - "{{ '%s.yml'|format(os_spec_os_family) }}"
+  - "default.yml"
+  tags:
+  - syslog-rsyslog
+  - syslog-rsyslog-install
+
+- name: "syslog-rsyslog | Updating {{ rsyslog_rsyslog_conf }}"
+  include: syslog-rsyslog-conf.yml
+  tags:
+  - syslog-rsyslog
+  - syslog-rsyslog-conf

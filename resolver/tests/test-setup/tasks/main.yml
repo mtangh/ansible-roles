@@ -1,2 +1,17 @@
 ---
-# ut-setup tasks file
+# test-setup tasks file
+
+- block:
+
+  - name: test-setup | create directories for test
+    command:
+      mkdir -p "{{ prefix_dir|d('') }}{{ item }}"
+      creates={{ prefix_dir|d('') }}{{ item }}
+    with_items:
+    - /etc
+
+  when: test_run|d(none) is not none
+        and prefix_dir|d('')|length > 0
+  tags:
+  - '[test-setup]'
+

@@ -1,0 +1,18 @@
+---
+# tasks file for logrotate of "redhat"
+
+- name: logrotate-redhat | Install the logrotate
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items: "{{ logrotate_install_packages
+                  if logrotate_install_packages|d(none) is not none
+                  else ['logrotate'] }}"
+  when: test_run|d(none) is none
+        and (item|d(none) is not none and item|length > 0)
+  tags:
+  - logrotate
+  - logrotate-install
+  - logrotate-redhat
+  - logrotate-redhat-install
+

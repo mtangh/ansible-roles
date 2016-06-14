@@ -1,0 +1,19 @@
+# rsyslog v3 config file
+# {{ ansible_managed }}
+{%  import 'macros.rsyslog-conf.j2' as m_rsyslog with context %}
+
+# if you experience problems, check
+# http://www.rsyslog.com/troubleshoot for assistance
+
+#### MODULES ####
+
+{{  m_rsyslog.rsyslog_conf_modules( rsyslog_conf_modules|d([]) ) -}}
+
+#### GLOBAL DIRECTIVES ####
+
+{{  m_rsyslog.rsyslog_conf_directives( rsyslog_conf_directives|d([]) ) -}}
+
+#### RULES ####
+
+{{  m_rsyslog.syslog_rules( rsyslog_conf_rules|d([]) ) -}}
+

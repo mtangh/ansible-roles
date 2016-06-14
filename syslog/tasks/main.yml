@@ -1,37 +1,29 @@
 ---
 # tasks file for syslog
 
-- block:
-
-  - name: syslog | Set facts platform.
-    set_fact:
-      platform_allow_os_families: [ "RedHat", "Test" ]
-      platform_allow_distributions:
-
-  - name: syslog | Check the platform.
-    include: "platform.yml"
-
+- name: syslog | Include OS/Distribution specific variables.
+  include_vars: "{{ item }}"
+  ignore_errors: yes
+  with_first_found:
+  - "{{ '%s-%s.yml'|format(os_spec_os_family,os_spec_os_distribution) }}"
+  - "{{ '%s.yml'|format(os_spec_os_family) }}"
+  - "default.yml"
   tags:
-  - always
-  - syslog-os-family
+  - syslog
+  - syslog-include-vars
 
 - name: "syslog | Install package"
-  include: "{{ __os_family }}-setup.yml"
+  include: "{{ item }}"
+  with_first_found:
+  - "{{ '%s-%s.yml'|format(os_spec_os_family,os_spec_os_distribution) }}"
+  - "{{ '%s.yml'|format(os_spec_os_family) }}"
+  - "default.yml"
   tags:
   - syslog
   - syslog-syslog-install
 
 - name: "syslog | Updating {{ syslog_syslog_conf }}"
-  template:
-    src: "etc/{{ syslog_syslog_type }}.conf.j2"
-    dest: "{{ prefix_dir|d('') }}{{ syslog_syslog_conf|d('/etc/syslog.conf') }}"
-    owner: "{{ test_owner|d('root') }}"
-    group: "{{ test_group|d('root') }}"
-    mode: "0644"
-    backup: yes
-  notify:
-  - syslog-start-syslog
+  include: syslog-conf.yml
   tags:
   - syslog
-  - syslog-syslog-conf
-
+  - syslog-conf

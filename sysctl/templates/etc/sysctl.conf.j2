@@ -5,74 +5,110 @@
 #
 # For binary values, 0 is disabled, 1 is enabled.  See sysctl(8) and
 # sysctl.conf(5) for more details.
-{%  set p = sysctl_conf_params if sysctl_conf_params is defined else none -%}
+{%  set p = sysctl_conf_params if sysctl_conf_params|d(none) is not none else {} -%}
 
 # Controls IP packet forwarding
-{%  if p['net.ipv4.ip_forward'] is undefined
-    or p['net.ipv4.ip_forward'] is not number
-    or p['net.ipv4.ip_forward'] not in [0,1] %}{{ '#' }}{% endif -%}
-net.ipv4.ip_forward = 0
+{%  set pv = p['net.ipv4.ip_forward']|int 
+        if p['net.ipv4.ip_forward']|d(none) is not none
+        and p['net.ipv4.ip_forward']|string in ['0','1']
+        else none -%}
+{%  if pv|d(none) is none %}{{ '#' }}{% endif -%}
+net.ipv4.ip_forward = {{ pv if pv|d(none) is not none else 0 }}
 
 # Controls source route verification
-{%  if p['net.ipv4.conf.default.rp_filter'] is undefined
-    or p['net.ipv4.conf.default.rp_filter'] is not number
-    or p['net.ipv4.conf.default.rp_filter'] not in [0,1] %}{{ '#' }}{% endif -%}
-net.ipv4.conf.default.rp_filter = 1
+{%  set pv = p['net.ipv4.conf.default.rp_filter']|int 
+        if p['net.ipv4.conf.default.rp_filter']|d(none) is not none
+        and p['net.ipv4.conf.default.rp_filter']|string in ['0','1']
+        else none %}
+{%  if pv|d(none) is none %}{{ '#' }}{% endif -%}
+net.ipv4.conf.default.rp_filter = {{ pv if pv|d(none) is not none else 1 }}
+
+# Controls source routing
+{%  set pv = p['net.ipv4.conf.default.accept_source_route']|int 
+        if p['net.ipv4.conf.default.accept_source_route']|d(none) is not none
+        and p['net.ipv4.conf.default.accept_source_route']|string in ['0','1']
+        else none %}
+{%  if pv|d(none) is none %}{{ '#' }}{% endif -%}
+net.ipv4.conf.default.accept_source_route = {{ pv if pv|d(none) is not none else 0 }}
+
+# Controls redirects
+{%  set pv = p['net.ipv4.conf.default.accept_redirects']|int 
+        if p['net.ipv4.conf.default.accept_redirects']|d(none) is not none
+        and p['net.ipv4.conf.default.accept_redirects']|string in ['0','1']
+        else none %}
+{%  if pv|d(none) is none %}{{ '#' }}{% endif -%}
+net.ipv4.conf.default.accept_redirects = {{ pv if pv|d(none) is not none else 0 }}
 
 # Controls the use of TCP syncookies
-{%  if p['net.ipv4.tcp_syncookies'] is undefined
-    or p['net.ipv4.tcp_syncookies'] is not number
-    or p['net.ipv4.tcp_syncookies'] not in [0,1] %}{{ '#' }}{% endif -%}
-net.ipv4.tcp_syncookies = 1
+{%  set pv = p['net.ipv4.tcp_syncookies']|int 
+        if p['net.ipv4.tcp_syncookies']|d(none) is not none
+        and p['net.ipv4.tcp_syncookies']|string in ['0','1']
+        else none %}
+{%  if pv|d(none) is none %}{{ '#' }}{% endif -%}
+net.ipv4.tcp_syncookies = {{ pv if pv|d(none) is not none else 1 }}
 
 # Controls the System Request debugging functionality of the kernel
-{%  if p['kernel.sysrq'] is undefined
-    or p['kernel.sysrq'] is not number
-    or p['kernel.sysrq'] not in [0,1] %}{{ '#' }}{% endif -%}
-kernel.sysrq = 0
+{%  set pv = p['kernel.sysrq']|int 
+        if p['kernel.sysrq']|d(none) is not none
+        and p['kernel.sysrq']|string in ['0','1']
+        else none %}
+{%  if pv|d(none) is none %}{{ '#' }}{% endif -%}
+kernel.sysrq = {{ pv if pv|d(none) is not none else 0 }}
 
 # Controls whether core dumps will append the PID to the core filename.
 # Useful for debugging multi-threaded applications.
-{%  if p['kernel.core_uses_pid'] is undefined
-    or p['kernel.core_uses_pid'] is not number
-    or p['kernel.core_uses_pid'] not in [0,1] %}{{ '#' }}{% endif -%}
-kernel.core_uses_pid = 1
+{%  set pv = p['kernel.core_uses_pid']|int 
+        if p['kernel.core_uses_pid']|d(none) is not none
+        and p['kernel.core_uses_pid']|string in ['0','1']
+        else none %}
+{%  if pv|d(none) is none %}{{ '#' }}{% endif -%}
+kernel.core_uses_pid = {{ pv if pv|d(none) is not none else 1 }}
 
 # Controls the default maxmimum size of a mesage queue
-{%  if p['kernel.msgmnb'] is undefined
-    or p['kernel.msgmnb'] is not number
-    or p['kernel.msgmnb'] == 0 %}{{ '#' }}{% endif -%}
-kernel.msgmnb = {{ p['kernel.msgmnb'] if p['kernel.msgmnb'] < 0 else 65536 }}
+{%  set pv = p['kernel.msgmnb']|int(10)
+        if p['kernel.msgmnb']|d(none) is not none
+        and p['kernel.msgmnb']|int > 0
+        else -1 %}
+{%  if pv <= 0 %}{{ '#' }}{% endif -%}
+kernel.msgmnb = {{ pv if pv > 0 else 65536 }}
 
 # Controls the maximum size of a message, in bytes
-{%  if p['kernel.msgmax'] is undefined
-    and p['kernel.msgmax'] is not number
-    and p['kernel.msgmax'] == 0 %}{{ '#' }}{% endif -%}
-kernel.msgmax = {{ p['kernel.msgmax'] if p['kernel.msgmax'] < 0 else 65536 }}
+{%  set pv = p['kernel.msgmax']|int(10)
+        if p['kernel.msgmax']|d(none) is not none
+        and p['kernel.msgmax']|int > 0
+        else -1 %}
+{%  if pv <= 0 %}{{ '#' }}{% endif -%}
+kernel.msgmax = {{ pv if pv > 0 else 65536 }}
 
 # Controls the maximum shared segment size, in bytes
-{%  if p['kernel.shmmax'] is undefined
-    and p['kernel.shmmax'] is not number
-    and p['kernel.shmmax'] == 0 %}{{ '#' }}{% endif -%}
-kernel.shmmax = {{ p['kernel.shmmax'] if p['kernel.shmmax'] < 0 else 68719476736 }}
+{%  set pv = p['kernel.shmmax']|int(10)
+        if p['kernel.shmmax']|d(none) is not none
+        and p['kernel.shmmax']|int > 0
+        else -1 %}
+{%  if pv <= 0 %}{{ '#' }}{% endif -%}
+kernel.shmmax = {{ pv if pv > 0 else 68719476736 }}
 
 # Controls the maximum number of shared memory segments, in pages
-{%  if p['kernel.shmall'] is undefined
-    and p['kernel.shmall'] is not number
-    and p['kernel.shmall'] == 0 %}{{ '#' }}{% endif -%}
-kernel.shmall = {{ p['kernel.shmall'] if p['kernel.shmall'] < 0 else 4294967296 }}
+{%  set pv = p['kernel.shmall']|int(10)
+        if p['kernel.shmall']|d(none) is not none
+        and p['kernel.shmall']|int > 0
+        else -1 %}
+{%  if pv <= 0 %}{{ '#' }}{% endif -%}
+kernel.shmall = {{ pv if pv > 0 else 4294967296 }}
 
-{%  if p is defined and p is not none %}
+{%  if p|d(none) %}
 # Additional Kernel sysctl configuration
-{%  for key, value in p|dictsort
-      if key not in [ '_',
-                      'net.ipv4.ip_forward',
-                      'net.ipv4.conf.default.rp_filter',
-                      'net.ipv4.conf.default.accept_source_route',
-                      'net.ipv4.tcp_syncookies',
-                      'kernel.sysrq', 'kernel.core_uses_pid',
-                      'kernel.msgmnb', 'kernel.msgmax',
-                      'kernel.shmmax', 'kernel.shmall' ] %}
+{%  set x_attrs = [
+        '_',
+        'net.ipv4.ip_forward',
+        'net.ipv4.conf.default.rp_filter',
+        'net.ipv4.conf.default.accept_source_route',
+        'net.ipv4.conf.default.accept_redirects',
+        'net.ipv4.tcp_syncookies',
+        'kernel.sysrq', 'kernel.core_uses_pid',
+        'kernel.msgmnb', 'kernel.msgmax', 'kernel.shmmax', 'kernel.shmall'
+        ] %}
+{%  for key, value in p|dictsort if key not in x_attrs %}
 {{ '%s = %s'|format(key,value)|trim }}
 {%    endfor %}
 {%  endif %}

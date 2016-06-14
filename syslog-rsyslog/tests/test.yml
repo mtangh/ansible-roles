@@ -1,0 +1,19 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+
+  tags:
+    01_default
+
+  vars:
+    os_spec_os_family: redhat
+    os_spec_os_distribution: centos
+    os_spec_os_version: "6.8"
+    os_spec_os_major_version: 6
+
+  roles:
+  - test-setup
+  - { role: ../.. }
+  - test-teardown
+

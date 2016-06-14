@@ -24,17 +24,29 @@
 #
 {%  if sudo_sudoers_host_aliases|d(none) is not none %}
 {%  for e in sudo_sudoers_host_aliases|d([])
-        if e|d('')|string|length > 0 %}
-{%    set alias = '%s = %s'|format(e.name,e.value|d(''))
-          if e.name is defined else e|string|trim %}
+        if e is not none and e|string|length > 0 %}
+{%    set alias = '%s = %s'|format(e.name,(
+          e.value|join(', ')
+          if e.value|d(none) is not none 
+          and e.value is iterable and e.value is not string
+          else (
+          e.value|trim
+          if e.value|d(none) is not none and e.value is string
+          else '' )))
+          if e.name|d(none) is not none else e|string|trim %}
 {%    set cmnts = e.comment
           if e.comment|d(none) is not none
           and e.comment is iterable and e.comment is not string
           else (e.comment.split('\n') if e.comment|d(none) is string else []) %}
+{%    if alias|d(none) is not none and alias in ['-','#'] %}
+{{ '#' if alias == '#' else '' }}
+{%    endif %}
 {%    for c in cmnts if c is not none and c|length > 0 %}
-{{ '# %s'|format(cmnts)|trim }}
+{{ '# %s'|format(c)|trim }}
 {%    endfor %}
+{%    if alias|d(none) is not none and alias not in ['-','#'] %}
 Host_Alias  {{ alias }}
+{%    endif %}
 {%  endfor %}
 {%  endif %}
 
@@ -50,17 +62,29 @@ Host_Alias  {{ alias }}
 #
 {%  if sudo_sudoers_user_aliases|d(none) is not none %}
 {%  for e in sudo_sudoers_user_aliases|d([])
-        if e|d('')|string|length > 0 %}
-{%    set alias = '%s = %s'|format(e.name,e.value|d(''))
-          if e.name is defined else e|string|trim %}
+        if e is not none and e|string|length > 0 %}
+{%    set alias = '%s = %s'|format(e.name,(
+          e.value|join(', ')
+          if e.value|d(none) is not none 
+          and e.value is iterable and e.value is not string
+          else (
+          e.value|trim
+          if e.value|d(none) is not none and e.value is string
+          else '' )))
+          if e.name|d(none) is not none else e|string|trim %}
 {%    set cmnts = e.comment
           if e.comment|d(none) is not none
           and e.comment is iterable and e.comment is not string
           else (e.comment.split('\n') if e.comment|d(none) is string else []) %}
+{%    if alias|d(none) is not none and alias in ['-','#'] %}
+{{ '#' if alias == '#' else '' }}
+{%    endif %}
 {%    for c in cmnts if c is not none and c|length > 0 %}
-{{ '# %s'|format(cmnts)|trim }}
+{{ '# %s'|format(c)|trim }}
 {%    endfor %}
+{%    if alias|d(none) is not none and alias not in ['-','#'] %}
 User_Alias  {{ alias }}
+{%    endif %}
 {%  endfor %}
 {%  endif %}
 
@@ -69,17 +93,29 @@ User_Alias  {{ alias }}
 ##
 {%  if sudo_sudoers_runas_aliases|d(none) is not none %}
 {%  for e in sudo_sudoers_runas_aliases|d([])
-        if e|d('')|string|length > 0 %}
-{%    set alias = '%s = %s'|format(e.name,e.value|d(''))
-          if e.name is defined else e|string|trim %}
+        if e is not none and e|string|length > 0 %}
+{%    set alias = '%s = %s'|format(e.name,(
+          e.value|join(', ')
+          if e.value|d(none) is not none 
+          and e.value is iterable and e.value is not string
+          else (
+          e.value|trim
+          if e.value|d(none) is not none and e.value is string
+          else '' )))
+          if e.name|d(none) is not none else e|string|trim %}
 {%    set cmnts = e.comment
           if e.comment|d(none) is not none
           and e.comment is iterable and e.comment is not string
           else (e.comment.split('\n') if e.comment|d(none) is string else []) %}
+{%    if alias|d(none) is not none and alias in ['-','#'] %}
+{{ '#' if alias == '#' else '' }}
+{%    endif %}
 {%    for c in cmnts if c is not none and c|length > 0 %}
-{{ '# %s'|format(cmnts)|trim }}
+{{ '# %s'|format(c)|trim }}
 {%    endfor %}
+{%    if alias|d(none) is not none and alias not in ['-','#'] %}
 Runas_Alias {{ alias }}
+{%    endif %}
 {%  endfor %}
 {%  endif %}
 
@@ -108,17 +144,29 @@ Runas_Alias {{ alias }}
 #
 {%  if sudo_sudoers_cmnd_aliases|d(none) is not none %}
 {%  for e in sudo_sudoers_cmnd_aliases|d([])
-        if e|d('')|string|length > 0 %}
-{%    set alias = '%s = %s'|format(e.name,e.value|d(''))
-          if e.name is defined else e|string|trim %}
+        if e is not none and e|string|length > 0 %}
+{%    set alias = '%s = %s'|format(e.name,(
+          e.value|join(', ')
+          if e.value|d(none) is not none 
+          and e.value is iterable and e.value is not string
+          else (
+          e.value|trim
+          if e.value|d(none) is not none and e.value is string
+          else '' )))
+          if e.name|d(none) is not none else e|string|trim %}
 {%    set cmnts = e.comment
           if e.comment|d(none) is not none
           and e.comment is iterable and e.comment is not string
           else (e.comment.split('\n') if e.comment|d(none) is string else []) %}
+{%    if alias|d(none) is not none and alias in ['-','#'] %}
+{{ '#' if alias == '#' else '' }}
+{%    endif %}
 {%    for c in cmnts if c is not none and c|length > 0 %}
 {{ '# %s'|format(c)|trim }}
 {%    endfor %}
+{%    if alias|d(none) is not none and alias not in ['-','#'] %}
 Cmnd_Alias  {{ alias }}
+{%    endif %}
 {%  endfor %}
 {%  endif %}
 
@@ -135,17 +183,26 @@ Cmnd_Alias  {{ alias }}
           if e.default|d(none) is not none
           and e.default is iterable and e.default is not string
           else ([e.default|trim] if e.default|d(none) is string
-          else ([e|trim] if e|d(none) is string else '')) %}
+                and e.default|d(none) not in ['-','#']
+          else (e.default if e.default|d(none) in ['-','#'] 
+          else ([e|trim] if e|d(none) is string
+                and e|d(none) not in ['-','#']
+          else (e if e|d(none) in ['-','#'] else none)))) %}
 {%    set cmnts = e.comment
           if e.comment|d(none) is not none
           and e.comment is iterable and e.comment is not string
           else (e.comment.split('\n') if e.comment|d(none) is string else []) %}
+{%    if dflts|d(none) is not none and dflts in ['-','#'] %}
+{{ '#' if dflts == '#' else '' }}
+{%    endif %}
 {%    for c in cmnts if c is not none and c|length > 0 %}
 {{ '# %s'|format(c)|trim }}
 {%    endfor %}
-{%    for dv in dflts|d([]) if dflts|d(none) is not none and dv|length > 0 %}
+{%    if dflts|d(none) is not none and dflts not in ['-','#'] %}
+{%      for dv in dflts|d([]) if dflts|d(none) is not none and dv|length > 0 %}
 Defaults    {{ dv|trim }}
-{%    endfor %}
+{%      endfor %}
+{%    endif %}
 {%  endfor %}
 {%  endif %}
 
@@ -156,11 +213,11 @@ Defaults    {{ dv|trim }}
 # root can run anything on any machine as any user
 root            ALL=(ALL) ALL
 #
-# Uncomment to allow people in group wheel to run all commands
-#%wheel          ALL=(ALL) ALL
+# Uncomment to allow people in group {{ sudo_administrator_group|d('wheel') }} to run all commands
+#{{ '%s%-14s'|format('%',sudo_administrator_group|d('wheel')) }} ALL=(ALL) ALL
 #
 # Same thing without a password
-#%wheel          ALL=(ALL) NOPASSWD: ALL
+#{{ '%s%-14s'|format('%',sudo_administrator_group|d('wheel')) }} ALL=(ALL) NOPASSWD: ALL
 #
 # Samples
 #%users          ALL=/sbin/mount /cdrom,/sbin/umount /cdrom
@@ -170,10 +227,12 @@ root            ALL=(ALL) ALL
 {%  for rule in sudo_sudoers_rules|d([])
         if rule is not none %}
 {%    set r = {
-        'u': rule.users|trim,
-        'h': (rule.hosts   if rule.hosts|d(none) is not none else 'ALL'),
-        'ra':(rule.runas   if rule.runas|d(none) is not none else 'ALL'),
-        'np':('NOPASSWD: ' if rule.nopasswd is defined and rule.nopasswd|bool
+        'u': (rule.users|trim if rule.users|d(none) is not none
+               else (rule|trim if rule is string else none)),
+        'h': (rule.hosts|trim if rule.hosts|d(none) is not none else 'ALL'),
+        'ra':(rule.runas|trim if rule.runas|d(none) is not none else 'ALL'),
+        'np':('NOPASSWD: ' if rule.nopasswd|d(none) is not none
+                             and rule.nopasswd|bool
                            else '') } %}
 {%    set r_cmd = rule.commands|join(', ')
         if rule.commands|d(none) is not none
@@ -185,21 +244,30 @@ root            ALL=(ALL) ALL
         and (rule.comment is iterable and rule.comment is not string)
         else (rule.comment.split('\n')
               if rule.comment|d(none) is string else []) %}
+{%    if r.u|d(none) is not none and r.u in ['-','#'] %}
+{{ '#' if r.u == '#' else '' }}
+{%    endif %}
 {%    for c in r_cmnts if c is not none and c|length > 0 %}
 {{ '# %s'|format(c|trim) }}
 {%    endfor %}
+{%    if r.u|d(none) is not none and r.u not in ['-','#'] %}
 {{ '%-15s %s=(%s) %s%s'|format(r.u,r.h,r.ra,r.np,r_cmd)|trim }}
+{%    endif %}
 {%  endfor %}
 {%  endif %}
-{%  if sudo_sudoers_dropin_not_supported|d(false) == false %}
+{%  if sudo_sudoers_dropin_dir|d(none) is not none %}
+{%    set dropin_dir_enabled = true
+          if sudo_sudoers_dropin_dir|string|trim|lower|
+             match('^(no|false)$') == false
+          else false %}
 
 ##
-# Read drop-in files from {{ sudo_sudoers_dropin_dir|d(none) if sudo_sudoers_dropin_dir is not none else '/etc/sudoers.d'  }}
-{% if sudo_sudoers_dropin_enabled|d(false) == false %}
+# Read drop-in files from {{ sudo_sudoers_dropin_dir if dropin_dir_enabled == true else '/etc/sudoers.d' }}
+{%    if dropin_dir_enabled == false %}
 # (the # here does not mean a comment)
-{% endif %}
+{%    endif %}
 ##
-{%  if sudo_sudoers_dropin_enabled|d(false) == false %}#{% endif -%}
-includedir {{ sudo_sudoers_dropin_dir|d(none) if sudo_sudoers_dropin_dir is not none else '/etc/sudoers.d' }}
+{% if dropin_dir_enabled == false %}#{% endif -%}
+includedir {{ sudo_sudoers_dropin_dir if dropin_dir_enabled == true else '/etc/sudoers.d' }}
 {%  endif %}
 

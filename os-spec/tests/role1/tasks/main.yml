@@ -1,0 +1,14 @@
+---
+# role1 tasks file
+
+- name: role1 | Debug print 'OS-Spec'
+  debug: 
+    msg: |
+      {{ 'Role1: OS-Spec: %s:%s v%s.'|format(
+         os_spec_os_family,os_spec_os_distribution,os_spec_os_version) }}
+
+- name: role1 | Debug print 'OS-Cond'
+  debug: 
+    msg: |
+      {{ 'Role1: OS-Cond: "%s".'|format( os_spec|string ) }}
+

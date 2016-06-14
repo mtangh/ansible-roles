@@ -1,0 +1,17 @@
+---
+# tasks file for syslog/syslog-conf
+
+- name: syslog-conf | Updating syslog.conf
+  template:
+    src: "etc/syslog.conf.j2"
+    dest: "{{ '%s%s'|format(prefix_dir|d(''),syslog_syslog_conf) }}"
+    owner: "{{ test_owner|d(syslog_syslog_conf_owner|d('root')) }}"
+    group: "{{ test_group|d(syslog_syslog_conf_group|d('root')) }}"
+    mode: "{{ syslog_syslog_conf_mode|d('0644') }}"
+    backup: yes
+  notify:
+  - syslog-start-syslog
+  tags:
+  - syslog
+  - syslog-conf
+

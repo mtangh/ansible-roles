@@ -1,38 +1,30 @@
 ---
 # defaults file for logrotate
 
-## logrotate include dirrectory
-logrotate_include_dir: /etc/logrotate.d
+# Includes OS Spec defaults
+logrotate_vars: |
+  {{ lookup('file','./defaults/%s.yml'|
+     format(os_spec_os_family|d('default')))|from_yaml }}
 
-## logrotate default config
-logrotate_conf_default:
-  cycle: weekly
-  rotate: 4
-  create: yes
+# logrotate conf file path
+logrotate_conf_file: "{{ logrotate_vars.logrotate_conf_file|d('/etc/logrotate.conf') }}"
 
-## logrotate conf files
-logrotate_conf_files:
-  - name: wtmp
-    logfiles: /var/log/wtmp
-    cycle: monthly
-    minsize: 1M
-    rotate: 3
-    create:
-      owner: root
-      group: utmp
-      mode: 0644
-  - name: btmp
-    logfiles: /var/log/btmp
-    cycle: monthly
-    minsize: 1M
-    rotate: 3
-    create:
-      owner: root
-      group: utmp
-      mode: 0600
+# logrotate include dirrectory
+logrotate_include_dir: "{{ logrotate_vars.logrotate_include_dir|d('/etc/logrotate.d') }}"
 
-## logrotate include files
-logrotate_conf_include_files:
+# logrotate default config
+logrotate_conf_default: |
+  {% if logrotate_vars.logrotate_conf_default|d(none) is not none %}{{
+    logrotate_vars.logrotate_conf_default
+  }}{% else %}{{ {
+    'cycle': 'weekly',
+    'rotate': 4,
+    'create': True
+  } }}{% endif %}
+
+# logrotate log files
+#
+# logrotate_logfiles_{defaults|includes|appends}
 #   - name:             string
 #     logfiles:         log-file-path
 #     cycle:            daily|weekly|monthly|yearly
@@ -66,36 +58,23 @@ logrotate_conf_include_files:
 #     lastaction:       scripts list
 #     prerotate:        scripts list
 #     postrotate:       scripts list
+#
 
-  - name: syslog
-    logfiles:
-    - /var/log/kern.log
-    - /var/log/messages
-    - /var/log/daemon.log
-    - /var/log/secure
-    - /var/log/maillog
-    - /var/log/spooler
-    - /var/log/boot.log
-    - /var/log/cron
-    sharedscripts: yes
-    postrotate:
-    - /bin/kill -HUP `cat /var/run/syslogd.pid 2>/dev/null` 2>/dev/null || true
-    - /bin/kill -HUP `cat /var/run/rsyslogd.pid 2>/dev/null` 2>/dev/null || true
+# logrotate log files in logrotate.conf
+logrotate_logfiles_defaults: |
+  {% if logrotate_vars.logrotate_logfiles_defaults|d(none) is not none %}{{
+    logrotate_vars.logrotate_logfiles_defaults
+  }}{% else %}{{ [] }}{% endif %}
 
-  - name: rpm
-    logfiles: /var/log/rpmpkgs
-    cycle: weekly
-    missingok: yes
-    ifempty: no
+# logrotate log files under the include directory
+logrotate_logfiles_includes: |
+  {% if logrotate_vars.logrotate_logfiles_includes|d(none) is not none %}{{
+    logrotate_vars.logrotate_logfiles_includes
+  }}{% else %}{{ [] }}{% endif %}
 
-  - name: yum
-    logfiles: /var/log/yum.log
-    cycle: yearly
-    size: 30k
-    create: 
-      owner: root
-      group: root
-      mode: 0600
-    missingok: yes
-    ifempty: no
+# Appending logrotate log files under the include directory
+logrotate_logfiles_appends: |
+  {% if logrotate_vars.logrotate_logfiles_appends|d(none) is not none %}{{
+    logrotate_vars.logrotate_logfiles_appends
+  }}{% else %}{{ [] }}{% endif %}
 

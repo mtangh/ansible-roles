@@ -1,21 +1,21 @@
 ---
 # defaults file for resolver
 
-## Reolsver: Domain
-#resolver_domain: 
+# Reolsver: Domain
+resolver_domain: 
 
-## Resolver: Search domain
-#resolver_search:
+# Resolver: Search domain
+resolver_search:
 
-## Resolver: Nameservers
-#resolver_nameservers:
-#- nameserver1
-#- nameserver2
-#- nameserver3
+# Resolver: Nameservers
+resolver_nameservers: []
+# - nameserver1
+# - nameserver2
+# - nameserver3
 
-## Resolver: Sortlist
-#resolver_sortlist:
+# Resolver: Sortlist
+resolver_sortlist: []
 
-## Resolver: Options
-#resolver_options:
+# Resolver: Options
+resolver_options: []
 

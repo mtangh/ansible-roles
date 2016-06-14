@@ -1,0 +1,15 @@
+---
+# tasks file for yumrepos repo files
+
+- name: yumrepos-repo-files | create | Create repo file(s).
+  template:
+    src: "{{ yumrepos_templates.yumreposconf }}"
+    dest: "{{ '%s%s/%s'|format(prefix_dir|d(''),yumrepos_repo_dir,yumrepos_repo_file.name) }}"
+    owner: "{{ test_owner|d( yumrepos_repo_file.file_owner|d('root') ) }}"
+    group: "{{ test_group|d( yumrepos_repo_file.file_group|d('root') ) }}"
+    mode: "{{ yumrepos_repo_file.file_mode|d('0644') }}"
+    backup: "{{ yumrepos_repo_file.file_backup|d('yes') }}"
+  when: yumrepos_repo_file.name|d(none) is not none
+        and yumrepos_repo_file.repos|d(none) is iterable
+        and yumrepos_repo_file.repos|d(none) is not string
+

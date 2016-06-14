@@ -1,29 +1,23 @@
 ---
 # tasks file for sudo
 
-- block:
-
-  - name: "sudo | Set facts platform."
-    set_fact:
-      platform_allow_os_families: [ "RedHat", "Darwin", "Test" ]
-      platform_allow_distributions:
-
-  - name: "sudo | Check the platform."
-    include: "platform.yml"
-
-  tags:
-  - always
-  - sudo-os-family
-
-- name: "sudo | Include vars."
-  include_vars: "{{ __os_family }}.yml"
-  tags:
-  - always
+- name: sudo | Include OS/Distribution specific variables.
+  include_vars: "{{ item }}"
+  ignore_errors: yes
+  with_first_found:
+  - "{{ '%s-%s.yml'|format(os_spec_os_family,os_spec_os_distribution) }}"
+  - "{{ '%s.yml'|format(os_spec_os_family) }}"
+  - "default.yml"
+  tags: 
   - sudo
   - sudo-include-vars
-
+  
 - name: "sudo | Install the sudo."
-  include: "{{ __os_family }}.yml"
+  include: "{{ item }}"
+  with_first_found:
+  - "{{ '%s-%s.yml'|format(os_spec_os_family,os_spec_os_distribution) }}"
+  - "{{ '%s.yml'|format(os_spec_os_family) }}"
+  - "default.yml"
   tags:
   - sudo
   - sudo-install
@@ -31,12 +25,15 @@
 - name: "sudo | Updating /etc/sudoers"
   template:
     src: "etc/sudoers.j2"
-    dest: "{{ prefix_dir|d('') }}/etc/sudoers"
-    owner: "{{ test_owner|d('root') }}"
-    group: "{{ test_group|d('wheel') }}"
-    mode: "0440"
+    dest: "{{ '%s%s'|format(prefix_dir|d(''),sudo_sudoers_file|d('/etc/sudoers')) }}"
+    owner: "{{ test_owner|d(sudo_sudoers_file_owner|d('root')) }}"
+    group: "{{ test_group|d(sudo_sudoers_file_group|d('wheel')) }}"
+    mode: "{{ sudo_sudoers_file_mode|d('0440') }}"
     backup: yes
-    validate: "visudo -c -f %s"
+    validate: "{{ sudo_sodoers_validate_command
+                  if test_run|d(none) is none
+                  and sudo_sodoers_validate_command|d(none) is not none
+                  else none }}"
   tags:
   - sudo
   - sudo-sudores

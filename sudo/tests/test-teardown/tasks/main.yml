@@ -1,2 +1,19 @@
 ---
 # test-teardown tasks file
+
+- block:
+
+  - name: "test-terdown | {{ test_casename }} | validate"
+    shell: |
+      [ -d "{{ '%s/files/expects/%s'|format(test_teardown_dir,test_casename) }}" ] &&
+      diff -Nur -I '^# Ansible managed:.*$' \
+        "{{ '%s/files/expects/%s'|format(test_teardown_dir,test_casename) }}" \
+        "{{ '%s%s'|format(test_prefix_dir,'') }}"
+    register: test_teardown_result
+
+  when: test_casename|d(none) is not none
+        and test_teardown_dir|d(none) is not none
+        and test_prefix_dir|d(none) is not none
+  tags:
+  - '[test-teardown]'
+

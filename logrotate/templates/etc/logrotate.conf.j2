@@ -2,116 +2,127 @@
 # {{ ansible_managed }}
 {%  import 'macros.logrotate.j2' as m_logrotate with context %}
 {%  set p = logrotate_conf_default
-        if logrotate_conf_default is defined else {} %}
+        if logrotate_conf_default|d(none) is not none else {} %}
 # see "man logrotate" for details
+
 {%  set cycle = p.cycle
-        if p.cycle is defined
+        if p.cycle|d(none) is not none
         and p.cycle|lower|trim|match('^(dai|week|month|year)ly$')
         else 'weekly' %}
 # Rotate log files {{ cycle|lower|trim }}
 {{ cycle }}
-{%  if p.size is defined
-    and p.size|string|trim|match('^[1-9][0-9]*([Kk]|[Mm]|[Gg]|)$') %}
 
+{%  if p.size|d(none) is not none
+    and p.size|string|trim|match('^[1-9][0-9]*([Kk]|[Mm]|[Gg]|)$') %}
 # Rotate log file size {{ p.size|upper|trim }}.
 # Log files are rotated when they grow bigger than size bytes. 
 size {{ p.size|upper|trim }}
-{%  endif %}
-{%  if p.minsize is defined
-    and p.minsize|string|trim|match('^[1-9][0-9]*([Kk]|[Mm]|[Gg]|)$') %}
 
+{%  endif %}
+{%  if p.minsize|d(none) is not none
+    and p.minsize|string|trim|match('^[1-9][0-9]*([Kk]|[Mm]|[Gg]|)$') %}
 # Log files are rotated when they grow bigger than size bytes,
 # but not before the additionally specified time interval
 # (daily, weekly, monthly, or yearly). 
 minsize {{ p.minsize|upper|trim }}
-{%  endif %}
 
-{%  set rotate = p.rotate
-        if p.rotate is defined and p.rotate is number else 4 %}
-# Keep {{ p.rotate }} days|weeks|months|years worth of backlogs
-rotate {{ p.rotate }}
+{%  endif %}
+{%  set p_rotate = p.rotate
+        if p.rotate|d(none) is not none and p.rotate is number else 4 %}
+# Keep {{ p_rotate }} [days|weeks|months|years] worth of backlogs
+rotate {{ p_rotate }}
 
 # Create new (empty) log files after rotating old ones
-{%  set cre_m,cre_o,cre_g = (
-        (p.create.mode if p.create.mode is defined else none),
-        (p.create.owner if p.create.owner is defined else none),
-        (p.create.group if p.create.group is defined else none)) %}
-{%  if cre_m is not none or cre_o is not none or cre_g is not none %}
-create {{ cre_m|d('0644') }} {{ cre_o|d('root') }} {{ cre_g|d('root') }}
+{%  set p_create = p.create
+        if p.create|d(none) is not none else {} %}
+{%  set p_cre_m,p_cre_o,p_cre_g = (
+        ( '%04o'|format(p_create.mode)
+          if p_create.mode|d(none) is not none else none ),
+        ( p_create.owner
+          if p_create.owner|d(none) is not none else none ),
+        ( p_create.group
+          if p_create.group|d(none) is not none else none ) ) %}
+{%  if p_cre_m|d(none) is not none
+    or p_cre_o|d(none) is not none
+    or p_cre_g|d(none) is not none %}
+create {{ p_cre_m|d('0644') }} {{ p_cre_o|d('root') }} {{ p_cre_g|d('root') }}
 {%  elif p.create|string|lower|trim|match('^(yes|no|true|false)$') %}
 {{ 'no' if p.create|string|lower|trim|match('^(no|false)$') else '' }}create
 {%  endif %}
-{%  if p.shred is defined
-    and p.shred|string|lower|trim|match('^(yes|no|true|false)$') %}
 
+{%  if p.shred|d(none) is not none
+    and p.shred|string|lower|trim|match('^(yes|no|true|false)$') %}
 # Delete log files using shred -u instead of unlink().
 # This should ensure that logs are not readable after theiri
 # scheduled deletion; this is off by default.
 {{ 'no' if p.shred|string|lower|trim|match('^(no|false)$') else '' }}shred
-{%    if p.shredcycles is defined and p.shredcycles is number %}
+{%    if p.shredcycles|d(none) is not none and p.shredcycles is number %}
 shredcycles {{ p.shredcycles }}
 {%    endif %}
-{%  endif %}
-{%  if p.dateext is defined
-    and p.dateext|string|lower|trim|match('^(yes|no|true|false)$') %}
 
+{%  endif %}
+{%  if p.dateext|d(none) is not none
+    and p.dateext|string|lower|trim|match('^(yes|no|true|false)$') %}
 # Archive old versions of log files adding a daily extension like YYYYMMDD
 # instead of simply adding a number.
 {{ 'no' if p.dateext|string|lower|trim|match('^(no|false)$') else '' }}dateext
-{%    if p.dateformat is defined and p.dateformat is not none %}
+{%    if p.dateformat|d(none) is not none %}
 dateformat {{ p.dateformat|string|trim }}
 {%    endif %}
-{%  endif %}
-{%  if p.extension is defined
-    and p.extension|string|lower|trim|match('^(yes|no|true|false)$') %}
 
+{%  endif %}
+{%  if p.extension|d(none) is not none
+    and p.extension|string|lower|trim|match('^(yes|no|true|false)$') %}
 # Log files with ext extension can keep it after the rotation.
 extension {{ p.extension }}
-{%  endif %}
 
+{%  endif %}
 # Uncomment this if you want your log files compressed
-{%  if p.compress is defined
+{%  if p.compress|d(none) is not none
     and p.compress|string|lower|trim|match('^(yes|true)$') %}{% set d_comp_pre = '' %}
-{%  elif p.compress is defined
+{%  elif p.compress|d(none) is not none
     and p.compress|string|lower|trim|match('^(no|false)$') %}{% set d_comp_pre = 'no' %}
 {%  endif %}
 {{ d_comp_pre|d('#') }}compress
-{%  if d_comp_pre is defined and d_comp_pre|d('#') == '' %}
-{%    if p.compresscmd is defined and p.compresscmd is not none %}
+{%  if d_comp_pre|d('#') == '' %}
+{%    if p.compresscmd|d(none) is not none %}
 compresscmd {{ p.compresscmd }}
 {%    endif %}
-{%    if p.uncompresscmd is defined and p.uncompresscmd is not none %}
+{%    if p.uncompresscmd|d(none) is not none %}
 uncompresscmd {{ p.uncompresscmd }}
 {%    endif %}
-{%    if p.compressoptions is defined and p.compressoptions is not none %}
+{%    if p.compressoptions|d(none) is not none %}
 compressoptions {{ p.compressoptions }}
 {%    endif %}
-{%    if p.compressext is defined and p.compressext is not none %}
+{%    if p.compressext|d(none) is not none %}
 compressext {{ p.compressext }}
 {%    endif %}
-{%    if p.delaycompress is defined
+{%    if p.delaycompress|d(none) is not none
       and p.delaycompress|string|lower|trim|match('^(yes|no|true|false)$') %}
 {{ 'no' if p.delaycompress|string|lower|trim|match('^(no|false)$') else '' }}delaycompress
 {%    endif %}
 {%  endif %}
-{%  if p.missingok is defined
-    and p.missingok|string|lower|trim|match('^(yes|no|true|false)$') %}
 
+{%  if p.missingok|d(none)
+    and p.missingok|string|lower|trim|match('^(yes|no|true|false)$') %}
 # If the log file is missing,
 # go on to the next one without issuing an error message.
 {{ 'no' if p.missingok|string|lower|trim|match('^(no|false)$') else '' }}missingok
-{%  endif %}
-{%  if p.ifempty is defined
-    and p.ifempty|string|lower|trim|match('^(yes|no|true|false)$') %}
 
+{%  endif %}
+{%  if p.ifempty|d(none)
+    and p.ifempty|string|lower|trim|match('^(yes|no|true|false)$') %}
 # Rotate the log file even if it is empty, overriding the notifempty option.
 {{ 'no' if p.ifempty|string|lower|trim|match('^(no|false)$') else '' }}ifempty
+
 {%  endif %}
-
-# RPM packages drop log rotation information into this directory
+{%  if logrotate_include_dir|d(none) is not none
+    and logrotate_include_dir|string|lower|trim|match('^(no|false)$') == false %}
+# Any packages drop log rotation information into this directory
 include {{ logrotate_include_dir|d('/etc/logrotate.d') }}
-{%  if p.tabooext is defined and p.tabooext is not none %}
 
+{%  endif %}
+{%  if p.tabooext|d(none) is not none %}
 # The current taboo extension list is changed.
 {%    set tabooexts = p.tabooext if p.tabooext is iterable
                                  and p.tabooext is not string
@@ -119,13 +130,18 @@ include {{ logrotate_include_dir|d('/etc/logrotate.d') }}
 {%    for ext in tabooexts if ext is not none %}
 tabooext {{ ext|trim }}
 {%    endfor %}
-{%  endif %}
 
-{%  if logrotate_conf_files is defined %}
+{%  endif %}
+{%  if logrotate_logfiles_defaults|d(none) is not none
+    and logrotate_logfiles_defaults is iterable
+    and logrotate_logfiles_defaults is not string %}
 # No package files -- we'll rotate them here
-{%    for f in logrotate_conf_files
-            	if f.path is defined and f.path is not none %}
+
+{%    for f in logrotate_logfiles_defaults
+          if f.name|d(none) is not none
+          and f.logfiles|d(none) is not none %}
 {{ m_logrotate.logrotate_file(f) }}
-{%    endfor %}
+{%    endfor -%}
+
 {%  endif %}
 # system-specific logs may be also be configured here.

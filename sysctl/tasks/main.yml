@@ -1,27 +1,13 @@
 ---
 # tasks file for sysctl
 
-- block:
-
-  - name: sysctl | Set facts platform.
-    set_fact:
-      platform_allow_os_families: [ "RedHat", "Test" ]
-      platform_allow_distributions:
-
-  - name: sysctl | Check the platform.
-    include: "platform.yml"
-
-  tags:
-  - always
-  - sysctl-os-family
-
 - name: sysctl | Updating /etc/sysctl.conf
   template:
     src: "etc/sysctl.conf.j2"
-    dest: "{{ prefix_dir|d('') }}/etc/sysctl.conf"
-    owner: "{{ test_owner|d('root') }}"
-    group: "{{ test_group|d('root') }}"
-    mode: "0644"
+    dest: "{{ '%s%s'|format(prefix_dir|d(''),sysctl_conf_path|d('/etc/sysctl.conf')) }}"
+    owner: "{{ test_owner|d( sysctl_conf_owner|d('root') ) }}"
+    group: "{{ test_group|d( sysctl_conf_group|d('root') ) }}"
+    mode: "{{ sysctl_conf_mode|d('0644') }}"
     backup: yes
   tags:
   - sysctl

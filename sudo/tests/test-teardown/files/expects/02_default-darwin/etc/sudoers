@@ -1,0 +1,143 @@
+# SUDOers
+# Ansible managed: test
+# Do NOT modify this file directly.
+
+#
+# sudoers file.
+#
+# This file MUST be edited with the 'visudo' command as root.
+# Failure to use 'visudo' may result in syntax or file permission errors
+# that prevent sudo from running.
+#
+# See the sudoers man page for the details on how to write a sudoers file.
+#
+
+##
+# Host alias specification
+##
+#
+# Groups of machines. You may prefer to use hostnames (perhaps using
+# wildcards for entire domains) or IP addresses instead.
+#
+# Host_Alias     FILESERVERS = fs1, fs2
+# Host_Alias     MAILSERVERS = smtp, smtp2
+#
+
+##
+# User alias specification
+##
+#
+# These aren't often necessary, as you can use regular groups
+# (ie, from files, LDAP, NIS, etc) in this file - just use %groupname
+# rather than USERALIAS
+#
+# User_Alias ADMINS = jsmith, mikem
+#
+
+##
+# Runas alias specification
+##
+
+##
+# Command alias specification
+##
+#
+# These are groups of related commands...
+#
+# - Networking
+#   Cmnd_Alias NETWORKING = /sbin/route, /sbin/ifconfig, /bin/ping, /sbin/iptables
+# - Installation and management of software
+#   Cmnd_Alias SOFTWARE = /bin/rpm, /usr/bin/up2date, /usr/bin/yum
+# - Services
+#   Cmnd_Alias SERVICES = /sbin/service, /sbin/chkconfig
+# - Updating the locate database
+#   Cmnd_Alias LOCATE = /usr/bin/updatedb
+# - Storage
+#   Cmnd_Alias STORAGE = /sbin/fdisk, /bin/mount, /bin/umount
+# - Delegating permissions
+#   Cmnd_Alias DELEGATING = /usr/sbin/visudo, /bin/chown, /bin/chmod, /bin/chgrp
+# - Processes
+#   Cmnd_Alias PROCESSES = /bin/nice, /bin/kill, /usr/bin/kill, /usr/bin/killall
+# - Drivers
+#   Cmnd_Alias DRIVERS = /sbin/modprobe
+#
+
+##
+# Defaults specification
+##
+#
+# Override built-in defaults
+#
+
+# Disable "ssh hostname sudo <cmd>",
+# because it will show the password in clear.
+# You have to run "ssh -t hostname sudo <cmd>".
+Defaults    requiretty
+
+# Refuse to run if unable to disable echo on the tty.
+# This setting should also be changed in order to be able to use
+# sudo without a tty. See requiretty above.
+Defaults    !visiblepw
+
+# The password prompt specified by passprompt will normally only
+# be used if the password prompt provided by systems such as PAM
+# matches the string "Password:".
+# If passprompt_override is set, passprompt will always be used.
+Defaults    passprompt = "[SUDO] %u@%H's Password: "
+
+# Number of minutes that can elapse before sudo will ask for a passwd again.
+Defaults    timestamp_timeout = 3
+
+# Number of minutes before the sudo password prompt times out, or 0 for no timeout.
+Defaults    passwd_timeout = 3
+
+# The number of tries a user gets to enter his/her password before sudo logs the
+# failure and exits.
+Defaults    passwd_tries = 3
+
+# Environment variables to be preserved in the user\'s environment when
+# the env_reset option is in effect.
+Defaults    env_reset
+Defaults    env_keep += "HOSTNAME"
+Defaults    env_keep += "HISTSIZE INPUTRC"
+Defaults    env_keep += "LANG LANGUAGE LINGUAS CHARSET"
+Defaults    env_keep += "LC_ALL LC_CTYPE LC_COLLATE LC_MESSAGES"
+Defaults    env_keep += "LC_NAME LC_ADDRESS LC_TELEPHONE LC_IDENTIFICATION"
+Defaults    env_keep += "LC_MEASUREMENT LC_MONETARY LC_NUMERIC LC_PAPER"
+Defaults    env_keep += "LC_TIME"
+Defaults    env_keep += "TZ"
+Defaults    env_keep += "LINES COLUMNS LSCOLORS"
+Defaults    env_keep += "DISPLAY XAUTHORIZATION XAUTHORITY _XKB_CHARSET"
+Defaults    env_keep += "HOME EDITOR VISUAL PAGER MAIL"
+Defaults    env_keep += "SSH_AUTH_SOCK"
+Defaults    env_keep += "BLOCKSIZE"
+Defaults    env_keep += "COLORFGBG COLORTERM"
+Defaults    env_keep += "__CF_USER_TEXT_ENCODING"
+
+##
+# User privilege specification
+##
+#
+# root can run anything on any machine as any user
+root            ALL=(ALL) ALL
+#
+# Uncomment to allow people in group admin to run all commands
+#%admin          ALL=(ALL) ALL
+#
+# Same thing without a password
+#%admin          ALL=(ALL) NOPASSWD: ALL
+#
+# Samples
+#%users          ALL=/sbin/mount /cdrom,/sbin/umount /cdrom
+#%users          localhost=/sbin/shutdown -h now
+#
+
+# Allows people in group admin to run all commands.
+%admin          ALL=(ALL) ALL
+
+##
+# Read drop-in files from /etc/sudoers.d
+# (the # here does not mean a comment)
+##
+#includedir /etc/sudoers.d
+

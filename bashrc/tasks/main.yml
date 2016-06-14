@@ -1,20 +1,6 @@
 ---
 # tasks file for bashrc
 
-- block:
-
-  - name: bashrc | Set facts platform.
-    set_fact:
-      platform_allow_os_families: [ "Darwin", "RedHat", "Test" ]
-      platform_allow_distributions:
-
-  - name: bashrc | Check the platform.
-    include: "platform.yml"
-
-  tags:
-  - always
-  - bashrc-os-family
-
 - name: bashrc | Create a directory for backup.
   file:
     path: "{{ prefix_dir|d('') }}/etc/._bashrc-origin"

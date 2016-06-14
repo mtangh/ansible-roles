@@ -1,0 +1,31 @@
+---
+# tasks file for yumrepos-repos
+
+- block:
+
+  - name: yumrepos-repos | Create repo dir.
+    file:
+      path: "{{ '%s%s'|format(prefix_dir|d(''),yumrepos_repo_dir) }}"
+      state: directory
+      owner: "{{ test_owner|d( yumrepos_repo_dir_owner|d('root') ) }}"
+      group: "{{ test_group|d( yumrepos_repo_dir_group|d('root') ) }}"
+      mode: "{{ yumrepos_repo_dir_mode|d('0755') }}"
+    tags:
+    - always
+    - yumrepos-create-repo-dir
+
+  - name: yumrepos-repos | Create repo file(s).
+    include: "{{ yumrepos_tasks.repos_create_file }}"
+    vars:
+      yumrepos_repo_file: "{{ item }}"
+    with_items: "{{ yumrepos_repos|d([]) }}"
+    when: item.name|d(none) is not none
+          and item.repos|d(none) is iterable
+          and item.repos|d(none) is not string
+    tags:
+    - tagged
+    - yumrepos-repos-create
+
+  when: yumrepos_repos|d(none) is iterable
+        and yumrepos_repos|d(none) is not string
+
