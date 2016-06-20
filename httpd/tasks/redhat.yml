@@ -1,0 +1,14 @@
+---
+# setup tasks file for httpd of "redhat"
+
+- name: httpd-redhat-setup | Install the httpd
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items: "{{ httpd_install_packages|d(['httpd']) }}"
+  when: test_run|d(none) is none
+  tags:
+  - httpd
+  - httpd-install
+  - httpd-redhat
+  - httpd-redhat-install

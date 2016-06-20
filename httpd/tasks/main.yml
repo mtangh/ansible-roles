@@ -1,10 +1,16 @@
 ---
 # tasks file for httpd
 
-- name: httpd-main | Include OS-specific variables.
-  include_vars: "{{ os_spec_os_family }}.yml"
+- name: httpd-main | Include OS/Distribution specific variables.
+  include_vars: "{{ item }}"
+  ignore_errors: yes
+  with_first_found:
+  - "{{ '%s-%s.yml'|format(os_spec_os_family,os_spec_os_distribution) }}"
+  - "{{ '%s.yml'|format(os_spec_os_family) }}"
+  - "default.yml"
   tags:
-  - always
+  - httpd
+  - httpd-include-vars
 
 - block:
 
@@ -18,9 +24,8 @@
   - name: "httpd-main | Set facts 'httpd_httpd_conf_directives' | out"
     set_fact:
       _httpd_directives_values: "{{ _httpd_httpd_conf_dvps_out|d([]) }}"
-    when: _httpd_httpd_conf_dvps_out is defined
-          and _httpd_httpd_conf_dvps_out is not none
  
+  when: httpd_httpd_conf_directives|d(none) is not none
   tags:
   - always
   - httpd-set-facts
@@ -39,18 +44,18 @@
     set_fact:
       _httpd_ssl_directives_values: "{{ _httpd_httpd_conf_dvps_out|d([]) }}"
  
-  when: httpd_httpd_ssl_directives is defined
-        and httpd_httpd_ssl_directives is not none
+  when: httpd_httpd_ssl_directives|d(none) is not none
   tags:
   - always
   - httpd-set-facts
   - httpd-set-facts-dvp-ssl
 
-- block:
-
-  - name: httpd-main | Install the httpd
-    include: "{{ os_spec_os_family }}-setup.yml"
-  
+- name: httpd-main | Install the httpd.
+  include: "{{ item }}"
+  with_first_found:
+  - "{{ '%s-%s.yml'|format(os_spec_os_family,os_spec_os_distribution) }}"
+  - "{{ '%s.yml'|format(os_spec_os_family) }}"
+  - "default.yml"
   tags:
   - httpd
   - httpd-install
@@ -67,18 +72,15 @@
 
   - name: "httpd-main | File '{{ httpd_httpd_conf_path|basename }}' Not Exist"
     fail: msg="'{{ prefix_dir|d('') ~ httpd_httpd_conf_path|basename }}' no such file or directory."
-    when: httpd_httpd_conf_file.stat.exists is undefined
-          or httpd_httpd_conf_file.stat.exists == false
+    when: httpd_httpd_conf_file.stat.exists|d(false) == false
 
   - name: "httpd-main | Backup '{{ httpd_httpd_conf_path|basename }}'"
     copy:
       src: "{{ prefix_dir|d('') ~ httpd_httpd_conf_path }}"
       dest: "{{ prefix_dir|d('') ~ httpd_httpd_conf_path }}.ORIG"
       remote_src: yes
-    when: httpd_httpd_conf_file.stat.exists is defined
-          and httpd_httpd_conf_file.stat.exists == true
-          and ( httpd_httpd_conf_file_origin.stat.exists is undefined
-              or httpd_httpd_conf_file_origin.stat.exists == false )
+    when: httpd_httpd_conf_file.stat.exists|d(false) == true
+          and httpd_httpd_conf_file_origin.stat.exists|d(false) == false
 
   - name: "httpd-main | Set facts for '{{ httpd_httpd_conf_path|basename }}'"
     set_fact:
@@ -105,18 +107,15 @@
 
   - name: "httpd-main | File '{{ httpd_httpd_ssl_conf_path|basename }}' Not Exist"
     fail: msg="'{{ httpd_httpd_ssl_conf_path|basename }}' no such file or directory."
-    when: httpd_httpd_ssl_conf_file.stat.exists is undefined
-          or httpd_httpd_ssl_conf_file.stat.exists == false
+    when: httpd_httpd_ssl_conf_file.stat.exists|d(false)  == false
 
   - name: "httpd-main | Backup '{{ httpd_httpd_ssl_conf_path|basename }}'"
     copy:
       src: "{{ prefix_dir|d('') ~ httpd_httpd_ssl_conf_path }}"
       dest: "{{ prefix_dir|d('') ~ httpd_httpd_ssl_conf_path }}.ORIG"
       remote_src: yes
-    when: httpd_httpd_ssl_conf_file.stat.exists is defined
-          and httpd_httpd_ssl_conf_file.stat.exists == true
-          and ( httpd_httpd_ssl_conf_file_origin.stat.exists is undefined
-              or httpd_httpd_ssl_conf_file_origin.stat.exists == false )
+    when: httpd_httpd_ssl_conf_file.stat.exists|d(false)  == true
+          and  httpd_httpd_ssl_conf_file_origin.stat.exist|d(false) == false
 
   - name: "httpd-main | Set facts for '{{ httpd_httpd_ssl_conf_path|basename }}'"
     set_fact:
@@ -127,8 +126,7 @@
   - name: "httpd-main | Configure '{{ httpd_httpd_ssl_conf_path|basename }}'"
     include: "main_configure.yml"
 
-  when: httpd_httpd_conf_path is defined
-        and httpd_httpd_conf_path is not none
+  when: httpd_httpd_conf_path|d(none) is not none
   tags:
   - httpd
   - httpd-conf
@@ -137,7 +135,11 @@
 - block:
 
   - name: "httpd-main | Configure for OS:{{ os_spec_os_family|d('N/A') }}"
-    include: "{{ os_spec_os_family }}-configure.yml"
+    include: "{{ item }}"
+    with_first_found:
+    - "{{ '%s-%s-configure.yml'|format(os_spec_os_family,os_spec_os_distribution) }}"
+    - "{{ '%s-configure.yml'|format(os_spec_os_family) }}"
+    - "default-configure.yml"
 
   tags:
   - httpd
@@ -151,19 +153,17 @@
       name: "{{ httpd_httpd_service_name }}"
       enabled: yes
     ignore_errors: true
-    when: httpd_httpd_service_enabled is defined
-          and httpd_httpd_service_enabled is not none
+    when: httpd_httpd_service_enabled|d(none)|bool == true
 
   - name: "httpd-main | Handle service - Initial state {{ httpd_httpd_initial_state|d('none') }}"
     service:
       name: "{{ httpd_httpd_service_name }}"
       state: "{{ httpd_httpd_startup_state }}"
     ignore_errors: true
-    when: httpd_httpd_initial_state is defined
-          and httpd_httpd_initial_state|lower|trim|match('^(started|stoped)$')
+    when: httpd_httpd_initial_state|d(none)|
+          string|lower|trim|match('^(started|stoped)$')
 
-  when: httpd_handle_service|d('false')
+  when: httpd_handle_service|d(true) == true
   tags:
   - httpd
   - httpd-service-setup
-
