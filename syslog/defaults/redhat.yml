@@ -5,8 +5,8 @@
 syslog_install_packages:
   - syslog
 
-# syslog type
-syslog_syslog_type: syslog
+# syslog service name
+syslog_service_name: syslog
 
 # syslog conf
 syslog_syslog_conf: /etc/syslog.conf

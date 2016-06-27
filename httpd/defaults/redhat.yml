@@ -1,31 +1,31 @@
 ---
-# vars file for httpd "RedHat"
+# vars file for httpd of "redhat"
 
-## httpd service name
+# httpd service name
 httpd_httpd_service_name: httpd
 
-## Set the service enabled/disable
+# Set the service enabled/disable
 httpd_httpd_service_enabled: false
 
-## Set startup httpd state.
+# Set startup httpd state.
 httpd_httpd_startup_state: stopped
 
-## httpd server root
+# httpd server root
 httpd_httpd_server_root: /etc/httpd
 
-## httpd.conf path
+# httpd.conf path
 httpd_httpd_conf_path: "{{ httpd_httpd_server_root }}/conf/httpd.conf"
 
-## httpd conf.d path
+# httpd conf.d path
 httpd_httpd_include_dir: "{{ httpd_httpd_server_root }}/conf.d"
 
-## ssl.conf path
+# ssl.conf path
 httpd_httpd_ssl_conf_path: "{{ httpd_httpd_server_root }}/conf.d/ssl.conf"
 
-## httpd conf validater
+# httpd conf validater
 httpd_httpd_conf_validate_command: /usr/sbin/httpd -t
 
-## Install packages
+# Install packages
 httpd_install_packages:
   - httpd
   - httpd-devel
@@ -77,33 +77,33 @@ httpd_install_packages:
 # - mod_wsgi
 # - mod_xsendfile
 
-## httpd.conf parameters
+# httpd.conf parameters
 httpd_httpd_conf_directives:
-  ServerName:
-    enabled: false
-  ServerAdmin:
-  ServerSignature: "Off"
-  User: apache
-  Group: apache
-  UseCanonicalName: "Off"
-  HostnameLookups: "Off"
-  Timeout: 120
-  KeepAlive: "Off"
-  MaxKeepAliveRequests: 100
-  KeepAliveTimeout: 15
-  ExtendedStatus:
-    enabled: false
-  DefaultType: text/plain
-  AddDefaultCharset: UTF-8
+  - ServerName:
+     enabled: false
+  - ServerAdmin:
+  - ServerSignature: "Off"
+  - User: apache
+  - Group: apache
+  - UseCanonicalName: "Off"
+  - HostnameLookups: "Off"
+  - Timeout: 120
+  - KeepAlive: "Off"
+  - MaxKeepAliveRequests: 100
+  - KeepAliveTimeout: 15
+  - ExtendedStatus:
+     enabled: false
+  - DefaultType: text/plain
+  - AddDefaultCharset: UTF-8
   
-## ssl.conf parameters
+# ssl.conf parameters
 httpd_httpd_ssl_directives:
-  SSLPassPhraseDialog: builtin 
-  SSLProtocol: "all -SSLv2 -SSLv3"
-  SSLCertificateFile: /etc/pki/tls/certs/localhost.crt
-  SSLCertificateKeyFile: /etc/pki/tls/private/localhost.key
+  - SSLPassPhraseDialog: builtin 
+  - SSLProtocol: "all -SSLv2 -SSLv3"
+  - SSLCertificateFile: /etc/pki/tls/certs/localhost.crt
+  - SSLCertificateKeyFile: /etc/pki/tls/private/localhost.key
 
-## Disabling conf.d files
+# Disabling conf.d files
 httpd_httpd_conf_disabled:
   - welcome.conf
 

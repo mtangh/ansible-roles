@@ -7,24 +7,14 @@ syslog_vars: |
      format(os_spec_os_family|d('default')))|from_yaml }}
 
 # syslog install packages
-syslog_install_packages: |
-  {% if syslog_vars.syslog_install_packages|d(none) is not none %}{{
-    syslog_vars.syslog_install_packages
-  }}{% else %}{{ 
-    [ 'syslog' ]
-  }}{% endif %}
+syslog_install_packages: "{{ syslog_vars.syslog_install_packages|d([]) }}"
 
-# syslog type
-syslog_syslog_type: "{{ syslog_vars.syslog_syslog_type|d('syslog') }}"
+# syslog service name
+syslog_service_name: "{{ syslog_vars.syslog_service_name|d('') }}"
 
 # syslog conf
-syslog_syslog_conf: "{{ syslog_vars.syslog_syslog_conf|d('/etc/syslog.conf') }}"
+syslog_syslog_conf: "{{ syslog_vars.syslog_syslog_conf|d('') }}"
 
 # syslog rules
-syslog_conf_rules: |
-  {% if syslog_vars.syslog_conf_rules|d(none) is not none %}{{
-    syslog_vars.syslog_conf_rules
-  }}{% else %}{{ 
-    []
-  }}{% endif %}
+syslog_conf_rules: "{{ syslog_vars.syslog_conf_rules|d([]) }}"
 
