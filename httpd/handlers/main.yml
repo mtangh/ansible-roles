@@ -5,23 +5,23 @@
   service:
     name: "{{ httpd_httpd_service_name|d('httpd') }}"
     enabled: yes
-  when: httpd_handle_service|d(true)
+  when: httpd_handle_service|d(true)|bool
 
 - name: httpd-start-httpd
   service:
     name: "{{ httpd_httpd_service_name|d('httpd') }}"
     state: started
-  when: httpd_handle_service is undefined
+  when: httpd_handle_service|d(true)|bool
 
 - name: httpd-stop-httpd
   service:
     name: "{{ httpd_httpd_service_name|d('httpd') }}"
     state: stoped
-  when: httpd_handle_service is undefined
+  when: httpd_handle_service|d(true)|bool
 
 - name: httpd-restart-httpd
   service:
     name: "{{ httpd_httpd_service_name|d('httpd') }}"
     state: restarted
-  when: httpd_handle_service is undefined
+  when: httpd_handle_service|d(true)|bool
 
