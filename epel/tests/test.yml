@@ -4,7 +4,7 @@
   gather_facts: no
 
   tags:
-    default
+    01_default
 
   vars:
     os_spec_os_family: redhat
@@ -17,3 +17,20 @@
   - { role: ../.. }
   - test-teardown
 
+- hosts: localhost
+  connection: local
+  gather_facts: no
+
+  tags:
+    02_centos7
+
+  vars:
+    os_spec_os_family: redhat
+    os_spec_os_distribution: centos
+    os_spec_os_version: "7.1"
+    os_spec_os_major_version: 7
+
+  roles:
+  - test-setup
+  - { role: ../.. }
+  - test-teardown
