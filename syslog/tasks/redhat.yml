@@ -7,7 +7,7 @@
     state: latest
   with_items: "{{ syslog_install_packages|d([]) }}"
   when: test_run|d(none) is none
-        and item|d(none) is not none and item|length > 0
+        and item|d(none) is not none and item|trim|length > 0
   notify:
   - syslog-enable-syslog
   tags:

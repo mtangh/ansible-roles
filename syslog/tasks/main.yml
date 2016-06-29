@@ -24,6 +24,7 @@
 
 - name: "syslog | Updating {{ syslog_syslog_conf }}"
   include: syslog-conf.yml
+  when: syslog_syslog_conf|d(none) is string
   tags:
   - syslog
   - syslog-conf
