@@ -1,9 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 THIS="${0##*/}"
 CDIR=$([ -n "${0%/*}" ] && cd "${0%/*}" 2>/dev/null; pwd)
 
 basedirs=""
 _rebuild=0
+_verbose=0
 _dry_run=0
 
 usage() {
@@ -22,6 +23,9 @@ do
     ;;
   --dry-run|-d)
     _dry_run=1
+    ;;
+  --verbose|-v)
+    _verbose=1
     ;;
   --help)
     usage
@@ -70,13 +74,21 @@ do
   find "$base_dir" -type d |
   while read dir
   do
+    [ $_verbose -ne 0 ] &&
+      echo "${THIS%.*}: #1 Check dir '$dir'"
     echo "${dir}" |
     grep -E '^(/.+|\.+|(.*/){0,1}\.(git|svn|cvs)(/.*){0,1})$' 1>&2 &&
       continue
-    ls -1A "${dir}" |wc -l |grep -vE '^0$' 1>&2 &&
+    [ $_verbose -ne 0 ] &&
+      echo "${THIS%.*}: #2 Dir '$dir' have a child ?"
+    echo $(ls -1A "${dir}" |wc -l) |grep -vE '^0$' 1>&2 &&
       continue
+    [ $_verbose -ne 0 ] &&
+      echo "${THIS%.*}: #2 Dir '$dir' is have not child."
     [ -e "${dir}/.gitkeep" ] &&
       continue
+    [ $_verbose -ne 0 ] &&
+      echo "${THIS%.*}: #3 Dir '$dir' is gitkeeping."
     [ $_dry_run -eq 0 ] &&
       touch "${dir}"/.gitkeep
     echo "${THIS%.*}: + '$dir'"
