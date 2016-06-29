@@ -2,7 +2,7 @@
 THIS="${0##*/}"
 CDIR=$([ -n "${0%/*}" ] && cd "${0%/*}" 2>/dev/null; pwd)
 
-base_dir="${base_dir:-.}"
+basedirs=""
 _rebuild=0
 _dry_run=0
 
@@ -29,14 +29,23 @@ do
   -*)
     ;;
   *)
-    base_dir="${base_dir} $1"
+    if [ ! -d "${1}" ]
+    then
+      echo "${THIS%.*}: no such directory '${1}'." 1>&2
+      exit 1
+    fi 
+    if [ -z "$basedirs" ]
+    then
+      basedirs="${1}"
+    else
+      basedirs="${basedirs}\n${1}"
+    fi
     ;;
   esac
   shift
 done
 
-[ -n "$base_dir" ] ||
-  usage
+basedirs="${basedirs:-.}"
 
 [ $_rebuild -ne 0 ] && {
   if [ $_dry_run -eq 0 ]
@@ -46,24 +55,32 @@ done
     findcmd="echo"
   fi
   # Remove gitkeep
-  find ${base_dir} \
+  find ${basedirs} \
        -name ".gitkeep" -a type f \
        -exec $findcmd {} \; 2>/dev/null
   echo
 }
 
-for dir in $(find $base_dir -type d 2>/dev/null)
+exec 2>/dev/null
+
+echo -e ${basedirs} |
+while read base_dir
 do
-  echo "${dir}" |
-  grep -E '^(/.+|\./|(\./|)\.git(/.*|))$' 1>/dev/null 2>&1 &&
-    continue
-  [ -n "$(ls -1A ${dir})" ] &&
-    continue
-  [ -e "$dir/.gitkeep" ] &&
-    continue
-  [ $_dry_run -eq 0 ] &&
-    touch $dir/.gitkeep
-  echo "gitkeep: $dir"
+  echo "${THIS%.*}: Finding '$base_dir'"
+  find "$base_dir" -type d |
+  while read dir
+  do
+    echo "${dir}" |
+    grep -E '^(/.+|\.+|(.*/){0,1}\.(git|svn|cvs)(/.*){0,1})$' 1>&2 &&
+      continue
+    ls -1A "${dir}" |wc -l |grep -vE '^0$' 1>&2 &&
+      continue
+    [ -e "${dir}/.gitkeep" ] &&
+      continue
+    [ $_dry_run -eq 0 ] &&
+      touch "${dir}"/.gitkeep
+    echo "${THIS%.*}: + '$dir'"
+  done
 done
 
 exit 0
