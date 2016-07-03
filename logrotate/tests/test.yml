@@ -4,14 +4,13 @@
   gather_facts: no
 
   tags:
-    default
+    01_default
+
+  vars_files:
+  - os-spec.yml
 
   vars:
-    os_spec_os_family: redhat
-    os_spec_os_distribution: centos
-    os_spec_os_version: "6.7"
-    os_spec_os_major_version: 6
-
+    
   roles:
   - test-setup
   - { role: ../.. }
@@ -22,13 +21,12 @@
   gather_facts: no
 
   tags:
-    default-extend
+    02_default-overwrite
+
+  vars_files:
+  - os-spec.yml
 
   vars:
-    os_spec_os_family: redhat
-    os_spec_os_distribution: centos
-    os_spec_os_version: "6.7"
-    os_spec_os_major_version: 6
 
     logrotate_conf_default:
       cycle: weekly
@@ -58,5 +56,30 @@
   roles:
   - test-setup
   - { role: ../.., tags: ['logrotate','logrotate-logfile-extend'] }
+  - test-teardown
+
+- hosts: localhost
+  connection: local
+  gather_facts: no
+
+  tags:
+    03_files-appends-only
+
+  vars_files:
+  - os-spec.yml
+
+  vars:
+
+    logrotate_logfiles_appends:
+    - name: httpd
+      logfiles: '/var/log/httpd/*log'
+      missingok: yes
+      ifempty: no
+      sharedscripts: yes
+      postrotate: '/sbin/service httpd reload >/dev/null 2>/dev/null ||true' 
+
+  roles:
+  - test-setup
+  - { role: ../.., tags: ['logrotate-logfile-appends'] }
   - test-teardown
 

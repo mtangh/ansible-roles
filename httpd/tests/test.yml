@@ -4,7 +4,7 @@
   gather_facts: no
 
   tags:
-    default
+    01_default
 
   vars:
     os_spec_os_family: redhat
@@ -12,8 +12,23 @@
     os_spec_os_version: "6.7"
     os_spec_os_major_version: 6
 
-    httpd_handle_service: false
-    httpd_httpd_conf_validate_command:
+  roles:
+  - test-setup
+  - { role: ../.. }
+  - test-teardown
+
+- hosts: localhost
+  connection: local
+  gather_facts: no
+
+  tags:
+    02_macosx-default
+
+  vars:
+    os_spec_os_family: darwin
+    os_spec_os_distribution: macosx
+    os_spec_os_version: "10.11.3"
+    os_spec_os_major_version: 10
 
   roles:
   - test-setup

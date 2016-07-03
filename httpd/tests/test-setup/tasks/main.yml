@@ -18,7 +18,7 @@
     src: "{{ item }}"
     dest: "{{ prefix_dir|d('') }}/etc/httpd/conf/"
   with_items:
-  - httpd.conf
+  - "{{ os_spec_os_family }}/httpd.conf"
   when: test_run is defined
         and prefix_dir is defined
   tags:
@@ -29,8 +29,8 @@
     src: "{{ item }}"
     dest: "{{ prefix_dir|d('') }}/etc/httpd/conf.d/"
   with_items:
-  - ssl.conf
-  - welcome.conf
+  - "{{ os_spec_os_family }}/ssl.conf"
+  - "{{ os_spec_os_family }}/welcome.conf"
   when: test_run is defined
         and prefix_dir is defined
   tags:

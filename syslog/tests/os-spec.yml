@@ -1,0 +1,4 @@
+os_spec_os_family: redhat
+os_spec_os_distribution: centos
+os_spec_os_version: "5.10"
+os_spec_os_major_version: 5

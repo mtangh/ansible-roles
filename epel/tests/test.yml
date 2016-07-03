@@ -22,7 +22,7 @@
   gather_facts: no
 
   tags:
-    02_centos7
+    02_default-centos7
 
   vars:
     os_spec_os_family: redhat

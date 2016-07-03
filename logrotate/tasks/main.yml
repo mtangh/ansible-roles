@@ -34,35 +34,50 @@
   - logrotate
   - logrotate-conf
 
-- block:
-
-  - name: logrotate | Create include directory.
-    file:
-      path: "{{ '%s%s'|format(prefix_dir|d(''),logrotate_include_dir) }}"
-      state: directory
-      owner: "{{ test_owner|d(logrotate_include_dir_owner|d('root')) }}"
-      group: "{{ test_group|d(logrotate_include_dir_group|d('root')) }}"
-      mode: "{{ logrotate_include_dir_mode|d('0755') }}"
-    tags:
-    - logrotate
-    - logrotate-logfiles-includes
-
-  - name: logrotate | Updating /etc/logrotate.d files
-    include: logrotate-logfile.yml
-    vars:
-      logrotate_conf_logfile: "{{ item }}"
-    with_items: "{{ logrotate_logfiles_includes|d([])|
-                    union(logrotate_logfiles_appends|d([])) }}"
-    when: item.name|d(none) is not none
-          and item.logfiles|d(none) is not none
-    tags:
-    - logrotate
-    - logrotate-logfiles-includes
-    
+- name: logrotate | Create include directory.
+  file:
+    path: "{{ '%s%s'|format(prefix_dir|d(''),logrotate_include_dir) }}"
+    state: directory
+    owner: "{{ test_owner|d(logrotate_include_dir_owner|d('root')) }}"
+    group: "{{ test_group|d(logrotate_include_dir_group|d('root')) }}"
+    mode: "{{ logrotate_include_dir_mode|d('0755') }}"
   when: logrotate_include_dir|d(none) is not none
         and logrotate_include_dir|string|trim|lower|
             match('^(no|false)$') == false
   tags:
   - logrotate
   - logrotate-logfiles-includes
+  - logrotate-logfiles-appends
+
+- block:
+
+  - name: logrotate | Updating include files
+    include: logrotate-logfile.yml
+    vars:
+      logrotate_conf_logfile: "{{ item }}"
+    with_items: "{{ logrotate_logfiles_includes|d([]) }}"
+    when: item.name|d(none) is not none
+          and item.logfiles|d(none) is not none
+    tags:
+    - logrotate
+    - logrotate-logfiles-includes
+
+  - name: logrotate | Appending include files
+    include: logrotate-logfile.yml
+    vars:
+      logrotate_conf_logfile: "{{ item }}"
+    with_items: "{{ logrotate_logfiles_appends|d([]) }}"
+    when: item.name|d(none) is not none
+          and item.logfiles|d(none) is not none
+    tags:
+    - logrotate
+    - logrotate-logfiles-appends
+
+  when: logrotate_include_dir|d(none) is not none
+        and logrotate_include_dir|string|trim|lower|
+            match('^(no|false)$') == false
+  tags:
+  - logrotate
+  - logrotate-logfiles-includes
+  - logrotate-logfiles-appends
 

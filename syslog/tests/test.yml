@@ -5,12 +5,11 @@
 
   tags:
     01_default
-
+  
+  vars_files:
+  - os-spec.yml
+  
   vars:
-    os_spec_os_family: redhat
-    os_spec_os_distribution: centos
-    os_spec_os_version: "5.10"
-    os_spec_os_major_version: 5
 
   roles:
   - test-setup
@@ -24,11 +23,10 @@
   tags:
     02_default-overwrite
 
+  vars_files:
+  - os-spec.yml
+  
   vars:
-    os_spec_os_family: redhat
-    os_spec_os_distribution: centos
-    os_spec_os_version: "6.6"
-    os_spec_os_major_version: 6
 
     # syslog rules
     syslog_conf_rules:

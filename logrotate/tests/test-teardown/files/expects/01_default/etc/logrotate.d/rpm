@@ -1,0 +1,8 @@
+# Ansible managed: test
+# rpm
+/var/log/rpmpkgs
+{
+  weekly
+  missingok
+  notifempty
+} # rpm

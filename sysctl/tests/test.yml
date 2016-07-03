@@ -6,11 +6,10 @@
   tags:
     01_default
 
+  vars_files:
+  - os-spec.yml
+
   vars:
-    os_spec_os_family: redhat
-    os_spec_os_distribution: centos
-    os_spec_os_version: "6.7"
-    os_spec_os_major_version: 6
 
   roles:
   - test-setup
@@ -23,12 +22,11 @@
 
   tags:
     02_set-params
+    
+  vars_files:
+  - os-spec.yml
 
   vars:
-    os_spec_os_family: redhat
-    os_spec_os_distribution: centos
-    os_spec_os_version: "6.7"
-    os_spec_os_major_version: 6
 
     sysctl_conf_params:
       net.ipv4.ip_forward: 1
