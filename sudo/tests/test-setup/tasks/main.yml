@@ -4,14 +4,20 @@
 - block:
 
   - name: test-setup | create directories for test
-    command:
-      mkdir -p "{{ prefix_dir|d('') }}{{ item }}"
-      creates={{ prefix_dir|d('') }}{{ item }}
-    with_items:
-    - /etc
+    file:
+      path: "{{ '%s%s'|format(prefix_dir,(item.path if item is not string else item)) }}"
+      state: directory
+      owner: "{{ item.owner|d(test_owner) }}"
+      group: "{{ item.group|d(test_group) }}"
+      mode: "{{ item.mode|d('0755') }}"
+    with_items: "{{ _test_setup_dirs|d([]) }}"
+    when: item|d(none) is not none
 
+  vars:
+    _test_setup_dirs:
+    - /etc
+    
   when: test_run|d(none) is not none
         and prefix_dir|d('')|length > 0
   tags:
   - '[test-setup]'
-
