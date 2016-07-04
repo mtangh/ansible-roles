@@ -1,3 +1,6 @@
+---
+# vars file for test case 03_overwrite-defaults.yml
+
 # SUDOers Drop-in dir
 sudo_sudoers_dropin_dir: '/etc/sudoers.dropins.d'
 

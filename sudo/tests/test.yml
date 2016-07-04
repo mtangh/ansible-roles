@@ -24,7 +24,7 @@
     02_default-darwin
 
   vars_files:
-  - "vars/os-spec-darwin.yml"
+  - "vars/os-spec_darwin.yml"
 
   vars:
 
@@ -41,8 +41,7 @@
     03_overwrite-defaults
 
   vars_files:
-  - "vars/os-spec-darwin.yml"
-  - "vars/{{ test_casename }}.yml"
+  - "vars/os-spec_darwin.yml"
  
   vars:
 
