@@ -1,14 +1,5 @@
 ---
-# role2 tasks file
+# test-role tasks file
 
-- name: role2 | Debug print 'OS-Spec'
-  debug: 
-    msg: |
-      {{ 'Role2: OS-Spec: %s:%s v%s.'|format(
-         os_spec_os_family,os_spec_os_distribution,os_spec_os_version) }}
-
-- name: role2 | Debug print 'OS-Cond'
-  debug: 
-    msg: |
-      {{ 'Role2: OS-Cond: "%s".'|format( os_spec|string ) }}
-
+- name: "{{ test_rolename }} | main"
+  include: ../../tasks/roles-main.yml

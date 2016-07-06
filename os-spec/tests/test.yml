@@ -1,15 +1,17 @@
 ---
+
 - hosts: localhost
   connection: local
   gather_facts: yes
 
   tags:
-  - default
+  - 01_os-supported
 
   vars:
     os_spec_os_family: "{{ 'RedHat'|lower }}"
     os_spec_os_distribution: "{{ 'CentOS'|lower }}"
     os_spec_os_version: '6.7'
+    os_spec_os_major_version: 6
 
   roles:
   - role1
@@ -18,32 +20,69 @@
 
   tasks:
 
-  - name: main | Debug print
+  - name: test | Touch
+
+  - name: test | Debug print
     debug: 
       msg: |
-        {{ 'OS-Spec: %s:%s-v%s.'|format(
-           os_spec_os_family,os_spec_os_distribution,os_spec_os_version ) }}
+        {{ 'OS-Spec: %s:%s-v%s(%s).'|format(
+           os_spec_os_family,os_spec_os_distribution,
+           os_spec_os_version,os_spec_os_major_version ) }}
 
 - hosts: localhost
   connection: local
   gather_facts: yes
 
   tags:
-  - os-unsupported
+  - 02_macosx-supported
+
+  vars:
+    os_spec_os_family: "{{ 'Darwin'|lower }}"
+    os_spec_os_distribution: "{{ 'macosx'|lower }}"
+    os_spec_os_version: '10.11.4'
+    os_spec_os_major_version: 10
+
+  roles:
+  - role1
+  - role2
+  - role3
+
+  tasks:
+
+  - name: test | Touch
+
+  - name: test | Debug print
+    debug: 
+      msg: |
+        {{ 'OS-Spec: %s:%s-v%s(%s).'|format(
+           os_spec_os_family,os_spec_os_distribution,
+           os_spec_os_version,os_spec_os_major_version ) }}
+
+- hosts: localhost
+  connection: local
+  gather_facts: yes
+
+  tags:
+  - 03_os-unsupported
 
   vars:
     os_spec_os_family: "{{ 'RedHat'|lower }}"
     os_spec_os_distribution: "{{ 'CentOS'|lower }}"
     os_spec_os_version: '5.7'
+    os_spec_os_major_version: 5
 
   roles:
   - role3
 
   tasks:
+  
+  - name: test | Touch
 
-  - name: main | Debug print
+
+  - name: test | Debug print
     debug: 
       msg: |
-        {{ 'OS-Spec: %s:%s-v%s.'|format(
-           os_spec_os_family,os_spec_os_distribution,os_spec_os_version ) }}
+        {{ 'OS-Spec: %s:%s-v%s(%s).'|format(
+           os_spec_os_family,os_spec_os_distribution,
+           os_spec_os_version,os_spec_os_major_version ) }}
 
