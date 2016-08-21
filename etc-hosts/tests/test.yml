@@ -1,0 +1,75 @@
+---
+- hosts: all
+  connection: local
+  gather_facts: true
+
+  tags:
+    01_default
+
+  vars_files:
+  - "vars/os-spec.yml"
+
+  roles:
+  - test-setup
+  - { role: ../.. }
+  - test-teardown
+
+- hosts: all
+  connection: local
+  gather_facts: true
+
+  tags:
+    02_ipv4-and-ipv6
+
+  vars_files:
+  - "vars/os-spec.yml"
+
+  roles:
+  - test-setup
+  - { role: ../.. }
+  - test-teardown
+
+- hosts: all
+  connection: local
+  gather_facts: true
+
+  tags:
+    03_ipv4-only
+
+  vars_files:
+  - "vars/os-spec.yml"
+
+  roles:
+  - test-setup
+  - { role: ../.. }
+  - test-teardown
+
+- hosts: all
+  connection: local
+  gather_facts: true
+
+  tags:
+    04_hosts-allow-deny
+
+  vars_files:
+  - "vars/os-spec.yml"
+
+  roles:
+  - test-setup
+  - { role: ../.. }
+  - test-teardown
+
+- hosts: all
+  connection: local
+  gather_facts: true
+
+  tags:
+    05_additional-hosts
+
+  vars_files:
+  - "vars/os-spec.yml"
+
+  roles:
+  - test-setup
+  - { role: ../.. }
+  - test-teardown
