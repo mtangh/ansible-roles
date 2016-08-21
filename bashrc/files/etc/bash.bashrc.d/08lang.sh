@@ -1,4 +1,4 @@
-# ${bashrcdir}/05lang.sh
+# ${bashrcdir}/08lang.sh
 # $Id$
 
 set +u

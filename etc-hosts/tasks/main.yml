@@ -9,8 +9,37 @@
     group: "{{ test_group|d('root') }}"
     mode: "0644"
     backup: yes
-  when: (etc_hosts_using_ipv4 is defined and etc_hosts_using_ipv4 == true)
-        or (etc_hosts_using_ipv6 is defined and etc_hosts_using_ipv6 == true)
+  vars:
+    etc_hosts_ipv4: |
+      {%  set o = etc_hosts_hosts_ipv4|d(none)
+              if etc_hosts_using_ipv4|d(true) == true
+              else [] %}
+      {%  if etc_hosts_using_ipv4|d(true) == true
+          and etc_hosts_additional_sets.hosts_ipv4|d(none) is iterable %}
+      {%    set _ = o.add( '-' )
+                if o.length > 0 else none %}
+      {%    for _hosts in etc_hosts_additional_sets.hosts_ipv4|d([])
+                if _hosts|d(none) is none %}
+      {%      set _ = o.add( _hosts ) %}
+      {%    endfor %}
+      {%  endif %}
+      {{- o -}}     
+    etc_hosts_ipv6: |
+      {%  set o = etc_hosts_hosts_ipv6|d(none)
+              if etc_hosts_using_ipv6|d(ftrue) == true
+              else [] %}
+      {%  if etc_hosts_using_ipv6|d(true) == true
+          and etc_hosts_additional_sets.hosts_ipv6|d(none) is iterable %}
+      {%    set _ = o.add( '-' )
+                if o.length > 0 else none %}
+      {%    for _hosts in etc_hosts_additional_sets.hosts_ipv6|d([])
+                if _hosts|d(none) is none %}
+      {%      set _ = o.add( _hosts ) %}
+      {%    endfor %}
+      {%  endif %}
+      {{- o -}}
+  when: (etc_hosts_using_ipv4|d(true) == true
+        or etc_hosts_using_ipv6|d(true) == true)
   tags:
   - etc-hosts
 
@@ -22,10 +51,24 @@
     group: "{{ test_group|d('root') }}"
     mode: "0644"
     backup: yes
-  when: etc_hosts_using_hosts_allow is defined
-        and etc_hosts_using_hosts_allow == true
+  vars:
+    etc_hosts_allow: |
+      {%  set o = etc_hosts_hosts_allow|d(none)
+              if etc_hosts_using_hosts_allow|d(true) == true
+              else [] %}
+      {%  if etc_hosts_using_hosts_allow|d(true) == true
+          and etc_hosts_additional_sets.hosts_allow|d(none) is iterable %}
+      {%    set _ = o.add( '-' ) 
+                if o.length > 0 else none %}
+      {%    for _acl in etc_hosts_additional_sets.hosts_allow|d([])
+                if _acl|d(none) is none %}
+      {%      set _ = o.add( _acl) %}
+      {%    endfor %}
+      {%  endif %}
+      {{- o -}}
+  when: etc_hosts_using_hosts_allow|d(true) == true
   tags:
-  - etc-hosts.allow
+  - etc-hosts-allow
 
 - name: etc-hosts | Updating /etc/hosts.deny
   template:
@@ -35,8 +78,21 @@
     group: "{{ test_group|d('root') }}"
     mode: "0644"
     backup: yes
-  when: etc_hosts_using_hosts_deny is defined
-        and etc_hosts_using_hosts_deny == true
+  vars:
+    etc_hosts_deny: |
+      {%  set o = etc_hosts_hosts_deny|d(none)
+              if etc_hosts_using_hosts_deny|d(true) == true
+              else [] %}
+      {%  if etc_hosts_using_hosts_deny|d(true) == true
+          and etc_hosts_additional_sets.hosts_deny|d(none) is iterable %}
+      {%    set _ = o.add( '-' ) 
+                if o.length > 0 else none %}
+      {%    for _acl in etc_hosts_additional_sets.hosts_deny|d([])
+                if _acl|d(none) is none %}
+      {%      set _ = o.add( _acl) %}
+      {%    endfor %}
+      {%  endif %}
+      {{- o -}}    
+  when: etc_hosts_using_hosts_deny|d(true) == true
   tags:
-  - etc-hosts.deny
-
+  - etc-hosts-deny

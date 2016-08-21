@@ -1,4 +1,4 @@
-# ${bashrcdir}/03inputrc.sh
+# ${bashrcdir}/04inputrc.sh
 # $Id$
 
 for input_rc in \

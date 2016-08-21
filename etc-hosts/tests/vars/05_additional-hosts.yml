@@ -1,0 +1,18 @@
+---
+
+etc_hosts_using_ipv4: true
+
+etc_hosts_using_ipv6: true
+
+etc_hosts_using_hosts_allow: true
+
+etc_hosts_using_hosts_deny: true
+
+etc_hosts_extras:
+  unit-test:
+    etc_hosts_ipv4:
+    - etc_hosts_ipv4 in etc_hosts_extras.unit-test
+    - 192.168.33.1: host-only-server1
+
+    etc_hosts_ipv6:
+    - "# etc_hosts_ipv6 for unit-test group"

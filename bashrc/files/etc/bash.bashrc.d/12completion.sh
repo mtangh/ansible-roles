@@ -3,7 +3,7 @@
 
 # completion dierctory
 sys_completions_dir="${bashrcdir}/completion.d"
-usr_completions_dir="${HOME}/.completion.d"
+usr_completions_dir="${HOME}/.bash_completion.d"
 
 # lookup completion settings
 for completion_sh in \

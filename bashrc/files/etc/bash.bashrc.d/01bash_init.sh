@@ -4,7 +4,7 @@
 [ -d "/etc/profile.d" ] ||
   return
 
-# load /etc/profiled.*.sh
+# load the /etc/profiled.*.sh
 for profile_sh in \
 `/bin/ls -1 /etc/profile.d/*.sh 2>/dev/null`
 do

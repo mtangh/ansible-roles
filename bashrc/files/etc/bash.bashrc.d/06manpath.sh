@@ -1,4 +1,4 @@
-# ${bashrcdir}/04manpath.sh
+# ${bashrcdir}/06manpath.sh
 # $Id$
 
 # path config command

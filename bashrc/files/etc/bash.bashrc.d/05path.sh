@@ -1,4 +1,4 @@
-# ${bashrcdir}/03path.sh
+# ${bashrcdir}/05path.sh
 # $Id$
 
 # path config command

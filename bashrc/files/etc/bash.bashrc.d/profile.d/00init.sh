@@ -15,5 +15,7 @@ then
     "${tmplt_dir}/`uname`" 1>/dev/null 2>&1
 fi
 
+# unset
+unset tmplt_dir
 
 # *eof* 

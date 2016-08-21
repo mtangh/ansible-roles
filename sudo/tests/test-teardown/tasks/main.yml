@@ -7,12 +7,14 @@
     shell: |
       if [ -d "{{ _test_expects_dir }}" ]
       then
-        diff -Nur -x .gitkeep -I '^# Ansible managed:.*$' \
+        diff -Nur -x '.gitkeep' -I '^# Ansible managed:.*$' \
           "{{ _test_expects_dir }}" \
           "{{ _test_actual_dir }}"
+      else
+        /bin/true
       fi
     register: test_teardown_result
-    ignore_errors: "{{ test_after_validation_no_errors|d(false) }}"
+    ignore_errors: "{{ test_teardown_ignore_errors|d(false) }}"
 
   vars:
     _test_expects_dir: "{{ '%s/files/expects/%s'|
