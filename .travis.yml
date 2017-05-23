@@ -23,7 +23,7 @@ install:
 
 script:
   # Basic role syntax check
-  - ./.travis.sh
+  - bash ./.travis.sh
 
 #notifications:
 #  webhooks: https://galaxy.ansible.com/api/v1/notifications/
