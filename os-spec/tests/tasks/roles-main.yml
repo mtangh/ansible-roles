@@ -27,7 +27,7 @@
 
   - name: "{{ test_rolename }} | Supported Touch"
     file:
-      path: "{{ '%s/%s.%s'|format(prefix_dir,test_rolename,'supported') }}
+      path: "{{ '%s/%s.%s'|format(prefix_dir,test_rolename,'supported') }}"
       state: touch
  
   when: os_spec_supported|success
@@ -43,7 +43,7 @@
  
   - name: "{{ test_rolename }} | Unsupported Touch"
     file:
-      path: "{{ '%s/%s.%s'|format(prefix_dir,test_rolename,'unsupported') }}
+      path: "{{ '%s/%s.%s'|format(prefix_dir,test_rolename,'unsupported') }}"
       state: touch
  
   when: os_spec_supported|failed

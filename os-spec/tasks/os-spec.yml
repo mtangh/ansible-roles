@@ -38,9 +38,9 @@
               '^[1-9][0-9]*([.][0-9][0-9]*|).*')
             else none ) }}"
 
-    when: os_spec_os_family is undefined
-          or os_spec_os_distribution is undefined
-          or os_spec_os_version is undefined
+    when: os_spec_os_family|d(none) is none
+          or os_spec_os_distribution|d(none) is none
+          or os_spec_os_version|d(none) is none
 
   when: os_spec|d(none) is not none
   tags:
@@ -52,22 +52,22 @@
     fail:
       msg: |
         {{ 'Unsupported OS: %s-%s v%s; Not in cond[ %s ].'|format(
-           os_spec_os_family,os_spec_os_distribution,os_spec_os_version|d('n/a'),
+           __os_family,__os_dist,os_spec_os_version|d('n/a'),
            (os_spec|d({})|string)) }}
     ignore_errors: "{{ os_spec_ignore_errors|d(false) }}"
     register: os_spec_supported
-    when: ( os_spec_os_family|d(none) is not none
-            and os_spec_os_distribution|d(none) is not none
-            and ( __os_vars.min|d(none) is not none 
-               or __os_vars.max|d(none) is not none ) )
+    when: ( __os_family|d(none) is not none
+            and __os_dist|d(none) is not none
+            and ( __os_vers.min|d(none) is not none 
+               or __os_vers.max|d(none) is not none ) )
           and
-          ( ( __os_vars.min|d(none) is not none
+          ( ( __os_vers.min|d(none) is not none
               and os_spec_os_version|d('0.0')|
-                  version_compare(__os_vars.min|d('0.0'),'<') )
+                  version_compare(__os_vers.min|d('0.0'),'<') )
             or
-            ( __os_vars.max|d(none) is not none
+            ( __os_vers.max|d(none) is not none
               and os_spec_os_version|d('99999.999')|
-                  version_compare(__os_vars.max|d('99999.999'),'>') ) )
+                  version_compare(__os_vers.max|d('99999.999'),'>') ) )
 
   vars:
     __os_family: "{{ os_spec_os_family }}"
