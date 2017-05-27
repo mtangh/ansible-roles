@@ -83,7 +83,7 @@
       {%      set _os_f_dict = _os_fam_v
                   if _os_fam_v is mapping else { __os_dist:_os_fam_v } %}
       {%      set _ = o.update({ 'min':none, 'max':none }) %}
-      {%    elsif ( o.min|d(none) is none and o.max|d(none) is none ) %}
+      {%    elif ( o.min|d(none) is none and o.max|d(none) is none ) %}
       {%      set _ = o.update({ 'min':'0', 'max':'ZZZZ' }) %}
       {%    endif %}
       {%-   for _os_dist_k, _os_dist_v in (_os_f_dict|d({})).iteritems()

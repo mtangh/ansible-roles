@@ -1,14 +1,14 @@
 ---
 # roles-main tasks file
 
-- name: "{{ test_rolename }} | Debug print 'OS-Cond'"
+- name: "{{ test_rolename }} | Debug print \'OS-Cond\'"
   debug: 
     msg: |
       {{ '%s: OS-Cond: "%s".'|format(
          test_rolename,
          os_spec|string ) }}
 
-- name: "{{ test_rolename }} | Debug print 'OS-Spec'"
+- name: "{{ test_rolename }} | Debug print \'OS-Spec\'"
   debug: 
     msg: |
       {{ '%s: OS-Spec: %s:%s v%s(%s).'|format(
