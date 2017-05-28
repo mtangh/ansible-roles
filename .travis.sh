@@ -53,7 +53,7 @@ $(find "${CDIR}" -maxdepth 3 -type f -a -name "test.yml" 2>/dev/null)
 do
   
   echo "${test}" |
-  grep "/os-spec/tests/" 1>/dev/null 2>&1 ||
+  grep "/os-spec/tests/" 1>/dev/null 2>&1 &&
   continue
 
   test_syntaxcheck_after_run "${test}" ||
