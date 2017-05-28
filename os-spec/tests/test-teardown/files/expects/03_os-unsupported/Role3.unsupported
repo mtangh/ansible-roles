@@ -1,0 +1,3 @@
+# BEGIN ANSIBLE MANAGED BLOCK
+Role3: OS-Spec: redhat:centos v5.7(5).
+# END ANSIBLE MANAGED BLOCK
