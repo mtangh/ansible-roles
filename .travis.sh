@@ -42,6 +42,9 @@ test_syntaxcheck_after_run() {
   return $rval
 }
 
+# Setup
+ansible -m setup localhost || :
+
 # OS spec
 test_syntaxcheck_after_run \
 "${CDIR}/os-spec/tests/test.yml" ||
