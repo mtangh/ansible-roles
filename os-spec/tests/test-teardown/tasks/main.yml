@@ -8,7 +8,7 @@
       if [ -d "{{ test_expects_dir }}" ]
       then
         diff -Nur -x '.gitkeep' -I '^# Ansible managed:.*$' \
-          "{{ test_expects_dir }}" "{{ test_prefixdir }}"
+          "{{ test_expects_dir }}" "{{ test_prefix_dir }}"
       else
         /bin/true
       fi

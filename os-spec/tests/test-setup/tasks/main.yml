@@ -8,17 +8,17 @@
     with_items:
     - main
     - "{{ test_casename }}"
-    when: '%s/vars/%s.yml'|format(test_root_dir,item)|is_file
+    when: ('%s/vars/%s.yml'|format(test_root_dir,item))|is_file
 
   - name: "{{ test_casename|d('noname') }} | test-setup | Create directories for test."
     file:
-      path: "{{ '%s%s'|format(test_prefixdir,item.path|d(item)) }}"
+      path: "{{ '%s%s'|format(test_prefix_dir,item.path|d(item)) }}"
       state: directory
       owner: "{{ item.owner|d(test_owner) }}"
       group: "{{ item.group|d(test_group) }}"
       mode: "{{ item.mode|d('0755') }}"
     with_flattened:
-    - "{{ test_prefixdir }}"
+    - "{{ test_prefix_dir }}"
     - "{{ test_setup_mkdirs|d([]) }}"
     ignore_errors: yes
     when: item|d(none) is not none
@@ -26,7 +26,7 @@
   - name: "{{ test_casename|d('noname') }} | test-setup | Copy files."
     synchronize:
       src: "{{ __test_sync_src_dir }}"
-      dest: "{{ test_prefixdir }}"
+      dest: "{{ test_prefix_dir }}"
       checksum: no
       compress: yes
       delete: yes
@@ -38,7 +38,7 @@
     - "{{ '%s/_default'|format(test_setupfiles_dir) }}"
     when: (('%s/%s'|format(test_setupfiles_dir,test_casename))|is_dir == true
           or ('%s/_default'|format(test_setupfiles_dir))|is_dir == true)
-          and test_prefixdir|d('')|is_dir == true
+          and test_prefix_dir|d('')|is_dir == true
 
   when: test_run|d(false)
   tags:
