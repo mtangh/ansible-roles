@@ -1,0 +1,59 @@
+---
+# test-setup defaults file
+
+test_run: yes
+
+# test case name
+test_casename: "{{
+            casename
+            if casename|d('')|string|trim|length >0
+            else lookup('pipe','mktemp -u testcase_XXXXXXXX') }}"
+
+# test owner and group
+test_owner: "{{ 
+            lookup('pipe','id -un')
+            if test_run|d(false) == true else none }}"
+test_group: "{{
+            lookup('pipe','id -gn')
+            if test_run|d(false) == true else none }}"
+
+# dirs.
+test_rootdir: "{{
+            playbook_dir|d(lookup('pipe','pwd'))
+            if test_run|d(false) == true else none }}"
+
+test_target_dir "{{
+            '%s/target'|format(test_rootdir)
+            if test_run|d(false) == true else none }}"
+
+test_setup_dir: "{{
+            '%s/test-setup'|format(test_rootdir)
+            if test_run|d(false) == true else none }}"
+test_setupfiles_dir: "{{
+            '%s/files'|format(test_setup_dir)
+            if test_run|d(false) == true else none }}"
+
+test_teardown_dir: "{{
+            '%s/test-teardown'|format(test_rootdir)
+            if test_run|d(false) == true else none }}"
+test_expects_dir: "{{
+            '%s/files/expects'|format(test_teardown_dir)
+            if test_run|d(false) == true else none }}"
+
+# rootdir of test case
+test_prefixdir: "{{
+            prefix_dir
+            if test_run|d(false) == true
+            and prefix_dir|d('')|string|trim|length > 0
+            else (
+            '%s/%s'|format(test_target_dir,test_casename)
+            if test_run|d(false) == true
+            and test_casename|d('')|string|trim|length > 0
+            else none ) }}"
+
+##
+#test_setup_mkdirs: []
+
+##
+#test_teardown_ignore_invalid: no
+

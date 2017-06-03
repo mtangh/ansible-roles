@@ -3,28 +3,19 @@
 
 - block:
 
-  - name: "test-terdown | {{ test_casename }} | validate"
+  - name: "{{ test_casename|d('noname') }} | test-terdown | validate"
     shell: |
-      if [ -d "{{ _test_expects_dir }}" ]
+      if [ -d "{{ test_expects_dir }}" ]
       then
         diff -Nur -x '.gitkeep' -I '^# Ansible managed:.*$' \
-          "{{ _test_expects_dir }}" \
-          "{{ _test_actual_dir }}"
+          "{{ test_expects_dir }}" "{{ test_prefixdir }}"
       else
         /bin/true
       fi
     register: test_teardown_result
-    ignore_errors: "{{ test_teardown_ignore_errors|d(false) }}"
+    ignore_errors: "{{ test_teardown_ignore_invalid|d(false) }}"
 
-  vars:
-    _test_expects_dir: "{{ '%s/files/expects/%s'|
-                       format(test_teardown_dir,test_casename) }}"
-    _test_actual_dir: "{{ '%s%s'|format(test_prefix_dir,'') }}"
-
-  when: test_run|d(none) is not none
-        and test_casename|d(none) is not none
-        and test_teardown_dir|d(none) is not none
-        and test_prefix_dir|d(none) is not none
+  when: test_run|d(false)
   tags:
   - '[test-teardown]'
 
