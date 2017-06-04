@@ -1,38 +1,64 @@
 ---
 # test-setup tasks file
 
-- name: test-setup | create directories for test
-  command:
-    mkdir -p "{{ prefix_dir|d('') }}{{ item }}"
-    creates={{ prefix_dir|d('') }}{{ item }}
-  with_items:
-  - /etc/httpd/conf
-  - /etc/httpd/conf.d
-  when: test_run is defined
-        and prefix_dir is defined
-  tags:
-  - '[unit_test_setup]'
+- block:
 
-- name: test-setup | copy files to httpd/conf
-  copy:
-    src: "{{ item }}"
-    dest: "{{ prefix_dir|d('') }}/etc/httpd/conf/"
-  with_items:
-  - "{{ os_spec_os_family }}/httpd.conf"
-  when: test_run is defined
-        and prefix_dir is defined
-  tags:
-  - '[unit_test_setup]'
+  - name: "{{ test_casename|d('noname') }} | test-setup | Include vars."
+    include_vars:
+      file: "{{ '%s/vars/%s.yml'|format(test_root_dir,item) }}"
+    with_items:
+    - main
+    - "{{ test_casename }}"
+    when: ('%s/vars/%s.yml'|format(test_root_dir,item))|is_file
+    changed_when: no
 
-- name: test-setup | copy files to httpd/conf.d
-  copy:
-    src: "{{ item }}"
-    dest: "{{ prefix_dir|d('') }}/etc/httpd/conf.d/"
-  with_items:
-  - "{{ os_spec_os_family }}/ssl.conf"
-  - "{{ os_spec_os_family }}/welcome.conf"
-  when: test_run is defined
-        and prefix_dir is defined
-  tags:
-  - '[unit_test_setup]'
+  - name: "{{ test_casename|d('noname') }} | test-setup | cleanup."
+    file:
+      path: "{{ test_prefix_dir }}"
+      state: absent
+      force: yes
+    changed_when: no
 
+  - name: "{{ test_casename|d('noname') }} | test-setup | Create a prefix directories."
+    file:
+      path: "{{ test_prefix_dir }}"
+      state: directory
+      owner: "{{ test_owner }}"
+      group: "{{ test_group }}"
+      mode: "0755"
+
+  - name: "{{ test_casename|d('noname') }} | test-setup | Create directories for test."
+    file:
+      path: "{{ '%s%s'|format(test_prefix_dir,item.path|d(item)) }}"
+      state: directory
+      owner: "{{ item.owner|d(test_owner) }}"
+      group: "{{ item.group|d(test_group) }}"
+      mode: "{{ item.mode|d('0755') }}"
+    with_items: "{{ test_setup_mkdirs|d([]) }}"
+    when: item|d(none) is not none
+    ignore_errors: yes
+
+  - name: "{{ test_casename|d('noname') }} | test-setup | Copy files."
+    synchronize:
+      src: "{{ item }}/"
+      dest: "{{ test_prefix_dir }}"
+      checksum: no
+      compress: yes
+      delete: yes
+      links: yes
+      recursive: yes
+    with_first_found:
+    - files:
+      - "{{ '%s/%s/%s'|format(test_setupfiles_dir,test_casename,os_spec_os_family|d('X')) }}"
+      - "{{ '%s/%s'|format(test_setupfiles_dir,test_casename) }}"
+      - "{{ '%s/%s'|format(test_setupfiles_dir,os_spec_os_family|d('X')) }}"
+      - "{{ '%s/default'|format(test_setupfiles_dir) }}"
+      skip: yes
+    when: test_setupfiles_dir|is_dir == true
+          and test_prefix_dir|d('')|is_dir == true
+    ignore_errors: yes
+
+  when: test_run|d(false)
+  no_log: yes
+  tags:
+  - '[test-setup]'

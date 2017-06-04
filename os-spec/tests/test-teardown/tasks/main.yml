@@ -5,15 +5,14 @@
 
   - name: "{{ test_casename|d('noname') }} | test-terdown | validate"
     shell: |
-      if [ -d "{{ test_expects_dir }}" ]
-      then
-        diff -Nur -x '.gitkeep' -I '^# Ansible managed:.*$' \
-          "{{ test_expects_dir }}" "{{ test_prefix_dir }}"
-      else
-        /bin/true
-      fi
-    register: test_teardown_result
-    ignore_errors: "{{ test_teardown_ignore_invalid|d(false) }}"
+      diff -Nur -x '.gitkeep' -I '^# Ansible managed:.*$' \
+        "{{ '%s/%s'|format(test_expects_dir,test_casename) }}" \
+        "{{ test_prefix_dir }}"
+    when: ('%s/%s'|format(test_expects_dir,test_casename))|is_dir
+    register: test_teardown_validate
+    changed_when: no
+    ignore_errors: yes
+    no_log: "{{ ('%s/%s'|format(test_expects_dir,test_casename))|is_dir == false }}"
 
   when: test_run|d(false)
   tags:

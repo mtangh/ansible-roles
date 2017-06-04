@@ -6,11 +6,6 @@
   tags:
     01_default
 
-  vars_files:
-  - "vars/os-spec.yml"
-
-  vars:
-
   roles:
   - test-setup
   - { role: ../.. }
@@ -22,11 +17,6 @@
 
   tags:
     02_default-darwin
-
-  vars_files:
-  - "vars/os-spec_darwin.yml"
-
-  vars:
 
   roles:
   - test-setup

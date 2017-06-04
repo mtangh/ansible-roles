@@ -1,6 +1,12 @@
 ---
 # vars file for test case 03_overwrite-defaults.yml
 
+# os-spec for darwin/macosx
+os_spec_os_family: darwin
+os_spec_os_distribution: maxosx
+os_spec_os_version: "10.11.1"
+os_spec_os_major_version: 10
+
 # SUDOers Drop-in dir
 sudo_sudoers_dropin_dir: '/etc/sudoers.dropins.d'
 

@@ -6,9 +6,6 @@
   tags:
     01_default
 
-  vars_files:
-  - os-spec.yml
-
   vars:
 
   roles:

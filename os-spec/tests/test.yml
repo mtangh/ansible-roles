@@ -22,10 +22,7 @@
 
   tasks:
 
-  - name: test | Touch
-    include: 'tasks/roles-main.yml'
-
-  - name: test | Debug print
+  - name: "{{ test_casename }} | main | Debug print"
     debug: 
       msg: |
         {{ 'OS-Spec: %s:%s-v%s(%s).'|format(
@@ -52,10 +49,7 @@
 
   tasks:
 
-  - name: test | Touch
-    include: 'tasks/roles-main.yml'
-
-  - name: test | Debug print
+  - name: "{{ test_casename }} | main | Debug print"
     debug: 
       msg: |
         {{ 'OS-Spec: %s:%s-v%s(%s).'|format(
@@ -80,10 +74,7 @@
 
   tasks:
   
-  - name: test | Touch
-    include: 'tasks/roles-main.yml'
-
-  - name: test | Debug print
+  - name: "{{ test_casename }} | main | Debug print"
     debug: 
       msg: |
         {{ 'OS-Spec: %s:%s-v%s(%s).'|format(

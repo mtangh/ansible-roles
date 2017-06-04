@@ -2,13 +2,13 @@
 # roles-main tasks file
 
 - name: "{{ test_rolename }} | Debug print OS-Cond"
-  debug: 
+  debug:
     msg: "{{ '%s: OS-Cond: %s.'|format(
            test_rolename,
            os_spec|d('')|string ) }}"
 
 - name: "{{ test_rolename }} | Debug print OS-Spec"
-  debug: 
+  debug:
     msg: "{{ '%s: OS-Spec: %s:%s v%s(%s).'|format(
            test_rolename,
            os_spec_os_family,os_spec_os_distribution,
@@ -16,15 +16,9 @@
 
 - block:
 
-  - name: "{{ test_rolename }} | Ssupported"
-    debug:
-      msg: "{{ '%s: Supported OS; %s'|format(
-             test_rolename,
-             os_spec_supported|d('*not registered*')) }}"
-
   - name: "{{ test_rolename }} | Supported Touch"
     blockinfile:
-      path: "{{ '%s/%s.%s'|format(prefix_dir|d(''),test_rolename,'supported') }}"
+      path: "{{ '%s/%s.%s'|format(test_prefix_dir|d(''),test_rolename,'supported') }}"
       state: present
       create: yes
       content: |
@@ -32,20 +26,14 @@
            test_rolename,
            os_spec_os_family,os_spec_os_distribution,
            os_spec_os_version,os_spec_os_major_version ) }}
- 
+
   when: os_spec_supported|success
 
 - block:
 
-  - name: "{{ test_rolename }} | Unsupported"
-    debug:
-      msg: "{{ '%s: Unsupported OS; %s'|format(
-             test_rolename,
-             os_spec_supported|d('*not registered*')) }}"
- 
   - name: "{{ test_rolename }} | Unsupported Touch"
     blockinfile:
-      path: "{{ '%s/%s.%s'|format(prefix_dir|d(''),test_rolename,'unsupported') }}"
+      path: "{{ '%s/%s.%s'|format(test_prefix_dir|d(''),test_rolename,'unsupported') }}"
       state: present
       create: yes
       content: |
@@ -53,6 +41,6 @@
            test_rolename,
            os_spec_os_family,os_spec_os_distribution,
            os_spec_os_version,os_spec_os_major_version ) }}
- 
+
   when: os_spec_supported|failed
 

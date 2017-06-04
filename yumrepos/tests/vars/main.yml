@@ -1,4 +1,10 @@
 ---
+
+os_spec_os_family: redhat
+os_spec_os_distribution: centos
+os_spec_os_version: "6.7"
+os_spec_os_major_version: 6
+
 yumrepos_repos:
 
 - name: epel

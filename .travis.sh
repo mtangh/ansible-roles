@@ -29,13 +29,22 @@ test_syntaxcheck_after_run() {
     host="$file"; break; }
   done || :
 
-  : && {
+  $play ${host:+-i $host} "${test##*/}" --syntax-check &&
+  $play ${host:+-i $host} "${test##*/}" -C; rval=$?
 
-    $play ${host:+-i $host} "${test##*/}" --syntax-check &&
-    $play ${host:+-i $host} "${test##*/}" -C
-
-  }
-  rval=$?
+  [ $rval -eq 0 ]  &&
+  for test_casename in $(
+    $play ${host:+-i $host} "${test##*/}" --list-tags 2>/dev/null |
+    sed -ne 's/^[ ]*play.*[ ]*TAGS:[ ]*\[\([^ ]*\)\].*$/\1/gp' |
+    sort -u)
+  do
+    $play ${host:+-i $host} "${test##*/}" \
+          --tags "$test_casename" \
+          -e "test_casename=$test_casename"
+    rval=$?
+    [ $rval -eq 0 ] ||
+    break
+  done
 
   popd || :
 

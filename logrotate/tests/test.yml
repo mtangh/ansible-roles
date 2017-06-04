@@ -6,11 +6,6 @@
   tags:
     01_default
 
-  vars_files:
-  - os-spec.yml
-
-  vars:
-    
   roles:
   - test-setup
   - { role: ../.. }
@@ -22,9 +17,6 @@
 
   tags:
     02_default-overwrite
-
-  vars_files:
-  - os-spec.yml
 
   vars:
 
@@ -64,9 +56,6 @@
 
   tags:
     03_files-appends-only
-
-  vars_files:
-  - os-spec.yml
 
   vars:
 
