@@ -18,7 +18,7 @@
       path: "{{ tests_prefix_dir }}"
       state: absent
       force: yes
-    when: "{{ tests_prefix_dir|is_dir == true }}"
+    when: tests_prefix_dir|is_dir == true
     no_log: "{{ tests_prefix_dir|is_dir == false }}"
 
   - name: "{{ tests_casename|d('noname') }} | test-setup | Create a prefix directories."
@@ -56,3 +56,4 @@
     - "{{ '%s/default'|format(tests_files_setup_dir|d('.')) }}"
   tags:
   - '[test-setup]'
+
