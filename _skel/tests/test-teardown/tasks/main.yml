@@ -1,0 +1,22 @@
+---
+# test-teardown tasks file
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
+
+- block:
+
+  - name: "{{ tests_casename|d('noname') }} | test-terdown | validate"
+    shell: |
+      diff -Nur -x '.gitkeep' -x '.gitkeep' -I '^# Ansible managed:.*$' \
+        "{{ tests_files_expects_dir_for_case }}" \
+        "{{ tests_prefix_dir }}"
+    when: tests_files_expects_dir_for_case|is_dir
+    changed_when: no
+    no_log: "{{ tests_files_expects_dir_for_case|is_dir == false }}"
+
+  when: tests_run|d(false)
+  vars:
+    tests_files_expects_dir_for_case: "{{
+      '%s/%s'|format(tests_files_expects_dir,tests_casename) }}"
+  tags:
+  - '[test-teardown]'
+
