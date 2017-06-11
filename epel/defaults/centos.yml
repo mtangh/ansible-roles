@@ -1,5 +1,6 @@
 ---
 # defaults file for epel of "centos"
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
 epel_centos_epel_urls:
   - "-"

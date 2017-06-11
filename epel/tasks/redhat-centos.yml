@@ -1,5 +1,6 @@
 ---
 # tasks file for epel of "centos"
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
 - name: epel-centos | Set fact centos major verson and EPEL Package Url.
   set_fact:
