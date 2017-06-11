@@ -1,12 +1,13 @@
 ---
 # tasks file for etc-hosts
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
 - name: etc-hosts | Updating /etc/hosts
   template:
     src: "etc/hosts.j2"
-    dest: "{{ prefix_dir|d('') }}/etc/hosts"
-    owner: "{{ test_owner|d('root') }}"
-    group: "{{ test_group|d('root') }}"
+    dest: "{{ tests_prefix_dir|d('') }}/etc/hosts"
+    owner: "{{ tests_owner|d('root') }}"
+    group: "{{ tests_group|d('root') }}"
     mode: "0644"
     backup: yes
   vars:
@@ -23,7 +24,7 @@
       {%      set _ = o.add( _hosts ) %}
       {%    endfor %}
       {%  endif %}
-      {{- o -}}     
+      {{- o -}}
     etc_hosts_ipv6: |
       {%  set o = etc_hosts_hosts_ipv6|d(none)
               if etc_hosts_using_ipv6|d(ftrue) == true
@@ -46,9 +47,9 @@
 - name: etc-hosts | Updating /etc/hosts.allow
   template:
     src: "etc/hosts.allow.j2"
-    dest: "{{ prefix_dir|d('') }}/etc/hosts.allow"
-    owner: "{{ test_owner|d('root') }}"
-    group: "{{ test_group|d('root') }}"
+    dest: "{{ tests_prefix_dir|d('') }}/etc/hosts.allow"
+    owner: "{{ tests_owner|d('root') }}"
+    group: "{{ tests_group|d('root') }}"
     mode: "0644"
     backup: yes
   vars:
@@ -58,7 +59,7 @@
               else [] %}
       {%  if etc_hosts_using_hosts_allow|d(true) == true
           and etc_hosts_additional_sets.hosts_allow|d(none) is iterable %}
-      {%    set _ = o.add( '-' ) 
+      {%    set _ = o.add( '-' )
                 if o.length > 0 else none %}
       {%    for _acl in etc_hosts_additional_sets.hosts_allow|d([])
                 if _acl|d(none) is none %}
@@ -73,9 +74,9 @@
 - name: etc-hosts | Updating /etc/hosts.deny
   template:
     src: "etc/hosts.deny.j2"
-    dest: "{{ prefix_dir|d('') }}/etc/hosts.deny"
-    owner: "{{ test_owner|d('root') }}"
-    group: "{{ test_group|d('root') }}"
+    dest: "{{ tests_prefix_dir|d('') }}/etc/hosts.deny"
+    owner: "{{ tests_owner|d('root') }}"
+    group: "{{ tests_group|d('root') }}"
     mode: "0644"
     backup: yes
   vars:
@@ -85,14 +86,14 @@
               else [] %}
       {%  if etc_hosts_using_hosts_deny|d(true) == true
           and etc_hosts_additional_sets.hosts_deny|d(none) is iterable %}
-      {%    set _ = o.add( '-' ) 
+      {%    set _ = o.add( '-' )
                 if o.length > 0 else none %}
       {%    for _acl in etc_hosts_additional_sets.hosts_deny|d([])
                 if _acl|d(none) is none %}
       {%      set _ = o.add( _acl) %}
       {%    endfor %}
       {%  endif %}
-      {{- o -}}    
+      {{- o -}}
   when: etc_hosts_using_hosts_deny|d(true) == true
   tags:
   - etc-hosts-deny

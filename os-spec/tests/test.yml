@@ -55,9 +55,11 @@
     os_spec_os_major_version: 10
 
   roles:
+  - test-setup
   - role1
   - role2
   - role3
+  - test-teardown
 
   tasks:
 
@@ -87,7 +89,9 @@
     os_spec_os_major_version: 5
 
   roles:
+  - test-setup
   - role3
+  - test-teardown
 
   tasks:
 

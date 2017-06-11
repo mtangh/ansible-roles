@@ -1,73 +1,101 @@
 ---
-- hosts: all
+# test
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
+
+- name: "{{ testcase }}"
+  hosts: localhost
   connection: local
-  gather_facts: true
+  remote_user: "{{ lookup('pipe','id -un') }}"
+
+  gather_facts: yes
+  gather_subset:
+  - network
 
   tags:
-    01_default
+  - "{{ testcase }}"
 
-  vars_files:
-  - "vars/os-spec.yml"
+  vars:
+    testcase: 01_default
 
   roles:
   - test-setup
   - { role: ../.. }
   - test-teardown
 
-- hosts: all
+- name: "{{ testcase }}"
+  hosts: localhost
   connection: local
-  gather_facts: true
+  remote_user: "{{ lookup('pipe','id -un') }}"
+
+  gather_facts: yes
+  gather_subset:
+  - network
 
   tags:
-    02_ipv4-and-ipv6
+  - "{{ testcase }}"
 
-  vars_files:
-  - "vars/os-spec.yml"
+  vars:
+    testcase: 02_ipv4-and-ipv6
 
   roles:
   - test-setup
   - { role: ../.. }
   - test-teardown
 
-- hosts: all
+- name: "{{ testcase }}"
+  hosts: localhost
   connection: local
-  gather_facts: true
+  remote_user: "{{ lookup('pipe','id -un') }}"
+
+  gather_facts: yes
+  gather_subset:
+  - network
 
   tags:
-    03_ipv4-only
+  - "{{ testcase }}"
 
-  vars_files:
-  - "vars/os-spec.yml"
+  vars:
+    testcase: 03_ipv4-only
 
   roles:
   - test-setup
   - { role: ../.. }
   - test-teardown
 
-- hosts: all
+- name: "{{ testcase }}"
+  hosts: localhost
   connection: local
-  gather_facts: true
+  remote_user: "{{ lookup('pipe','id -un') }}"
+
+  gather_facts: yes
+  gather_subset:
+  - network
 
   tags:
-    04_hosts-allow-deny
+  - "{{ testcase }}"
 
-  vars_files:
-  - "vars/os-spec.yml"
+  vars:
+    testcase: 04_hosts-allow-deny
 
   roles:
   - test-setup
   - { role: ../.. }
   - test-teardown
 
-- hosts: all
+- name: "{{ testcase }}"
+  hosts: localhost
   connection: local
-  gather_facts: true
+  remote_user: "{{ lookup('pipe','id -un') }}"
+
+  gather_facts: yes
+  gather_subset:
+  - network
 
   tags:
-    05_additional-hosts
+  - "{{ testcase }}"
 
-  vars_files:
-  - "vars/os-spec.yml"
+  vars:
+    testcase: 05_additional-hosts
 
   roles:
   - test-setup

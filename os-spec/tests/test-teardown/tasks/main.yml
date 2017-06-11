@@ -6,7 +6,9 @@
 
   - name: "{{ tests_casename|d('noname') }} | test-terdown | validate"
     shell: |
-      diff -Nur -x '.gitkeep' -x '.gitkeep' -I '^# Ansible managed:.*$' \
+      diff -Nur \
+        {{ tests_ignore_validation_files|d('') }}\
+        -I '^# Ansible managed:.*$' \
         "{{ tests_files_expects_dir_for_case }}" \
         "{{ tests_prefix_dir }}"
     when: tests_files_expects_dir_for_case|is_dir

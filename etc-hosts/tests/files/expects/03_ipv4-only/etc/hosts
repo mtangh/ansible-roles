@@ -1,0 +1,18 @@
+# /etc/hosts
+# Ansible managed: test
+
+### Loopback
+127.0.0.1           shermy shermy.local localhost localhost.localdomain localhost4 localhost4.localdomain4
+
+### IPv4
+192.168.28.140      shermy shermy.local
+
+# etc_hosts_ipv4
+192.168.12.1        server1
+192.168.12.2        server2
+192.168.12.3        server3
+
+# multi name server
+192.168.12.45       server4 server5
+#192.168.12.6        server6
+
