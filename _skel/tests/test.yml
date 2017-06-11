@@ -9,11 +9,11 @@
 
   gather_facts: no
   
-  vars:
-    testcase: default
-
   tags:
   - "{{ testcase }}"
+
+  vars:
+    testcase: default
 
   roles:
   - test-setup

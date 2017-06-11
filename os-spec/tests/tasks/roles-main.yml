@@ -1,29 +1,30 @@
 ---
-# roles-main tasks file
+# roles-main.yml
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
-- name: "{{ test_rolename }} | Debug print OS-Cond"
+- name: "{{ tests_casename }} | {{ tests_rolename }} | Debug print OS-Cond"
   debug:
     msg: "{{ '%s: OS-Cond: %s.'|format(
-           test_rolename,
+           tests_rolename,
            os_spec|d('')|string ) }}"
 
-- name: "{{ test_rolename }} | Debug print OS-Spec"
+- name: "{{ tests_rolename }} | Debug print OS-Spec"
   debug:
     msg: "{{ '%s: OS-Spec: %s:%s v%s(%s).'|format(
-           test_rolename,
+           tests_rolename,
            os_spec_os_family,os_spec_os_distribution,
            os_spec_os_version,os_spec_os_major_version ) }}"
 
 - block:
 
-  - name: "{{ test_rolename }} | Supported Touch"
+  - name: "{{ tests_casename }} | {{ tests_rolename }} | Supported Touch"
     blockinfile:
-      path: "{{ '%s/%s.%s'|format(test_prefix_dir|d(''),test_rolename,'supported') }}"
+      path: "{{ '%s/%s.%s'|format(tests_prefix_dir|d(''),tests_rolename,'supported') }}"
       state: present
       create: yes
       content: |
         {{ '%s: OS-Spec: %s:%s v%s(%s).'|format(
-           test_rolename,
+           tests_rolename,
            os_spec_os_family,os_spec_os_distribution,
            os_spec_os_version,os_spec_os_major_version ) }}
 
@@ -31,14 +32,14 @@
 
 - block:
 
-  - name: "{{ test_rolename }} | Unsupported Touch"
+  - name: "{{ tests_casename }} | {{ tests_rolename }} | Unsupported Touch"
     blockinfile:
-      path: "{{ '%s/%s.%s'|format(test_prefix_dir|d(''),test_rolename,'unsupported') }}"
+      path: "{{ '%s/%s.%s'|format(tests_prefix_dir|d(''),tests_rolename,'unsupported') }}"
       state: present
       create: yes
       content: |
         {{ '%s: OS-Spec: %s:%s v%s(%s).'|format(
-           test_rolename,
+           tests_rolename,
            os_spec_os_family,os_spec_os_distribution,
            os_spec_os_version,os_spec_os_major_version ) }}
 

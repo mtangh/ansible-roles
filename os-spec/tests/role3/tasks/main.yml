@@ -1,5 +1,7 @@
 ---
-# test-role tasks file
+# role* tasks file
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
-- name: "{{ test_rolename }} | main"
+- name: "{{ tests_casename }} | {{ tests_rolename }} | main"
   include: ../../tasks/roles-main.yml
+

@@ -39,7 +39,7 @@
       links: yes
       recursive: yes
     with_first_found:
-      files: "{{ tests_files_setup_first_found_dirs|d([]) }}"
+    - files: "{{ tests_files_setup_first_found_dirs|d([]) }}"
       skip: yes
     when: tests_files_setup_dir|is_dir == true
           and tests_prefix_dir|d('')|is_dir == true

@@ -4,9 +4,7 @@ dependencies:
   os_spec:
     RedHat:
       CentOS: { ver_min: '6.5', ver_max: '7.3' }
-    Darwin: 
+    Darwin:
       MacOSX: { ver_max: '10.10' }
   os_spec_ignore_errors: yes
-  tags:
-  - os-spec-verify
 

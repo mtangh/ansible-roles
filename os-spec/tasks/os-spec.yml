@@ -1,5 +1,6 @@
 ---
 # os-spec.yml
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
 - block:
 
@@ -10,7 +11,7 @@
           and os_spec_os_family|d(none) is none
           and os_spec_os_distribution|d(none) is none
           and os_spec_os_version|d(none) is none
- 
+
   - name: "os-spec | Set Facts - OS Spec."
     set_fact:
       os_spec_os_family: "{{
@@ -58,7 +59,7 @@
     register: os_spec_supported
     when: ( __os_family|d(none) is not none
             and __os_dist|d(none) is not none
-            and ( __os_vers.min|d(none) is not none 
+            and ( __os_vers.min|d(none) is not none
                or __os_vers.max|d(none) is not none ) )
           and
           ( ( __os_vers.min|d(none) is not none
@@ -90,8 +91,8 @@
                 if _os_fam_k|string|trim|lower not in ( 'all' )
                 and _os_dist_k|string|trim|lower in ( __os_dist, 'all' )
                 and ( _os_dist_v|d(none) is mapping
-                   or _os_dist_v|d(none)|bool == true ) -%} 
-      {%      if _os_dist_k|string|trim|lower not in ( 'all' ) 
+                   or _os_dist_v|d(none)|bool == true ) -%}
+      {%      if _os_dist_k|string|trim|lower not in ( 'all' )
               or ( o.min|d(none) is none and o.max|d(none) is none ) %}
       {%        set _os_ver_min = _os_dist_v.ver_min|string|trim
                     if _os_dist_v.ver_min|d(none) is not none
