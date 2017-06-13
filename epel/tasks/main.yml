@@ -2,42 +2,21 @@
 # tasks file for epel
 # vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
-- name: epel | Include OS/Distribution specific variables.
-  include_vars: "{{ item }}"
-  ignore_errors: yes
-  with_first_found:
-  - "{{ '%s-%s.yml'|format(os_spec_os_family,os_spec_os_distribution) }}"
-  - "{{ '%s.yml'|format(os_spec_os_family) }}"
-  - "defaulti.yml"
-  tags:
-  - always
+- block:
 
-- name: epel | Install the epel.
-  include: "{{ item }}"
-  with_first_found:
-  - "{{ '%s-%s.yml'|format(os_spec_os_family,os_spec_os_distribution) }}"
-  - "{{ '%s.yml'|format(os_spec_os_family) }}"
-  - "default.yml"
+  - name: epel | Install the epel.
+    yum:
+      name: "{{ epel_package_name|d('epel-release') }}"
+      state: latest
+      update_cache: "{{ epel_update_cache|d(true) }}"
+    notify:
+    - epel-yum-clean-metadata
+
+  - name: epel | Refresh yum metadata
+    meta: flush_handlers
+  
+  when: tests_run|d(false) == false
+        and platforms_supported|d(false) == true
   tags:
   - epel
   - epel-install
-
-- block:
-
-  - name: epel | Set fact - yumrepos
-    set_fact:
-      yumrepos_repos:
-      - name: "epel"
-        repos: "{{ epel_epel_repos|d([]) }}"
-      - name: "epel-testing"
-        repos: "{{ epel_epel_testing_repos|d([]) }}"
-
-  - name: epel | Create EPEL repo files.
-    include: "{{ yumrepos_tasks.repos_create }}"
-
-  when: epel_epel_repos|d([])|length > 0
-        and epel_epel_testing_repos|d([])|length > 0
-  tags:
-  - epel
-  - epel-repo
-

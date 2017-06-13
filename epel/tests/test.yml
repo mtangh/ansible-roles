@@ -1,36 +1,40 @@
 ---
-- hosts: localhost
+# test
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
+
+- name: "{{ testcase }}"
+  hosts: localhost
   connection: local
+  remote_user: "{{ lookup('pipe','id -un') }}"
+
   gather_facts: yes
 
   tags:
-    01_default
+  - "{{ testcase }}"
 
   vars:
-    os_spec_os_family: redhat
-    os_spec_os_distribution: centos
-    os_spec_os_version: "6.7"
-    os_spec_os_major_version: 6
+    testcase: 01_default
 
   roles:
   - test-setup
   - { role: ../.. }
   - test-teardown
 
-- hosts: localhost
+- name: "{{ testcase }}"
+  hosts: localhost
   connection: local
-  gather_facts: no
+  remote_user: "{{ lookup('pipe','id -un') }}"
+
+  gather_facts: yes
 
   tags:
-    02_default-centos7
+  - "{{ testcase }}"
 
   vars:
-    os_spec_os_family: redhat
-    os_spec_os_distribution: centos
-    os_spec_os_version: "7.1"
-    os_spec_os_major_version: 7
+    testcase: 02_default-centos7
 
   roles:
   - test-setup
   - { role: ../.. }
   - test-teardown
+

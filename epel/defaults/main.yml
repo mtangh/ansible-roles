@@ -9,48 +9,9 @@ epel_meta: |
 # If necessary,
 # define a default value with a variable name beginning with "epel_" here.
 
-# Includes OS Spec defaults
-epel_vars: |
-  {{ lookup('file','./defaults/%s.yml'|
-     format(os_spec_os_distribution|d('default')))|from_yaml }}
+# EPEL Package name
+epel_package_name: epel-release
 
-#
-# - id: "epel"
-#   name: "Extra Packages for Enterprise Linux {{ ansible_distribution_major_version }} - $basearch"
-#   baseurl:
-#     url: "http://download.fedoraproject.org/pub/epel/{{ ansible_distribution_major_version }}/$basearch"
-#     enabled: no
-#   mirrorlist:
-#     url: "https://mirrors.fedoraproject.org/metalink?repo=epel{{ ansible_distribution_major_version }}&arch=$basearch"
-#     enabled: yes
-#   proxy:
-#     url:
-#     username:
-#     password:
-#   failovermethod: "priority"
-#   enabled: yes
-#   gpgcheck: yes
-#   gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}"
-#   ssl:
-#     verify:
-#     cacert:
-#     clientkey:
-#     clientcert:
-#
-
-# EPEL repos
-epel_epel_repos: |
-  {% if epel_vars.epel_epel_repos|d(none) is not none %}{{
-    epel_vars.epel_epel_repos
-  }}{% else %}{{
-    []
-  }}{% endif %}
-
-# EPEL Testing
-epel_epel_testing_repos: |
-  {% if epel_vars.epel_epel_testing_repos|d(none) is not none %}{{
-    epel_vars.epel_epel_testing_repos
-  }}{% else %}{{
-    []
-  }}{% endif %}
+# Force yum to check if cache is out of date and redownload if needed. 
+epel_update_cache: ye
 
