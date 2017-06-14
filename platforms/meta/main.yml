@@ -1,10 +1,10 @@
 ---
-# meta file for epel
+# meta file for platforms
 # vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
 galaxy_info:
   author: MT
-  company:
+  company: UGOOLE.ORG
   description:
 
   #
@@ -50,21 +50,16 @@ galaxy_info:
   # of versions.
   #
   #platforms:
-  #- name: EL
-  #  versions:
-  #  - 5
-  #  - 6
   #- name: Fedora
   #  versions:
-  #  - 16
-  #  - 17
-  #  - 18
-  #- name: Ubuntu
+  #  - all
+  #  - 25
+  #- name: SomePlatform
   #  versions:
-  #  - precise
-  #  - quantal
-  #  - raring
-  #  - saucy
+  #  - all
+  #  - 1.0
+  #  - 7
+  #  - 99.99
 
   #
   # List tags for your role here, one per line. A tag is a keyword that
@@ -80,8 +75,4 @@ galaxy_info:
 # List your role dependencies here, one per line.
 # Be sure to remove the '[]' above if you add dependencies to this list.
 #
-dependencies:
-- role: platforms
-  platforms: { 'RedHat': yes }
-  no_errors: yes
-
+dependencies: []

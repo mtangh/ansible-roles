@@ -1,9 +1,0 @@
----
-dependencies:
-- role: os-spec
-  os_spec:
-    RedHat:
-      CentOS: { ver_min: '6.5', ver_max: '7.3' }
-    Darwin:
-      MacOSX: { ver_min: '10.10' }
-

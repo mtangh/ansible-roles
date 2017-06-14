@@ -1,0 +1,85 @@
+---
+# platforms.yml
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
+
+- block:
+
+  - name: "Evaluate whether this platform is supported."
+    set_fact:
+      platforms_conditions: "{{ __p_conds }}"
+      platforms_no_errors: "{{ __p_no_errors }}"
+      platforms_supported: "{{ 
+        true 
+        if ( __p_dist_ver in __p_vers )
+        or ( (__p_dist_ver if __p_dist_ver|string|trim|length > 0
+             else 'zzzzzzzz')|version_compare(__p_ver_min,'>=')
+         and (__p_dist_ver if __p_dist_ver|string|trim|length > 0
+             else '0')|version_compare(__p_ver_max,'<=') )
+        else false }}"
+    no_log: "{{ true if ansible_check_mode|d(false) == false else false }}"
+
+  - name: "Does the role support this platform ?"
+    fail:
+      msg: |
+        {{ 'Unsupported platform: %s-%s v%s; Not in [ %s ].'|format(
+           __p_family|d('none'),__p_dist|d('none'),__p_dist_ver|d('n/a'),
+           (__p_conds|d({})|string)) }}
+    when: platforms_supported|d(false) == false
+          and __p_no_errors|d(true) == false
+    no_log: "{{ true if ansible_check_mode|d(false) == false else false }}"
+
+  when: platforms|d(none) is not none
+  vars:
+    __p_conds: "{{ platforms|d({}) }}"
+    __p_no_errors: "{{ no_errors|d(false) }}"
+    __p_family: "{{ ansible_os_family|d('none')|string|trim|lower }}"
+    __p_dist: "{{ ansible_distribution|d('none')|string|trim|lower }}"
+    __p_dist_ver: "{{ ansible_distribution_version|d(none) }}"
+    __platforms_and_versions: |
+      {%- set o = {} -%}
+      {%- set p = { 'family':(ansible_os_family|d('none')|string|trim|lower),
+                    'dist':(ansible_distribution|d('none')|string|trim|lower) } -%}
+      {%- for _os_fam_k, _os_fam_v in (__p_conds|d({})).iteritems()
+              if (_os_fam_k|string|trim|lower) in ( p.family, 'all' )
+              and ( _os_fam_v|d(none) is mapping
+                 or _os_fam_v|d(none)|bool == true ) -%}
+      {%    set _os_f_dict = {} %}
+      {%    if _os_fam_k|string|trim|lower not in ( 'all' ) %}
+      {%      set _os_f_dict = _os_fam_v
+                  if _os_fam_v is mapping else { p.dist:_os_fam_v } %}
+      {%      set _ = o.update({ 'min':none, 'max':none }) %}
+      {%    elif ( o.min|d(none) is none and o.max|d(none) is none ) %}
+      {%      set _ = o.update({ 'min':'0', 'max':'zzzzzzzz' }) %}
+      {%    endif %}
+      {%-   for _os_dist_k, _os_dist_v in (_os_f_dict|d({})).iteritems()
+                if _os_fam_k|string|trim|lower not in ( 'all' )
+                and _os_dist_k|string|trim|lower in ( p.dist, 'all' )
+                and ( _os_dist_v|d(none) is mapping
+                   or _os_dist_v|d(none)|bool == true ) -%}
+      {%      if _os_dist_k|string|trim|lower not in ( 'all' )
+              or ( o.min|d(none) is none and o.max|d(none) is none ) %}
+      {%        set _os_ver_min = _os_dist_v.ver_min|string|trim
+                    if _os_dist_v.ver_min|d(none) is not none else '0' %}
+      {%        set _os_ver_max = _os_dist_v.ver_max|string|trim
+                    if _os_dist_v.ver_max|d(none) is not none else 'zzzzzzzz' %}
+      {%        set _ = o.update({ 'min':_os_ver_min, 'max':_os_ver_max }) %}
+      {%      endif %}
+      {%-   endfor -%}
+      {%- endfor -%}
+      {{ o }}
+    __p_vers: "{{
+      __platforms_and_versions
+      if __platforms_and_versions|d(none) is iterable
+      and __platforms_and_versions|d(none) is not string
+      else [] }}"
+    __p_ver_min: "{{
+      __platforms_and_versions.min
+      if __platforms_and_versions.min|d(none) is not none
+      else '0' }}"
+    __p_ver_max: "{{
+      __platforms_and_versions.max
+      if __platforms_and_versions.max|d(none) is not none
+      else 'zzzzzzzz' }}"
+  tags:
+  - always
+

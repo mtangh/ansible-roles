@@ -1,0 +1,10 @@
+---
+dependencies:
+- role: platforms
+  platforms:
+    RedHat:
+      CentOS: { ver_min: '6.5', ver_max: '7.3' }
+    Darwin:
+      MacOSX: { ver_max: '10.10' }
+  no_errors: yes
+

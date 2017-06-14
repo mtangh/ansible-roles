@@ -4,7 +4,7 @@
 
 # Meta data for this role.
 epel_meta: |
-    {{ lookup('file','./meta/main.yml')|from_yaml }}
+    {{ lookup('file',('%s/meta/main.yml'|format(role_path)))|from_yaml }}
 
 # If necessary,
 # define a default value with a variable name beginning with "epel_" here.
@@ -13,5 +13,5 @@ epel_meta: |
 epel_package_name: epel-release
 
 # Force yum to check if cache is out of date and redownload if needed. 
-epel_update_cache: ye
+epel_update_cache: yes
 

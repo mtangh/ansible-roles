@@ -1,0 +1,47 @@
+---
+# roles-main.yml
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
+
+- name: "{{ tests_casename }} | {{ tests_rolename }} | Debug print Platform conditions"
+  debug:
+    msg: "{{ '%s: Conditions: %s.'|format(
+           tests_rolename,
+           platforms_conditions|d({})|string ) }}"
+
+- name: "{{ tests_rolename }} | Debug print Platform"
+  debug:
+    msg: "{{ '%s: Platform: %s:%s v%s.'|format(
+           tests_rolename,
+           ansible_os_family,ansible_distribution,
+           ansible_distribution_version ) }}"
+
+- block:
+
+  - name: "{{ tests_casename }} | {{ tests_rolename }} | Supported Touch"
+    blockinfile:
+      path: "{{ '%s/%s.%s'|format(tests_prefix_dir|d(''),tests_rolename,'supported') }}"
+      state: present
+      create: yes
+      content: |
+        {{ '%s: Platform: %s:%s v%s.'|format(
+           tests_rolename,
+           ansible_os_family,ansible_distribution,
+           ansible_distribution_version ) }}
+
+  when: platforms_supported|d(false) == true
+
+- block:
+
+  - name: "{{ tests_casename }} | {{ tests_rolename }} | Unsupported Touch"
+    blockinfile:
+      path: "{{ '%s/%s.%s'|format(tests_prefix_dir|d(''),tests_rolename,'unsupported') }}"
+      state: present
+      create: yes
+      content: |
+        {{ '%s: Platform: %s:%s v%s.'|format(
+           tests_rolename,
+           ansible_os_family,ansible_distribution,
+           ansible_distribution_version ) }}
+
+  when: platforms_supported|d(true) == false
+

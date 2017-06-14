@@ -1,8 +1,0 @@
----
-# tasks file for os-spec
-# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
-
-- include: "os-spec.yml"
-  tags:
-  - os-spec-verify
-
