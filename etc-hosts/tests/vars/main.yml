@@ -2,10 +2,9 @@
 # vars/main.yml
 # vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
-os_spec_os_family: redhat
-os_spec_os_distribution: centos
-os_spec_os_version: "6.7"
-os_spec_os_major_version: 6
+ansible_os_family: RedHat
+ansible_distribution: CentOS
+ansible_distribution_version: "6.7"
 
 tests_ignore_validation_files: "-x '.get*' -x 'hosts.[0-9]*' -x 'hosts.allow.[0-9]*' -x 'hosts.deny.[0-9]*'"
 

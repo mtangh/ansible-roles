@@ -2,39 +2,35 @@
  #  name: macros.hosts.j2
  #---------------------------------------------------------------------#}
 
-{%  macro dump( h_list, is_ipv6 = false ) -%}
-{%    for h_item in h_list
-          if h_list is not none
-          and h_list is not string
-          and h_list is iterable
+{%  macro dump( h_list = [] ) -%}
+{%    for h_item in (h_list|d([]))
+          if (h_list is iterable and h_list is not string)
           and h_item is not none %}
-{%      if h_item is defined and h_item is mapping %}
-{%        set comented = ""
-              if h_item.disabled is undefined else "#" %}
+{%      if h_item is mapping %}
+{%        set commented = ''
+              if h_item.disabled|d(false) == false else '#' %}
 {%        for ipaddr, name in h_item|dictsort(false)
-              if ipaddr != 'disabled' and name is not none %}
-{{ comented }}{{ (("%-19s" if not is_ipv6 else "%-39s") ~ " %s")|format(ipaddr,(name if name is string else name|join(" ")))|trim }}
+              if ipaddr|ipaddr and name|d(none) is not none %}
+{{ ('%s%-19s %s' if ipaddr|ipv4 else '%s%-39s %s')|format(
+   commented,ipaddr,(name if name is string else name|join(' ')))|trim }}
 {%        endfor %}
 {%      elif h_item is string %}
-{{ "# %s"|format(h_item)|trim if h_item != "-" else "" }}
+{{ '# %s'|format(h_item)|trim if h_item|match('^-+$') else '' }}
 {%      endif %}
 {%    else %}
 {{ h_list }}
 {%    endfor %}
 {%  endmacro -%}
 
-{%  macro dump_acls( acls ) -%}
-{%    for acl in acls
-          if acls is not none
-          and acls is not string
-          and acls is iterable
+{%  macro dump_acls( acls = [] ) -%}
+{%    for acl in (acls|d([]))
+          if acls is iterable and acls is not string
           and acl is not none %}
 {%      for service, entries in acl|dictsort(false)
-            if acl is mapping
-            and acl is not string
+            if acl is mapping and acl is not string
             and service is not none %}
 {%        set entries = entries 
-              if entries is not none else "ALL" %}
+              if entries is not none else 'ALL' %}
 {%        for entry in entries 
               if entries is iterable
               and entries is not string
@@ -42,40 +38,40 @@
 {%          if entry is mapping
             and entry.clientlist is defined
             and entry.clientlist is not none %}
-{%            set clientlist = entry.clientlist|join(", ")|trim
+{%            set clientlist = entry.clientlist|join(', ')|trim
                   if entry.clientlist is iterable
                   and entry.clientlist is not string
                   else entry.clientlist|trim %}
-{%            set line_cont = "\\"
+{%            set line_cont = '\\'
                   if entry.option is defined
                   and entry.option is not none
-                  else "" %}
+                  else '' %}
 {%            if line_cont|length > 0
               and entry.option is string %}
 {%              if clientlist|length <= 32
                 and entry.option|length <= 16 %}
-{{ "%-14s: %-48s:%s"|format(service,clientlist,entry.option)|trim }}
+{{ '%-14s: %-48s:%s'|format(service,clientlist,entry.option)|trim }}
 {%              else %}
-{{ "%-14s: %s %s"|format(service,clientlist,line_cont)|trim }}
-{{ "%16s:%s"|format("",entry.option)|trim }}
+{{ '%-14s: %s %s'|format(service,clientlist,line_cont)|trim }}
+{{ '%16s:%s'|format('',entry.option)|trim }}
 {%              endif %}
 {%            elif line_cont|length > 0
               and entry.option is iterable
               and entry.option is not string %}
-{{ "%-14s: %s %s"|format(service,clientlist,line_cont)|trim }}
+{{ '%-14s: %s %s'|format(service,clientlist,line_cont)|trim }}
 {%              for option in entry.option
                     if option is not none %}
-{{ "%16s"|format("")}}{{ ":%s %s"|format(option,("\\" if loop.index < loop.length else ""))|trim }}
+{{ '%16s'|format('')}}{{ ':%s %s'|format(option,('\\' if loop.index < loop.length else ''))|trim }}
 {%              endfor %}
 {%            endif %}
 {%          else %}
-{{ "%-14s: %s"|format(service,entry)|trim }}
+{{ '%-14s: %s'|format(service,entry)|trim }}
 {%          endif %}
 {%        else %}
-{{ "%-14s: %s"|format(service,entries)|trim }}
+{{ '%-14s: %s'|format(service,entries)|trim }}
 {%        endfor %}
 {%      else %}
-{{ "# %s"|format(acl)|trim }}
+{{ '# %s'|format(acl)|trim }}
 {%      endfor %}
 {%    endfor %}
 {%  endmacro -%}

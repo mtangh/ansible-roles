@@ -2,98 +2,76 @@
 # tasks file for etc-hosts
 # vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
-- name: etc-hosts | Updating /etc/hosts
-  template:
-    src: "etc/hosts.j2"
-    dest: "{{ tests_prefix_dir|d('') }}/etc/hosts"
-    owner: "{{ tests_owner|d('root') }}"
-    group: "{{ tests_group|d('root') }}"
-    mode: "0644"
-    backup: yes
-  vars:
-    etc_hosts_ipv4: |
-      {%  set o = etc_hosts_hosts_ipv4|d(none)
-              if etc_hosts_using_ipv4|d(true) == true
-              else [] %}
-      {%  if etc_hosts_using_ipv4|d(true) == true
-          and etc_hosts_additional_sets.hosts_ipv4|d(none) is iterable %}
-      {%    set _ = o.add( '-' )
-                if o.length > 0 else none %}
-      {%    for _hosts in etc_hosts_additional_sets.hosts_ipv4|d([])
-                if _hosts|d(none) is none %}
-      {%      set _ = o.add( _hosts ) %}
-      {%    endfor %}
-      {%  endif %}
-      {{- o -}}
-    etc_hosts_ipv6: |
-      {%  set o = etc_hosts_hosts_ipv6|d(none)
-              if etc_hosts_using_ipv6|d(ftrue) == true
-              else [] %}
-      {%  if etc_hosts_using_ipv6|d(true) == true
-          and etc_hosts_additional_sets.hosts_ipv6|d(none) is iterable %}
-      {%    set _ = o.add( '-' )
-                if o.length > 0 else none %}
-      {%    for _hosts in etc_hosts_additional_sets.hosts_ipv6|d([])
-                if _hosts|d(none) is none %}
-      {%      set _ = o.add( _hosts ) %}
-      {%    endfor %}
-      {%  endif %}
-      {{- o -}}
-  when: (etc_hosts_using_ipv4|d(true) == true
-        or etc_hosts_using_ipv6|d(true) == true)
-  tags:
-  - etc-hosts
+- block:
 
-- name: etc-hosts | Updating /etc/hosts.allow
-  template:
-    src: "etc/hosts.allow.j2"
-    dest: "{{ tests_prefix_dir|d('') }}/etc/hosts.allow"
-    owner: "{{ tests_owner|d('root') }}"
-    group: "{{ tests_group|d('root') }}"
-    mode: "0644"
-    backup: yes
-  vars:
-    etc_hosts_allow: |
-      {%  set o = etc_hosts_hosts_allow|d(none)
-              if etc_hosts_using_hosts_allow|d(true) == true
-              else [] %}
-      {%  if etc_hosts_using_hosts_allow|d(true) == true
-          and etc_hosts_additional_sets.hosts_allow|d(none) is iterable %}
-      {%    set _ = o.add( '-' )
-                if o.length > 0 else none %}
-      {%    for _acl in etc_hosts_additional_sets.hosts_allow|d([])
-                if _acl|d(none) is none %}
-      {%      set _ = o.add( _acl) %}
-      {%    endfor %}
-      {%  endif %}
-      {{- o -}}
-  when: etc_hosts_using_hosts_allow|d(true) == true
-  tags:
-  - etc-hosts-allow
+  - name: etc-hosts | Updating /etc/hosts
+    template:
+      src: "etc/hosts.j2"
+      dest: "{{ tests_prefix_dir|d('') }}/etc/hosts"
+      owner: "{{ tests_owner|d('root') }}"
+      group: "{{ tests_group|d('root') }}"
+      mode: "0644"
+      backup: yes
+    when: (etc_hosts_using_ipv4|d(true) == true
+          or etc_hosts_using_ipv6|d(true) == true)
+    tags:
+    - etc-hosts
+    
+  - name: etc-hosts | Updating /etc/hosts.allow
+    template:
+      src: "etc/hosts.allow.j2"
+      dest: "{{ tests_prefix_dir|d('') }}/etc/hosts.allow"
+      owner: "{{ tests_owner|d('root') }}"
+      group: "{{ tests_group|d('root') }}"
+      mode: "0644"
+      backup: yes
+    when: etc_hosts_using_hosts_allow|d(true) == true
+    tags:
+    - etc-hosts-allow
 
-- name: etc-hosts | Updating /etc/hosts.deny
-  template:
-    src: "etc/hosts.deny.j2"
-    dest: "{{ tests_prefix_dir|d('') }}/etc/hosts.deny"
-    owner: "{{ tests_owner|d('root') }}"
-    group: "{{ tests_group|d('root') }}"
-    mode: "0644"
-    backup: yes
+  - name: etc-hosts | Updating /etc/hosts.deny
+    template:
+      src: "etc/hosts.deny.j2"
+      dest: "{{ tests_prefix_dir|d('') }}/etc/hosts.deny"
+      owner: "{{ tests_owner|d('root') }}"
+      group: "{{ tests_group|d('root') }}"
+      mode: "0644"
+      backup: yes
+    when: etc_hosts_using_hosts_deny|d(true) == true
+    tags:
+    - etc-hosts-deny
+
   vars:
-    etc_hosts_deny: |
-      {%  set o = etc_hosts_hosts_deny|d(none)
-              if etc_hosts_using_hosts_deny|d(true) == true
+    etc_hosts: |
+      {%  set o = { 'hosts':[] 'allow':[], 'deny':[] } %}
+      {%  set _hname = inventory_hostname_short|lower
+              if inventory_hostname_short|d('')|string|trim|length > 0
+              else inventory_hostname|d('')|string|lower %}
+      {%  set _hents = [etc_hosts_hosts[_hname]]
+              if (etc_hosts_hosts|d({}))|selectattr(_hname)
+              and etc_hoats_hosts[_hname] is not none
               else [] %}
-      {%  if etc_hosts_using_hosts_deny|d(true) == true
-          and etc_hosts_additional_sets.hosts_deny|d(none) is iterable %}
-      {%    set _ = o.add( '-' )
-                if o.length > 0 else none %}
-      {%    for _acl in etc_hosts_additional_sets.hosts_deny|d([])
-                if _acl|d(none) is none %}
-      {%      set _ = o.add( _acl) %}
-      {%    endfor %}
-      {%  endif %}
+      {%  set _grnames = (group_names|d([])|sort)|union(['default','all']) %}
+      {%  for __grname in _grnames|d([])
+              if (etc_hosts_hosts|d({}))|selectattr(__grname|lower)
+              and __grname|lower not in [ _hname ] %}
+      {%    set _hents = _hents|union(etc_hosts_hosts[__grname|lower] %}
+      {%  endfor %}
+      {%  for _h_ent in _hents|d([])
+              if (_h_ent|d(none) is iterable and _h_ent is not string)
+              or (_h_ent.hosts|d(none) is iterable and _h_ent.hosts is not string)
+              or (_h_ent.allow|d(none) is iterable and _h_ent.allow is not string)
+              or (_h_ent.deny|d(none) is iterable and _h_ent.deny is not string) %}
+      {%    if (_h_ent|d(none) is iterable and _h_ent is not string)
+            or (_h_ent.hosts|d(none) is iterable and _h_ent.hosts is not string) %}
+      {%      set _ = (o.hosts)|union(_h_ent.hosts|d(_h_ent)) %}
+      {%    endif %}
+      {%    if (_h_ent.allow|d(none) is iterable and _h_ent.allow is not string) %}
+      {%      set _ = (o.allow)|union(_h_ent.allow) %}
+      {%    endif %}
+      {%    if (_h_ent.deny|d(none) is iterable and _h_ent.deny is not string) %}
+      {%      set _ = (o.deny)|union(_h_ent.deny) %}
+      {%    endif %}
+      {%  endfor %}
       {{- o -}}
-  when: etc_hosts_using_hosts_deny|d(true) == true
-  tags:
-  - etc-hosts-deny
+

@@ -4,7 +4,7 @@
 
 # Meta data for this role.
 etc_hosts_meta: |
-    {{ lookup('file','./meta/main.yml')|from_yaml }}
+    {{ lookup('file',('%s/meta/main.yml'|format(role_path))|from_yaml }}
 
 # If necessary,
 # define a default value with a variable name beginning with "etc_hosts_" here.
@@ -24,33 +24,22 @@ etc_hosts_using_hosts_allow: true
 # Enable/Disable "hosts.deny"
 etc_hosts_using_hosts_deny: true
 
-# IPv4 Hosts entries
-etc_hosts_hosts_ipv4:
-# - <ipaddr>: name[ name...]
+# Hosts entries
+etc_hosts_hosts:
+##  <targetname>:
+##    hosts:
+##    - <ipaddr>: name[ name...]
+##    allow:
+##    - <servicename>: entries
+##    deny:
+##    - <servicename>: entries
+##
+  default:
+    hosts: []
+    allow:
+    - ALL:
+      - 127.0.0.1
+    - sshd: ALL
+    deny:
+    - ALL: ALL
 
-# IPv6 Hosts entries
-etc_hosts_hosts_ipv6:
-# - <ipaddr>: name[ name...]
-
-# Hosts Allow
-etc_hosts_hosts_allow:
-# - <servicename>: entries
-- ALL:
-  - 127.0.0.1
-- sshd: ALL
-
-# Hosts Deny
-etc_hosts_hosts_deny:
-# - <servicename>: entries
-- ALL: ALL
-
-# Local hosts set
-etc_hosts_additional_sets:
-##  hosts_ipv4:
-##  - <ipaddr>: name[ name...]
-##  hosos_ipv6:
-##  - <ipaddr>: name[ name...]
-##  hosts_allow:
-##  - <servicename>: entries
-##  hosts_deny:
-##  - <servicename>: entries
