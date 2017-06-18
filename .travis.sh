@@ -56,7 +56,7 @@ ansible -m setup localhost || :
 
 # OS spec
 test_syntaxcheck_after_run \
-"${CDIR}/os-spec/tests/test.yml" ||
+"${CDIR}/platforms/tests/test.yml" ||
 exit 1
 
 # Run tests
@@ -65,7 +65,7 @@ $(find "${CDIR}" -maxdepth 3 -type f -a -name "test.yml" 2>/dev/null)
 do
   
   echo "${test}" |
-  grep "/os-spec/tests/" 1>/dev/null 2>&1 &&
+  grep "/platforms/tests/" 1>/dev/null 2>&1 &&
   continue
 
   test_syntaxcheck_after_run "${test}" ||
