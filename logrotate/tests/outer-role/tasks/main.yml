@@ -1,0 +1,18 @@
+---
+# tasks file for tests/outer-role
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
+
+- name: "outer-role | print logrotate_logfiles"
+  debug:
+    var: outer_role_logrotate_logfiles
+
+- name: "outer-role | logrotate-logfile."
+  include_role:
+    name:  logrotate
+    tasks_from: logrotate-logfile
+  with_items: "{{ outer_role_logrotate_logfiles|d([]) }}"
+  loop_control:
+    loop_var: logrotate_conf_logfile
+  when: logrotate_conf_logfile.name|d(none) is not none
+        and logrotate_conf_logfile.logfiles|d(none) is not none
+

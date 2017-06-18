@@ -1,9 +1,0 @@
----
-# defaults file for logrotate of "default"
-
-# logrotate log files in logrotate.conf
-logrotate_logfiles_defaults:
-
-# logrotate log files under the include dir.
-logrotate_logfiles_includes:
-

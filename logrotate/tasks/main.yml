@@ -1,49 +1,66 @@
 ---
 # tasks file for logrotate
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
-- name: logrotate | Include OS/Distribution specific variables.
-  include_vars: "{{ item }}"
+- name: "logrotate | Include OS/Distribution specific variables."
+  include_vars: "{{ _include_vars_file }}"
   ignore_errors: yes
   with_first_found:
-  - "{{ '%s-%s.yml'|format(os_spec_os_family,os_spec_os_distribution) }}"
-  - "{{ '%s.yml'|format(os_spec_os_family) }}"
-  - "default.yml"
+  - files:
+    - "{{ 'vars/%s-%s.yml'|format(
+          ansible_os_family|d('*')|lower,
+          ansible_distribution|d('*')|lower) }}"
+    - "{{ 'vars/%s.yml'|format(ansible_os_family|d('*')|lower) }}"
+    - "vars/default.yml"
+    skip: yes
+  loop_control:
+    loop_var: _include_vars_file
   tags:
   - logrotate
   - logrotate-include-vars
 
-- name: logrotate | Install the logrotate.
-  include: "{{ item }}"
+- name: "logrotate | Install the logrotate."
+  include: "{{ _include_file }}"
   with_first_found:
-  - "{{ '%s-%s.yml'|format(os_spec_os_family,os_spec_os_distribution) }}"
-  - "{{ '%s.yml'|format(os_spec_os_family) }}"
-  - "default.yml"
+  - files:
+    - "{{ 'tasks/%s-%s.yml'|format(
+          ansible_os_family|d('*')|lower,
+          ansible_distribution|d('*')|lower) }}"
+    - "{{ 'tasks/%s.yml'|format(ansible_os_family|d('*')|lower) }}"
+    - "tasks/default.yml"
+    skip: yes
+  loop_control:
+    loop_var: _include_file
   tags:
   - logrotate
   - logrotate-install
 
-- name: logrotate | Updating logrotate configuration.
+- name: "logrotate | Updating logrotate configuration."
   template:
     src: "etc/logrotate.conf.j2"
-    dest: "{{ '%s%s'|format(prefix_dir|d(''),logrotate_conf_file|d('/etc/logrotate.conf')) }}"
-    owner: "{{ test_owner|d(logrotate_conf_file_owner|d('root')) }}"
-    group: "{{ test_group|d(logrotate_conf_file_group|d('root')) }}"
+    dest: "{{ '%s%s'|format(
+              tests_prefix_dir|d(''),
+              logrotate_conf_file|d('/etc/logrotate.conf')) }}"
+    owner: "{{ tests_owner|d(logrotate_conf_file_owner|d('root')) }}"
+    group: "{{ tests_group|d(logrotate_conf_file_group|d('root')) }}"
     mode: "{{ logrotate_conf_file_mode|d('0644') }}"
-    backup: yes
+    backup: "{{ tests_run|d(false) == false }}"
   tags:
   - logrotate
   - logrotate-conf
 
-- name: logrotate | Create include directory.
+- name: "logrotate | Create include directory."
   file:
-    path: "{{ '%s%s'|format(prefix_dir|d(''),logrotate_include_dir) }}"
+    path: "{{ '%s%s'|format(
+              tests_prefix_dir|d(''),
+              logrotate_include_dir|d('/etc/logrotate.d')) }}"
     state: directory
-    owner: "{{ test_owner|d(logrotate_include_dir_owner|d('root')) }}"
-    group: "{{ test_group|d(logrotate_include_dir_group|d('root')) }}"
+    owner: "{{ tests_owner|d(logrotate_include_dir_owner|d('root')) }}"
+    group: "{{ tests_group|d(logrotate_include_dir_group|d('root')) }}"
     mode: "{{ logrotate_include_dir_mode|d('0755') }}"
-  when: logrotate_include_dir|d(none) is not none
-        and logrotate_include_dir|string|trim|lower|
-            match('^(no|false)$') == false
+  when: logrotate_include_dir|d(none) is string
+        and (logrotate_include_dir|string|lower)|
+            match('^[ ]*(no|false)[ ]*$') == false
   tags:
   - logrotate
   - logrotate-logfiles-includes
@@ -51,33 +68,21 @@
 
 - block:
 
-  - name: logrotate | Updating include files
+  - name: "logrotate | Updating include files."
     include: logrotate-logfile.yml
-    vars:
-      logrotate_conf_logfile: "{{ item }}"
-    with_items: "{{ logrotate_logfiles_includes|d([]) }}"
-    when: item.name|d(none) is not none
-          and item.logfiles|d(none) is not none
+    with_items: "{{ logrotate_logfiles|d([]) }}"
+    loop_control:
+      loop_var: logrotate_conf_logfile
+    when: logrotate_conf_logfile.name|d(none) is not none
+          and logrotate_conf_logfile.logfiles|d(none) is not none
     tags:
     - logrotate
     - logrotate-logfiles-includes
 
-  - name: logrotate | Appending include files
-    include: logrotate-logfile.yml
-    vars:
-      logrotate_conf_logfile: "{{ item }}"
-    with_items: "{{ logrotate_logfiles_appends|d([]) }}"
-    when: item.name|d(none) is not none
-          and item.logfiles|d(none) is not none
-    tags:
-    - logrotate
-    - logrotate-logfiles-appends
-
   when: logrotate_include_dir|d(none) is not none
-        and logrotate_include_dir|string|trim|lower|
-            match('^(no|false)$') == false
+        and (logrotate_include_dir|string|lower)|
+            match('^[ ]*(no|false)[ ]*$') == false
   tags:
   - logrotate
   - logrotate-logfiles-includes
-  - logrotate-logfiles-appends
 

@@ -15,7 +15,7 @@
 {%  if p.size|d(none) is not none
     and p.size|string|trim|match('^[1-9][0-9]*([Kk]|[Mm]|[Gg]|)$') %}
 # Rotate log file size {{ p.size|upper|trim }}.
-# Log files are rotated when they grow bigger than size bytes. 
+# Log files are rotated when they grow bigger than size bytes.
 size {{ p.size|upper|trim }}
 
 {%  endif %}
@@ -23,7 +23,7 @@ size {{ p.size|upper|trim }}
     and p.minsize|string|trim|match('^[1-9][0-9]*([Kk]|[Mm]|[Gg]|)$') %}
 # Log files are rotated when they grow bigger than size bytes,
 # but not before the additionally specified time interval
-# (daily, weekly, monthly, or yearly). 
+# (daily, weekly, monthly, or yearly).
 minsize {{ p.minsize|upper|trim }}
 
 {%  endif %}
@@ -132,12 +132,11 @@ tabooext {{ ext|trim }}
 {%    endfor %}
 
 {%  endif %}
-{%  if logrotate_logfiles_defaults|d(none) is not none
-    and logrotate_logfiles_defaults is iterable
-    and logrotate_logfiles_defaults is not string %}
+{%  if logrotate_conf_default.logfiles|d(none) is iterable
+    and logrotate_conf_default.logfiles is not string %}
 # No package files -- we'll rotate them here
 
-{%    for f in logrotate_logfiles_defaults
+{%    for f in logrotate_conf_default.logfiles
           if f.name|d(none) is not none
           and f.logfiles|d(none) is not none %}
 {{ m_logrotate.logrotate_file(f) }}

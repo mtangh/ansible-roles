@@ -1,16 +1,18 @@
 ---
-# "logrotate-logfile" tasks file for logrotate 
+# "logrotate-logfile" tasks file for logrotate
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
-- name: logrotate-logfile | Create logrotate file under the /etc/logrotate.d.
+- name: "logrotate | logrotate-logfile | Create logrotate file under the /etc/logrotate.d."
   template:
     src: "etc/logrotate.include.conf.j2"
-    dest: "{{ '%s%s/%s'|format(prefix_dir|d(''),logrotate_include_dir,logrotate_conf_logfile.name) }}"
-    owner: "{{ test_owner|d(logrotate_conf_logfile.owner|d('root')) }}"
-    group: "{{ test_group|d(logrotate_conf_logfile.group|d('root')) }}"
+    dest: "{{ '%s%s/%s'|format(
+              tests_prefix_dir|d(''),logrotate_include_dir|d('/etc/logrotate.d'),
+              logrotate_conf_logfile.name) }}"
+    owner: "{{ tests_owner|d(logrotate_conf_logfile.owner|d('root')) }}"
+    group: "{{ tests_group|d(logrotate_conf_logfile.group|d('root')) }}"
     mode: "{{ logrotate_conf_logfile.mode|d('0644') }}"
   when: logrotate_conf_logfile.name|d(none) is not none
         and logrotate_conf_logfile.logfiles|d(none) is not none
   tags:
-  - tagged
   - logrotate-conf-logfile
 

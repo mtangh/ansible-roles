@@ -1,74 +1,56 @@
 ---
-- hosts: localhost
+- name: "{{ testcase }}"
+  hosts: localhost
   connection: local
+  remote_user: "{{ lookup('pipe','id -un') }}"
+
   gather_facts: no
 
   tags:
-    01_default
+  - "{{ testcase }}"
+
+  vars:
+    testcase: 01_default
 
   roles:
   - test-setup
   - { role: ../.. }
   - test-teardown
 
-- hosts: localhost
+- name: "{{ testcase }}"
+  hosts: localhost
   connection: local
+  remote_user: "{{ lookup('pipe','id -un') }}"
+
   gather_facts: no
 
   tags:
-    02_default-overwrite
+  - "{{ testcase }}"
 
   vars:
-
-    logrotate_conf_default:
-      cycle: weekly
-      rotate: 8
-      size: 1024M
-      minsize: 1M
-      dateext: yes
-      dateformat: '%Y%m%d'
-      compress: yes
-      compressext: .gz
-      delaycompress: yes
-      missingok: yes
-      ifempty: yes
-      create:
-        mode: 0644
-        owner: root
-        group: wheel
-
-    logrotate_logfiles_appends:
-    - name: httpd
-      logfiles: '/var/log/httpd/*log'
-      missingok: yes
-      ifempty: no
-      sharedscripts: yes
-      postrotate: '/sbin/service httpd reload >/dev/null 2>/dev/null ||true' 
+    testcase: 02_set-logrotate-config
 
   roles:
   - test-setup
-  - { role: ../.., tags: ['logrotate','logrotate-logfile-extend'] }
+  - { role: ../.. }
   - test-teardown
 
-- hosts: localhost
+- name: "{{ testcase }}"
+  hosts: localhost
   connection: local
+  remote_user: "{{ lookup('pipe','id -un') }}"
+
   gather_facts: no
 
   tags:
-    03_files-appends-only
+  - "{{ testcase }}"
 
   vars:
-
-    logrotate_logfiles_appends:
-    - name: httpd
-      logfiles: '/var/log/httpd/*log'
-      missingok: yes
-      ifempty: no
-      sharedscripts: yes
-      postrotate: '/sbin/service httpd reload >/dev/null 2>/dev/null ||true' 
+    testcase: 03_files-appends-only
 
   roles:
   - test-setup
-  - { role: ../.., tags: ['logrotate-logfile-appends'] }
+  - { role: ../.. }
+  - outer-role
   - test-teardown
 

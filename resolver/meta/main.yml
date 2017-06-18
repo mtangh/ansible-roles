@@ -78,7 +78,7 @@ galaxy_info:
 dependencies:
   - role: platforms
     platforms:
-      RedHat: yes,
+      RedHat: yes
       Debian: yes
     no_errors: yes
 

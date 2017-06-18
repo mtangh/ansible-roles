@@ -1,0 +1,13 @@
+---
+# defaults file for tests/outer-role
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
+
+outer_role_logrotate_logfiles:
+
+- name: httpd
+  logfiles: '/var/log/httpd/*log'
+  missingok: yes
+  ifempty: no
+  sharedscripts: yes
+  postrotate: '/sbin/service httpd reload >/dev/null 2>/dev/null ||true'
+

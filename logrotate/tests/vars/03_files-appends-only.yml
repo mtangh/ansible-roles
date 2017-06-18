@@ -1,0 +1,74 @@
+---
+# vars/03_files-appends-only.yml
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
+
+logrotate_conf_default:
+  cycle: weekly
+  rotate: 8
+  size: 1024M
+  minsize: 1M
+  dateext: yes
+  dateformat: '%Y%m%d'
+  compress: yes
+  compressext: .gz
+  delaycompress: yes
+  missingok: yes
+  ifempty: yes
+  create:
+    mode: 0644
+    owner: root
+    group: wheel
+  logfiles:
+  - name: wtmp
+    logfiles: /var/log/wtmp
+    cycle: monthly
+    minsize: 1M
+    rotate: 3
+    create:
+      owner: root
+      group: utmp
+      mode: '0644'
+  - name: btmp
+    logfiles: /var/log/btmp
+    cycle: monthly
+    minsize: 1M
+    rotate: 3
+    create:
+      owner: root
+      group: utmp
+      mode: '0600'
+
+logrotate_logfiles:
+
+- name: syslog
+  logfiles:
+  - /var/log/kern.log
+  - /var/log/messages
+  - /var/log/daemon.log
+  - /var/log/secure
+  - /var/log/maillog
+  - /var/log/spooler
+  - /var/log/boot.log
+  - /var/log/cron
+  sharedscripts: yes
+  postrotate:
+  - /bin/kill -HUP `cat /var/run/syslogd.pid 2>/dev/null` 2>/dev/null ||true
+  - /bin/kill -HUP `cat /var/run/rsyslogd.pid 2>/dev/null` 2>/dev/null ||true
+
+- name: rpm
+  logfiles: /var/log/rpmpkgs
+  cycle: weekly
+  missingok: yes
+  ifempty: no
+
+- name: yum
+  logfiles: /var/log/yum.log
+  cycle: yearly
+  size: 30k
+  create:
+    owner: root
+    group: root
+    mode: '0600'
+  missingok: yes
+  ifempty: no
+
