@@ -1,18 +1,23 @@
 # /etc/hosts
 # Ansible managed: test
 
-### Loopback
-127.0.0.1           shermy shermy.local localhost localhost.localdomain localhost4 localhost4.localdomain4
+# Loopback
+127.0.0.1           unittest unittest.tests.com localhost localhost.localdomain localhost4 localhost4.localdomain4
 
-### IPv4
-192.168.28.140      shermy shermy.local
+# Entries for all IP addresses of this host are as follows:
+## IPv4
+192.168.1.1         unittest unittest.tests.com
+192.168.1.2         unittest unittest.tests.com
 
-# etc_hosts_ipv4
+# The host name database is as follows:
 192.168.12.1        server1
 192.168.12.2        server2
 192.168.12.3        server3
 
-# multi name server
+# Multi name server
 192.168.12.45       server4 server5
+# Disabled
 #192.168.12.6        server6
+
+# IPv6
 

@@ -75,7 +75,7 @@
   - "{{ testcase }}"
 
   vars:
-    testcase: 04_hosts-allow-deny
+    testcase: 04_hosts-allow-and-deny
 
   roles:
   - test-setup

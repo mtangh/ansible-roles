@@ -6,5 +6,17 @@ ansible_os_family: RedHat
 ansible_distribution: CentOS
 ansible_distribution_version: "6.7"
 
+ansible_hostname: 'unittest'
+
+ansible_fqdn: 'unittest.tests.com'
+
+ansible_all_ipv4_addresses:
+- 192.168.1.1
+- 192.168.1.2
+
+ansible_all_ipv6_addresses:
+- 2017:0618:1538:0:192:168:1:1
+- 2017:0618:1548:0:192:168:1:2
+
 tests_ignore_validation_files: "-x '.get*' -x 'hosts.[0-9]*' -x 'hosts.allow.[0-9]*' -x 'hosts.deny.[0-9]*'"
 

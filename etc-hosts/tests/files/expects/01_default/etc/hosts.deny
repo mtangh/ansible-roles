@@ -15,3 +15,5 @@
 #       See 'man tcpd' for information on tcp_wrappers
 #
 
+ALL           : ALL
+

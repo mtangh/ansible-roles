@@ -13,5 +13,8 @@
 #
 
 ALL           : 127.0.0.1
-sshd          : ALL
+sshd          : 192.168.12.1
+sshd          : 192.168.12.2 \
+                :spawn /bin/date \
+                :allow
 
