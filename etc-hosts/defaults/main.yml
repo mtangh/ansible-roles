@@ -10,19 +10,19 @@ etc_hosts_meta: |
 # define a default value with a variable name beginning with "etc_hosts_" here.
 
 # Enable/Disable Hostname
-etc_hosts_using_ip_by_hostname: true
+etc_hosts_using_ip_by_hostname: yes
 
 # Enable/Disable IPv4 hosts
-etc_hosts_using_ipv4: true
+etc_hosts_using_ipv4: yes
 
 # Enable/Disable IPv6 hosts
-etc_hosts_using_ipv6: true
+etc_hosts_using_ipv6: yes
 
 # Enable/Disable "hosts.allow"
-etc_hosts_using_hosts_allow: true
+etc_hosts_using_hosts_allow: yes
 
 # Enable/Disable "hosts.deny"
-etc_hosts_using_hosts_deny: true
+etc_hosts_using_hosts_deny: yes
 
 # Hosts entries
 etc_hosts_hosts:

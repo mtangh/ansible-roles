@@ -44,17 +44,32 @@
   vars:
     etc_hosts: |
       {%  set o = { 'hosts':[], 'allow':[], 'deny':[] } %}
+      {%  set _etc_hosts = etc_hosts_hosts
+              if etc_hosts_hosts|d(none) is mapping else {} %}
       {%  set _hname = inventory_hostname_short|lower
               if inventory_hostname_short|d('')|string|trim|length > 0
               else inventory_hostname|d('')|string|lower %}
-      {%  set _hents = [etc_hosts_hosts[_hname]]
-              if ((etc_hosts_hosts|d({}))[_hname])|d(none) is not none
+      {%  if _etc_hosts.default|d(none) is not none
+          and ( _etc_hosts.hosts|d(none) is not none
+             or _etc_hosts.allow|d(none) is not none
+             or _etc_hosts.deny|d(none) is not none ) %}
+      {%    set _hosts = _etc_hosts.hosts
+                if _etc_hosts.hosts|d(none) is not none else none %}
+      {%    set _hallow = _etc_hosts.allow
+                if _etc_hosts.allow|d(none) is not none else none %}
+      {%    set _hdeny = _etc_hosts.deny
+                if _etc_hosts.deny|d(none) is not none else none %}
+      {%    set _ = _etc_hosts.update({
+                'default':{ 'hosts':_hosts, 'allow':_hallow, 'deny':_hdeny } }) %}
+      {%  endif %}
+      {%  set _hents = [_etc_hosts[_hname]]
+              if ((_etc_hosts|d({}))[_hname])|d(none) is not none
               else [] %}
       {%  set _grnames = (group_names|d([])|sort)|union(['default','all']) %}
       {%  for __grname in _grnames|d([])
               if __grname|lower not in [ _hname ]
-              and ((etc_hosts_hosts|d({}))[__grname|lower])|d(none) is not none %}
-      {%    set _ = _hents.append( etc_hosts_hosts[__grname|lower] ) %}
+              and ((_etc_hosts|d({}))[__grname|lower])|d(none) is not none %}
+      {%    set _ = _hents.append( _etc_hosts[__grname|lower] ) %}
       {%  endfor %}
       {%  for _h_ent in _hents|d([])
               if (_h_ent|d(none) is iterable and _h_ent is not string)
@@ -73,4 +88,5 @@
       {%    endif %}
       {%  endfor %}
       {{- o -}}
+  when: platforms_supported|d(false) == true
 

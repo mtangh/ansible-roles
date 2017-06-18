@@ -2,13 +2,13 @@
 # vars/05_additional-hosts.yml
 # vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
-etc_hosts_using_ipv4: true
+etc_hosts_using_ipv4: yes
 
-etc_hosts_using_ipv6: true
+etc_hosts_using_ipv6: yes
 
-etc_hosts_using_hosts_allow: true
+etc_hosts_using_hosts_allow: yes
 
-etc_hosts_using_hosts_deny: true
+etc_hosts_using_hosts_deny: yes
 
 etc_hosts_hosts:
   default:
@@ -23,7 +23,7 @@ etc_hosts_hosts:
       - server4
       - server5
     - 192.168.12.6: server6
-      disabled: true
+      disabled: yes
     - "2001:2e8:632:0:2:1:0:11": serverr-ipv6-1
     - "2001:2e8:632:0:2:1:0:12": serverr-ipv6-2
     - "2001:2e8:632:0:2:1:0:13": serverr-ipv6-3

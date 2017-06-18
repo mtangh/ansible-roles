@@ -30,8 +30,8 @@
 
   when: platforms|d(none) is not none
   vars:
-    __p_conds: "{{ platforms|d({}) }}"
-    __p_no_errors: "{{ no_errors|d(false) }}"
+    __p_conds: "{{ platforms|d({}) if platforms|d(none) is mapping else {} }}"
+    __p_no_errors: "{{ no_errors|d(false)|bool }}"
     __p_family: "{{ ansible_os_family|d('none')|string|trim|lower }}"
     __p_dist: "{{ ansible_distribution|d('none')|string|trim|lower }}"
     __p_dist_ver: "{{ ansible_distribution_version|d(none) }}"

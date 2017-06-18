@@ -1,0 +1,19 @@
+---
+# vars/02_set-resolver.yml
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
+
+resolver_domain: domain.test.com
+
+resolver_search: search.test.com
+
+resolver_nameservers:
+- 192.168.1.1
+- 192.168.1.2
+- 192.168.1.3
+
+# Resolver: Sortlist
+resolver_sortlist: []
+
+# Resolver: Options
+resolver_options: []
+

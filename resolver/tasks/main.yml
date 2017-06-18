@@ -1,14 +1,21 @@
 ---
 # tasks file for resolver
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
-- name: resolver| Updating /etc/resolv.conf
+- name: "resolver| Updating /etc/resolv.conf"
   template:
     src: "etc/resolv.conf.j2"
-    dest: "{{ prefix_dir|d('') }}/etc/resolv.conf"
-    owner: "{{ test_owner|d('root') }}"
-    group: "{{ test_group|d('root') }}"
+    dest: "{{ tests_prefix_dir|d('') }}/etc/resolv.conf"
+    owner: "{{ tests_owner|d('root') }}"
+    group: "{{ tests_group|d('root') }}"
     mode: "0644"
-    backup: yes
+    backup: "{{ tests_run|d(false) == false }}"
+  when: platforms_supported|d(false) == true
+        and ( (resolver_domain|d(none) is string and resolver_domain|length > 0)
+           or (resolver_search|d(none) is string and search_domain|length > 0)
+           or (resolver_nameservers|d(none) is iterable and resolver_nameservers|length > 0)
+           or (resolver_sortlist|d(none) is iterable and resolver_sortlist|length > 0)
+           or (resolver_options|d(none) is iterable and resolver_options|length > 0) )
   tags:
   - resolver
 

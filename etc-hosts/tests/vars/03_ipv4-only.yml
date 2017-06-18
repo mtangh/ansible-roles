@@ -2,13 +2,13 @@
 # vars/03_ipv4-only.yml
 # vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
-etc_hosts_using_ipv4: true
+etc_hosts_using_ipv4: yes
 
-etc_hosts_using_ipv6: false
+etc_hosts_using_ipv6: no
 
-etc_hosts_using_hosts_allow: false
+etc_hosts_using_hosts_allow: no
 
-etc_hosts_using_hosts_deny: false
+etc_hosts_using_hosts_deny: no
 
 etc_hosts_hosts:
   default:
@@ -23,7 +23,7 @@ etc_hosts_hosts:
       - server5
     - "Disabled"
     - 192.168.12.6: server6
-      disabled: true
+      disabled: yes
     - "-"
     - "IPv6"
     - "2001:2e8:632:0:2:1:0:11": serverr-ipv6-1

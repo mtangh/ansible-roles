@@ -1,12 +1,37 @@
 ---
-- hosts: localhost
+# test
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
+
+- name: "{{ testcase }}"
+  hosts: localhost
   connection: local
+  remote_user: "{{ lookup('pipe','id -un') }}"
+
   gather_facts: no
 
   tags:
-    01_default
+  - "{{ testcase }}"
 
   vars:
+    testcase: 01_default
+
+  roles:
+  - test-setup
+  - { role: ../.. }
+  - test-teardown
+
+- name: "{{ testcase }}"
+  hosts: localhost
+  connection: local
+  remote_user: "{{ lookup('pipe','id -un') }}"
+
+  gather_facts: no
+
+  tags:
+  - "{{ testcase }}"
+
+  vars:
+    testcase: 02_set-resolver
 
   roles:
   - test-setup
