@@ -7,7 +7,7 @@ resolver_meta: |
     {{ lookup('file',('%s/meta/main.yml'|format(role_path))|from_yaml }}
 
 # If necessary,
-# define a default value with a variable name beginning with "etc_resolver_" here.
+# define a default value with a variable name beginning with "resolver_" here.
 
 # Reolsver: Domain
 resolver_domain:

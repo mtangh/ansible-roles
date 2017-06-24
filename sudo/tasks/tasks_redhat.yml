@@ -1,0 +1,32 @@
+---
+# tasks file for sudo of "redhat"
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
+
+- name: "sudo | redhat | Install the sudo"
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items: "{{ sudo_install_packages|d(['sudo']) }}"
+  when: tests_run|d(false) == false
+        and item|d(none) is not none
+        and item|string|trim|length > 0
+  tags:
+  - sudo
+  - sudo-install
+  - sudo-redhat
+  - sudo-redhat-install
+
+- name: "sudo | redhat | Create a dropins dir."
+  file:
+    path: "{{ '%s%s'|format(tests_prefix_dir|d(''),
+              sudo_sudoers_dropin_dir|d('/etc/sudoers.d')) }}"
+    state: directory
+    owner: "{{ tests_owner|d(sudo_sudoers_file_owner|d('root')) }}"
+    group: "{{ tests_group|d(sudo_sudoers_file_group|d('wheel')) }}"
+    mode: "{{ sudo_sudoers_file_mode|d('0775') }}"
+  tags:
+  - sudo
+  - sudo-install
+  - sudo-redhat
+  - sudo-redhat-install
+  

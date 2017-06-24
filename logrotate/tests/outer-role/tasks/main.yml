@@ -9,10 +9,10 @@
 - name: "outer-role | logrotate-logfile."
   include_role:
     name:  logrotate
-    tasks_from: logrotate-logfile
+    tasks_from: logrotate-include-file
   with_items: "{{ outer_role_logrotate_logfiles|d([]) }}"
   loop_control:
-    loop_var: logrotate_conf_logfile
-  when: logrotate_conf_logfile.name|d(none) is not none
-        and logrotate_conf_logfile.logfiles|d(none) is not none
+    loop_var: logrotate_include_file
+  when: logrotate_include_file.name|d(none) is not none
+        and logrotate_include_file.logfiles|d(none) is not none
 

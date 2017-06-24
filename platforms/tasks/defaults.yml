@@ -1,0 +1,72 @@
+---
+# taska/defaults.yml
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
+
+- block:
+
+  - name: "platforms | defaults | Load the defaults vars for platforms."
+    set_fact:
+      platforms_defaults_file: "{{ _defaults_file|basename }}"
+      platforms_defaults_vars: "{{ lookup('file',_defaults_file)|from_yaml }}"
+      platforms_defaults_exported: |
+        {%  set o = false %}
+        {%  if _export == true or _export_var|d('')|string|trim|length > 0 %}
+        {%    set _e = _export_var
+                  if _export_var|d('')|string|trim|length > 0
+                  else none %}
+        {%    set _ = vars.update({ _e:{} })
+                  if _e is not none
+                  else none %}
+        {%    for _k, _v in (platforms_defaults_vars|d({}))|dictsort
+                  if _k|d('')|string|trim|length > 0 %}
+        {%      if _e is not none and vars[_e] is defined 
+                and vars[_e][_k]|d(none) is none %}
+        {%        set _ = vars[_e].update({ _k:_v }) %}
+        {%        set o = true %}
+        {%      elif _e is none 
+                and vars[_k]|d(none) is none %}
+        {%        set _ = vars.update({ _k:_v }) %}
+        {%        set o = true %}
+        {%      endif %}
+        {%    endfor %}
+        {%  endif %}
+        {{- o -}}
+    with_first_found:
+    - files:
+      - "{{ '%s/platforms_%s_%s_%s.yml'|format(_r_path,_p.family,_p.dist,_p.major) }}"
+      - "{{ '%s/platforms_%s_%s.yml'|format(_r_path,_p.family,_p.dist) }}"
+      - "{{ '%s/platforms_%s.yml'|format(_r_path,_p.family) }}"
+      - "{{ '%s/%s_%s_%s.yml'|format(_r_path,_p.family,_p.dist,_p.major) }}"
+      - "{{ '%s/%s_%s.yml'|format(_r_path,_p.family,_p.dist) }}"
+      - "{{ '%s/%s.yml'|format(_r_path,_p.family) }}"
+      - "{{ '%s/platforms_default.yml'|format(_r_path) }}"
+      - "{{ '%s/default.yml'|format(_r_path) }}"
+      skip: yes
+    loop_control:
+      loop_var: _defaults_file
+
+  rescue:
+  
+  - name: "platforms | defaults | Reset platforms defaults. "
+    set_fact:
+      platforms_defaults_file: ''
+      platforms_defaults_vars: {}
+      platforms_defaults_exported: no
+  
+  when: role_path|d('')|is_dir
+        and ansible_os_family|d('')|string|length > 0
+  vars:
+    _r_path: "{{
+      '%s'|format(platforms_defaults_path|d(path|d('.'))) }}"
+    _export: "{{
+      platforms_exports_vars|d(exports|d(false))|bool == true
+      or platforms_exports_vars|d(exports|d(''))|string|trim|length > 0 }}"
+    _export_var: "{{
+      platforms_exports_vars|d(exports|d('')|string|trim
+      if platforms_exports_vars|d(exports|d(false))|bool == false
+      else '' }}"
+    _p:
+      family: "{{ ansible_os_family|d('')|string|lower }}"
+      dist: "{{ ansible_distribution|d('')|string|lower }}"
+      major: "{{ ansible_distribution_major_version|d('')|string|lower }}"
+

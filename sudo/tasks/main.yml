@@ -1,23 +1,36 @@
 ---
 # tasks file for sudo
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
-- name: sudo | Include OS/Distribution specific variables.
-  include_vars: "{{ item }}"
+- name: "sudo | Include OS/Distribution specific variables."
+  include_vars: "{{ _include_vars_file }}"
   ignore_errors: yes
   with_first_found:
-  - "{{ '%s-%s.yml'|format(os_spec_os_family,os_spec_os_distribution) }}"
-  - "{{ '%s.yml'|format(os_spec_os_family) }}"
-  - "default.yml"
-  tags: 
+  - files:
+    - "{{ 'vars/vars_%s-%s.yml'|format(
+          ansible_os_family|d('*')|lower,
+          ansible_distribution|d('*')|lower) }}"
+    - "{{ 'vars/vars_%s.yml'|format(ansible_os_family|d('*')|lower) }}"
+    - "vars/vars_default.yml"
+    skip: yes
+  loop_control:
+    loop_var: _include_vars_file
+  tags:
   - sudo
   - sudo-include-vars
-  
-- name: "sudo | Install the sudo."
-  include: "{{ item }}"
+
+- name: "sudo | Install the logrotate."
+  include: "{{ _include_tasks_file }}"
   with_first_found:
-  - "{{ '%s-%s.yml'|format(os_spec_os_family,os_spec_os_distribution) }}"
-  - "{{ '%s.yml'|format(os_spec_os_family) }}"
-  - "default.yml"
+  - files:
+    - "{{ 'tasks/tasks_%s-%s.yml'|format(
+          ansible_os_family|d('*')|lower,
+          ansible_distribution|d('*')|lower) }}"
+    - "{{ 'tasks/tasks_%s.yml'|format(ansible_os_family|d('*')|lower) }}"
+    - "tasks/tasks_default.yml"
+    skip: yes
+  loop_control:
+    loop_var: _include_tasks_file
   tags:
   - sudo
   - sudo-install
@@ -25,13 +38,13 @@
 - name: "sudo | Updating /etc/sudoers"
   template:
     src: "etc/sudoers.j2"
-    dest: "{{ '%s%s'|format(prefix_dir|d(''),sudo_sudoers_file|d('/etc/sudoers')) }}"
-    owner: "{{ test_owner|d(sudo_sudoers_file_owner|d('root')) }}"
-    group: "{{ test_group|d(sudo_sudoers_file_group|d('wheel')) }}"
+    dest: "{{ '%s%s'|format(tests_prefix_dir|d(''),sudo_sudoers_file|d('/etc/sudoers')) }}"
+    owner: "{{ tests_owner|d(sudo_sudoers_file_owner|d('root')) }}"
+    group: "{{ tests_group|d(sudo_sudoers_file_group|d('wheel')) }}"
     mode: "{{ sudo_sudoers_file_mode|d('0440') }}"
-    backup: yes
+    backup: "{{ tests_run|d(false) == false }}"
     validate: "{{ sudo_sodoers_validate_command
-                  if test_run|d(none) is none
+                  if tests_run|d(false) == false
                   and sudo_sodoers_validate_command|d(none) is not none
                   else none }}"
   tags:

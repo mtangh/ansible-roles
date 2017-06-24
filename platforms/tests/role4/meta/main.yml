@@ -1,0 +1,6 @@
+---
+dependencies:
+- role: platforms
+  platforms:
+  no_errors: yes
+

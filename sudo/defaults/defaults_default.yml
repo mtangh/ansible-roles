@@ -1,0 +1,61 @@
+---
+# defaults file for sudo
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
+
+# Install packages
+sudo_install_packages:
+
+# SUDOers Admin group
+sudo_administrator_group: "wheel"
+
+# SUDOers Drop-in dir
+sudo_sudoers_dropin_dir:
+
+# SUDOers Host aliases
+sudo_sudoers_host_aliases: []
+
+# SODOers User aliases
+sudo_sudoers_user_aliases: []
+
+# SUDOers RunAs aliases
+sudo_sudoers_runas_aliases: []
+
+# SODOers Command aliases
+sudo_sudoers_cmnd_aliases: []
+
+# SODOers Defaults
+sudo_sudoers_defaults:
+- "-"
+- default: "requiretty"
+  comment: |
+    Disable "ssh hostname sudo <cmd>",
+    because it will show the password in clear.
+    You have to run "ssh -t hostname sudo <cmd>".
+- "-"
+- default: "!visiblepw"
+  comment: |
+    Refuse to run if unable to disable echo on the tty.
+    This setting should also be changed in order to be able to use
+    sudo without a tty. See requiretty above.
+- "-"
+- default:
+  - "env_reset"
+  - "env_keep += \"HOSTNAME\""
+  - "env_keep += \"HISTSIZE INPUTRC\""
+  - "env_keep += \"LANG LANGUAGE LINGUAS\""
+  - "env_keep += \"LC_ALL LC_CTYPE LC_COLLATE LC_MESSAGES\""
+  - "env_keep += \"LC_NAME LC_ADDRESS LC_TELEPHONE LC_IDENTIFICATION\""
+  - "env_keep += \"LC_MEASUREMENT LC_MONETARY LC_NUMERIC LC_PAPER\""
+  - "env_keep += \"LC_TIME\""
+  - "env_keep += \"TZ\""
+  - "env_keep += \"LINES COLUMNS\""
+  - "env_keep += \"DISPLAY XAUTHORIZATION XAUTHORITY _XKB_CHARSET\""
+  - "env_keep += \"EDITOR VISUAL PAGER MAIL\""
+  - "env_keep += \"SSH_AUTH_SOCK\""
+  comment: |
+    Environment variables to be preserved in the user's environment when
+    the env_reset option is in effect.
+
+# SUDOers rules
+sudo_sudoers_rules: []
+
