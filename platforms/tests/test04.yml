@@ -1,5 +1,5 @@
 ---
-# test_defaulta.yml
+# test04
 # vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
 - name: "{{ testcase }}"
@@ -27,13 +27,13 @@
     test_pattern:
       name: redhat_fedora
       family: RedHat
-      dist: fedora
+      dist: Fedora
       major:
   - role: role4
     test_pattern:
       name: debian
       family: Debian
-      dist:
+      dist: Ubuntu
       major:
   - role: role4
     test_pattern:
@@ -48,10 +48,4 @@
       dist:
       major:
   - test-teardown
-
-  tasks:
-
-  - name: "{{ testcase }} | main | Debug print"
-    debug:
-      var: platforms_defaults_vars
 

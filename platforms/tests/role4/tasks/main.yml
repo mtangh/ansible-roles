@@ -2,24 +2,21 @@
 # role* tasks file
 # vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
-- name: "{{ tests_casename }} | {{ tests_rolename }} | main - set_fact"
+- name: "{{ tests_casename }} | {{ tests_rolename }} | set fact - {{ test_pattern.name|d('???') }}"
   set_fact:
     ansible_os_family: "{{ test_pattern.family|d('') }}"
-    ansible_distribution: "{{ test_pattern.dist|d('' }}"
+    ansible_distribution: "{{ test_pattern.dist|d('') }}"
     ansible_distribution_major_version: "{{ test_pattern.major|d('') }}"
+    vars_for_platforms:
 
-- name: "{{ tests_casename }} | {{ tests_rolename }} | main - load defaults"
-  include_roles:
+- name: "{{ tests_casename }} | {{ tests_rolename }} | load defaults - {{ test_pattern.name|d('???') }}"
+  include_role:
     name: platforms
     tasks_from: defaults
   vars:
-    path: "{{ role_path }}"
+    path: "{{ '%s/role4/defaults'|format(lookup('pipe','pwd')) }}"
     exports: yes
 
-- name: "{{ tests_casename }} | {{ tests_rolename }} | main - debug defaults"
-  debug:
-    var: vars_for_platforms
-
-- name: "{{ tests_casename }} | {{ tests_rolename }} | main - validate"
+- name: "{{ tests_casename }} | {{ tests_rolename }} | validate task - {{ test_pattern.name|d('???') }}"
   include: "tasks/tasks_{{ test_pattern.name|d('default') }}.yml"
 

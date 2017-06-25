@@ -1,9 +1,10 @@
 ---
-# role* tasks file
+# tasks file for role4
 # vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
-- name: "{{ tests_casename }} | {{ tests_rolename }} | redhat_fedora"
+- name: "{{ tests_casename }} | {{ tests_rolename }} | validate - {{ test_pattern.name|d('???') }}"
   fail:
     mag: "Undefined variable."
   when: vars_for_platforms|d(none) is not none
+        and vars_for_platforms|dictsort|length > 0
 

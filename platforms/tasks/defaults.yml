@@ -7,29 +7,27 @@
   - name: "platforms | defaults | Load the defaults vars for platforms."
     set_fact:
       platforms_defaults_file: "{{ _defaults_file|basename }}"
-      platforms_defaults_vars: "{{ lookup('file',_defaults_file)|from_yaml }}"
-      platforms_defaults_exported: |
-        {%  set o = false %}
-        {%  if _export == true or _export_var|d('')|string|trim|length > 0 %}
+      platforms_defaults_vars: |-
+        {%- set o = {} -%}
+        {%- set _defaults_vars = lookup('file',_defaults_file)|from_yaml -%}
+        {%- if _export == true or _export_var|d('')|string|trim|length > 0 -%}
         {%    set _e = _export_var
                   if _export_var|d('')|string|trim|length > 0
                   else none %}
         {%    set _ = vars.update({ _e:{} })
                   if _e is not none
                   else none %}
-        {%    for _k, _v in (platforms_defaults_vars|d({}))|dictsort
-                  if _k|d('')|string|trim|length > 0 %}
-        {%      if _e is not none and vars[_e] is defined 
-                and vars[_e][_k]|d(none) is none %}
-        {%        set _ = vars[_e].update({ _k:_v }) %}
-        {%        set o = true %}
-        {%      elif _e is none 
-                and vars[_k]|d(none) is none %}
-        {%        set _ = vars.update({ _k:_v }) %}
-        {%        set o = true %}
+        {%    for _k, _v in (_defaults_vars|d({}))|dictsort
+                  if (_k|d(''))|string|trim|length > 0 %}
+        {%      if _e is not none and o[_e] is defined %}
+        {%        set _ = o[_e].update({ _k:_v }) %}
+        {%      elif (_e is none)
+                and (vars[_k]|d(none) is none
+                 or (vars[_k] is iterable and vars[_k]|length <= 0)) %}
+        {%        set _ = o.update({ _k:_v }) %}
         {%      endif %}
         {%    endfor %}
-        {%  endif %}
+        {%- endif -%}
         {{- o -}}
     with_first_found:
     - files:
@@ -45,25 +43,31 @@
     loop_control:
       loop_var: _defaults_file
 
-  rescue:
-  
-  - name: "platforms | defaults | Reset platforms defaults. "
-    set_fact:
-      platforms_defaults_file: ''
-      platforms_defaults_vars: {}
-      platforms_defaults_exported: no
-  
-  when: role_path|d('')|is_dir
-        and ansible_os_family|d('')|string|length > 0
+  - name: "platforms | defaults | Exports defaults vars for platforms."
+    set_fact: "{{ item.key }}={{ item.value }}"
+    with_dict: "{{
+      platforms_defaults_vars
+      if _export|bool == true and platforms_defaults_vars|d(none) is not none
+      else {} }}"
+    when: item.key|d(none) is not none
+
+  when: (platforms_defaults_path|d(path|d('')))|is_dir
+        and (ansible_os_family|d(''))|string|length > 0
   vars:
+    platforms_defaults_file:
+    platforms_defaults_vars:
     _r_path: "{{
-      '%s'|format(platforms_defaults_path|d(path|d('.'))) }}"
+      '%s'|format(platforms_defaults_path|d(path|d('.')))
+      if ansible_os_family|d('')|string|length > 0
+      else '_' }}"
     _export: "{{
-      platforms_exports_vars|d(exports|d(false))|bool == true
-      or platforms_exports_vars|d(exports|d(''))|string|trim|length > 0 }}"
+      ansible_os_family|d('')|string|length > 0
+      and ( platforms_exports_vars|d(exports|d(false))|bool == true
+         or platforms_exports_vars|d(exports|d(''))|string|trim|length > 0 ) }}"
     _export_var: "{{
-      platforms_exports_vars|d(exports|d('')|string|trim
-      if platforms_exports_vars|d(exports|d(false))|bool == false
+      platforms_exports_vars|d(exports|d(''))|string|trim
+      if ansible_os_family|d('')|string|length > 0
+      and platforms_exports_vars|d(exports|d(false))|bool == false
       else '' }}"
     _p:
       family: "{{ ansible_os_family|d('')|string|lower }}"

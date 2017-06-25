@@ -2,8 +2,6 @@
 # tasks file for platforms
 # vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
-- debug:
-    msg: "platforms={{ platforms }}"
 - include: "platforms.yml"
   no_log: "{{ true if ansible_check_mode|d(false) == false else false }}"
   tags:
