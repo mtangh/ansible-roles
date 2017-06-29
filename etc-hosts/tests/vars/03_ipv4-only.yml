@@ -1,5 +1,5 @@
 ---
-# vars/03_ipv4-only.yml
+# tests/vars/03_ipv4-only.yml
 # vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
 etc_hosts_using_ipv4: yes

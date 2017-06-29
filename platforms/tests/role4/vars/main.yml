@@ -4,3 +4,7 @@
 
 tests_rolename: Role4
 
+vars_for_platforms_is_not_empty_list:
+- from
+- role_vars
+

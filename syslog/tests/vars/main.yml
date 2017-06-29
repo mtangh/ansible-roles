@@ -1,4 +1,9 @@
-os_spec_os_family: redhat
-os_spec_os_distribution: centos
-os_spec_os_version: "5.10"
-os_spec_os_major_version: 5
+---
+# tests/vars/main.yml
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
+
+ansible_os_family: RedHat
+ansible_distribution: CentOS
+ansible_distribution_major_version: "5"
+ansible_distribution_version: "5.7"
+

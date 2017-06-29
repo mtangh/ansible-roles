@@ -12,14 +12,24 @@ platforms_meta: |
 #
 # platforms:
 #
-#   RedHat: yes|no
+#   ansible_os_family: yes|no
+#   ansible_os_family:
+#     ansible_distribution: yes|no
+#   ansible_os_family:
+#     ansible_distribution:
+#       ver_min: version-string
+#       ver_max: version-string
 #
-#   Debian:
-#     Ubuntu: yes|no
+# e.g.
+#   platforms
+#     RedHat: yes|no
+#     Debian:
+#       Ubuntu: yes|no
+#     Darwin:
+#       MacOSX: { ver_min: '10.7', ver_max: '10.11' }
 #
-#   Darwin:
-#     MacOSX: { ver_min: '10.7', ver_max: '10.11' }
-#
-# ignore_errors: yes|no
-#
+platforms: {}
+
+# Do not fail
+no_errors: yes
 

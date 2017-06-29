@@ -2,52 +2,52 @@
 # tasks file for sudo
 # vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
-- name: "sudo | Include OS/Distribution specific variables."
-  include_vars: "{{ _include_vars_file }}"
-  ignore_errors: yes
-  with_first_found:
-  - files:
-    - "{{ 'vars/vars_%s-%s.yml'|format(
-          ansible_os_family|d('*')|lower,
-          ansible_distribution|d('*')|lower) }}"
-    - "{{ 'vars/vars_%s.yml'|format(ansible_os_family|d('*')|lower) }}"
-    - "vars/vars_default.yml"
-    skip: yes
-  loop_control:
-    loop_var: _include_vars_file
-  tags:
-  - sudo
-  - sudo-include-vars
+- block:
 
-- name: "sudo | Install the logrotate."
-  include: "{{ _include_tasks_file }}"
-  with_first_found:
-  - files:
-    - "{{ 'tasks/tasks_%s-%s.yml'|format(
-          ansible_os_family|d('*')|lower,
-          ansible_distribution|d('*')|lower) }}"
-    - "{{ 'tasks/tasks_%s.yml'|format(ansible_os_family|d('*')|lower) }}"
-    - "tasks/tasks_default.yml"
-    skip: yes
-  loop_control:
-    loop_var: _include_tasks_file
-  tags:
-  - sudo
-  - sudo-install
+  - name: "sudo | The path of this role."
+    command: echo {{ role_path|quote }}
+    register: from_role_path
+    changed_when: no
+    check_mode: no
 
-- name: "sudo | Updating /etc/sudoers"
-  template:
-    src: "etc/sudoers.j2"
-    dest: "{{ '%s%s'|format(tests_prefix_dir|d(''),sudo_sudoers_file|d('/etc/sudoers')) }}"
-    owner: "{{ tests_owner|d(sudo_sudoers_file_owner|d('root')) }}"
-    group: "{{ tests_group|d(sudo_sudoers_file_group|d('wheel')) }}"
-    mode: "{{ sudo_sudoers_file_mode|d('0440') }}"
-    backup: "{{ tests_run|d(false) == false }}"
-    validate: "{{ sudo_sodoers_validate_command
-                  if tests_run|d(false) == false
-                  and sudo_sodoers_validate_command|d(none) is not none
-                  else none }}"
+  - name: "sudo | Platform specific initialization processing."
+    include_role:
+      name: platforms
+      tasks_from: setup
+
   tags:
   - sudo
-  - sudo-sudores
+  - sudo-setup
+
+- block:
+
+  - name: "sudo | Updating '/etc/sudoers'."
+    template:
+      src: "etc/sudoers.j2"
+      dest: "{{ '%s%s'|format(tests_prefix_dir|d(''),sudo_sudoers_file|d('/etc/sudoers')) }}"
+      owner: "{{ tests_owner|d(sudo_sudoers_file_owner|d('root')) }}"
+      group: "{{ tests_group|d(sudo_sudoers_file_group|d('wheel')) }}"
+      mode: "{{ sudo_sudoers_file_mode|d('0440') }}"
+      backup: "{{ tests_run|d(false) == false }}"
+      validate: "{{ _validate_command }}"
+    tags:
+    - sudo-sudores
+
+  - name: "sudo | Process {{ sudo_sudoers_dir }}."
+    include: 'dropins.yml'
+    static: yes
+    with_items: "{{ sudo_sudoers_dropins|d([]) }}"
+    loop_control:
+      loop_var: sudo_sudoers_dropin
+    tags:
+    - sudo-dropins
+
+  vars:
+    _validate_command: "{{
+      sudo_sodoers_validate_command|d(omit)
+      if tests_run|d(false) == false
+      and sudo_sodoers_validate_command|d('')|string|trim|length > 0
+      else omit }}"
+  tags:
+  - sudo
 

@@ -1,0 +1,84 @@
+---
+# tasks/vars.yml
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
+
+- block:
+
+  - name: "platforms | vars | Load platform-specific vars."
+    set_fact:
+      platforms_vars_file: "{{ _defaults_file|basename }}"
+      platforms_vars_vars: |-
+        {%- set o = {} -%}
+        {%- set _defaults_vars = lookup('file',_defaults_file)|from_yaml -%}
+        {%- if _exports == true or _exports_var|d('')|string|trim|length > 0 -%}
+        {%    set _e = _exports_var
+                  if _exports_var|d('')|string|trim|length > 0
+                  else none %}
+        {%    set _ = vars.update({ _e:{} })
+                  if _e is not none
+                  else none %}
+        {%    for _k, _v in (_defaults_vars|d({}))|dictsort
+                  if (_k|d(''))|string|trim|length > 0 %}
+        {%      if _e is not none and o[_e] is defined %}
+        {%        set _ = o[_e].update({ _k:((o[_e][_k]|d({}))|combine(_v,recursive=true)) }) %}
+        {%      elif (_e is none)
+                and (_force == true or _combine == true)
+                 or (vars[_k]|d(none) is none)
+                 or (vars[_k] is iterable and vars[_k]|length <= 0)
+                 or (vars[_k] is mapping and vars[_k]|dictsort|length <= 0)) %}
+        {%        set _ = o.update({ _k:((vars[_k]|d({}))|combine(_v,recursive=true)) }) %}
+        {%      endif %}
+        {%    endfor %}
+        {%- endif -%}
+        {{- o -}}
+    with_first_found:
+    - files:
+      - "{{ '%s/platforms-%s_%s_%s.yml'|format(_vars_path,_p.family,_p.dist,_p.major) }}"
+      - "{{ '%s/platforms-%s_%s.yml'|format(_vars_path,_p.family,_p.dist) }}"
+      - "{{ '%s/platforms-%s.yml'|format(_vars_path,_p.family) }}"
+      - "{{ '%s/%s_%s_%s.yml'|format(_vars_path,_p.family,_p.dist,_p.major) }}"
+      - "{{ '%s/%s_%s.yml'|format(_vars_path,_p.family,_p.dist) }}"
+      - "{{ '%s/%s.yml'|format(_vars_path,_p.family) }}"
+      - "{{ '%s/platforms-default.yml'|format(_vars_path) }}"
+      - "{{ '%s/default.yml'|format(_vars_path) }}"
+      skip: "{{ no_errors|d(true)|bool }}"
+    loop_control:
+      loop_var: _defaults_file
+
+  - name: "platforms | vars | Export platform-specific vars."
+    set_fact: "{{ item.key }}={{ item.value }}"
+    with_dict: "{{
+      platforms_vars_vars
+      if _exports|bool == true and platforms_vars_vars|d(none) is not none
+      else {} }}"
+    when: item.key|d(none) is not none
+
+  when: (platforms_vars.path|d(path|d('')))|is_dir
+        and (ansible_os_family|d(''))|string|length > 0
+  vars:
+    _vars_path: "{{
+      '%s'|format(platforms_vars.path|d(path|d('.')))
+      if ansible_os_family|d('')|string|length > 0
+      else '.' }}"
+    _exports: "{{
+      ansible_os_family|d('')|string|length > 0
+      and ( platforms_vars.exports|d(exports|d(false))|bool == true
+         or platforms_vars.exports|d(exports|d(''))|string|trim|length > 0 ) }}"
+    _exports_var: "{{
+      platforms_vars.exports|d(exports|d(''))|string|trim
+      if ansible_os_family|d('')|string|length > 0
+      and platforms_vars.exports|d(exports|d(false))|bool == false
+      else '' }}"
+    _combine: "{{
+      platforms_vars.combine|d(combine|d(false))|bool
+      if ansible_os_family|d('')|string|length > 0
+      else false }}"
+    _force: "{{
+      platforms_vars.force|d(force|d(false))|bool
+      if ansible_os_family|d('')|string|length > 0
+      else false }}"
+    _p:
+      family: "{{ ansible_os_family|d('')|string|lower }}"
+      dist: "{{ ansible_distribution|d('')|string|lower }}"
+      major: "{{ ansible_distribution_major_version|d('')|string|lower }}"
+

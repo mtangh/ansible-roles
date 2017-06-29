@@ -1,13 +1,14 @@
 ---
 # tasks file for syslog of "redhat"
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
-- name: syslog-redhat | Install the syslog
+- name: "syslog | redhat | Install the syslog"
   yum:
     name: "{{ item }}"
     state: latest
   with_items: "{{ syslog_install_packages|d([]) }}"
-  when: test_run|d(none) is none
-        and item|d(none) is not none and item|trim|length > 0
+  when: tests_run|d(false) == false
+        and item|d(none) is string and item|trim|length > 0
   notify:
   - syslog-enable-syslog
   tags:

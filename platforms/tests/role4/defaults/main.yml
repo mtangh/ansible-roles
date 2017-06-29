@@ -4,3 +4,12 @@
 
 vars_for_platforms:
 
+vars_for_platforms_is_not_empty_list:
+- from
+- role_defaults
+
+combine_vars_for_platforms:
+  from_role_defaults: yes
+
+force_overwrite_vars_for_platforms: from_role_defaults
+

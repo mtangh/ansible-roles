@@ -4,6 +4,9 @@
 
 - name: "{{ tests_casename }} | {{ tests_rolename }} | validate - {{ test_pattern.name|d('???') }}"
   fail:
-    mag: "Undefined variable."
+    mag: "{{ test_pattern.name|d('???') }}: Condition incorrect."
   when: vars_for_platforms.default|d(false)|bool == false
+        or combine_vars_for_platforms.from_platforms_default|d(false) == false
+        or combine_vars_for_platforms.from_role_defaults|d(false) == false        
+        or force_overwrite_vars_for_platforms != 'from_platforms_default'
 

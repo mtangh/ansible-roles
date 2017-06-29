@@ -7,23 +7,15 @@
     ansible_os_family: "{{ test_pattern.family|d('') }}"
     ansible_distribution: "{{ test_pattern.dist|d('') }}"
     ansible_distribution_major_version: "{{ test_pattern.major|d('') }}"
-    vars_for_platforms:
 
 - name: "{{ tests_casename }} | {{ tests_rolename }} | role_path - {{ test_pattern.name|d('???') }}"
   command: echo {{ role_path|quote }}
-  register: role4_role_path_st
+  register: role5_role_path_st
 
-- name: "{{ tests_casename }} | {{ tests_rolename }} | load defaults - {{ test_pattern.name|d('???') }}"
+- name: "{{ tests_casename }} | {{ tests_rolename }} | load tasks - {{ test_pattern.name|d('???') }}"
   include_role:
     name: platforms
-    tasks_from: vars
+    tasks_from: tasks
   vars:
-    platforms_vars:
-      path: "{{ '%s/vars'|format(role4_role_path_st.stdout) }}"
-      exports: yes
-      combine: "{{ test_pattern.combine|d(false)|bool }}"
-      force: "{{ test_pattern.force|d(false)|bool }}"
-
-- name: "{{ tests_casename }} | {{ tests_rolename }} | validate task - {{ test_pattern.name|d('???') }}"
-  include: "tasks/tasks_{{ test_pattern.name|d('default') }}.yml"
-
+    platforms_tasks: 
+      path: "{{ '%s/tasks'|format(role5_role_path.stdout) }}"

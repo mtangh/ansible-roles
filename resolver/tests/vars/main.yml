@@ -4,4 +4,6 @@
 
 ansible_os_family: RedHat
 ansible_distribution: CentOS
+ansible_distribution_major_version: "6"
 ansible_distribution_version: "6.7"
+

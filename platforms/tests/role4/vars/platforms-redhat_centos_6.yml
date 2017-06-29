@@ -5,3 +5,7 @@
 vars_for_platforms:
   RedHat_CentOS_6: yes
 
+vars_for_platforms_is_not_empty_list:
+- from
+- redhat_centos_6
+

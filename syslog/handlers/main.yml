@@ -1,21 +1,22 @@
 ---
 # handlers file for syslog
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
 - name: syslog-enable-syslog
   service:
     name: syslog
     enabled: yes
-  when: test_run|d(none) is none
+  when: tests_run|d(none) is none
 
 - name: syslog-start-syslog 
   service:
     name: syslog
     state: started
-  when: test_run|d(none) is none
+  when: tests_run|d(none) is none
 
 - name: syslog-restart-syslog
   service:
     name: syslog
     state: restarted
-  when: test_run|d(none) is none
+  when: tests_run|d(none) is none
 

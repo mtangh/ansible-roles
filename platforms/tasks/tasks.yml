@@ -1,0 +1,32 @@
+---
+# tasks/tasks.yml
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
+
+- block:
+
+  - name: "platforms | tasks | Handle platform-specific tasks."
+    include: "{{ _tasks_file }}"
+    with_first_found:
+    - files:
+      - "{{ '%s/platforms-%s_%s_%s.yml'|format(_tasks_path,_p.family,_p.dist,_p.major) }}"
+      - "{{ '%s/platforms-%s_%s.yml'|format(_tasks_path,_p.family,_p.dist) }}"
+      - "{{ '%s/platforms-%s.yml'|format(_tasks_path,_p.family) }}"
+      - "{{ '%s/%s_%s_%s.yml'|format(_tasks_path,_p.family,_p.dist,_p.major) }}"
+      - "{{ '%s/%s_%s.yml'|format(_tasks_path,_p.family,_p.dist) }}"
+      - "{{ '%s/%s.yml'|format(_tasks_path,_p.family) }}"
+      skip: "{{ no_errors|d(true)|bool }}"
+    loop_control:
+      loop_var: _tasks_file
+
+  when: (platforms_tasks.path|d(path|d('')))|is_dir
+        and (ansible_os_family|d(''))|string|length > 0
+  vars:
+    _tasks_path: "{{
+      '%s'|format(platforms_tasks.path|d(path|d('.')))
+      if ansible_os_family|d('')|string|length > 0
+      else '.' }}"
+    _p:
+      family: "{{ ansible_os_family|d('')|string|lower }}"
+      dist: "{{ ansible_distribution|d('')|string|lower }}"
+      major: "{{ ansible_distribution_major_version|d('')|string|lower }}"
+

@@ -2,38 +2,22 @@
 # tasks file for logrotate
 # vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
-- name: "logrotate | Include OS/Distribution specific variables."
-  include_vars: "{{ _include_vars_file }}"
-  ignore_errors: yes
-  with_first_found:
-  - files:
-    - "{{ 'vars/vars_%s-%s.yml'|format(
-          ansible_os_family|d('*')|lower,
-          ansible_distribution|d('*')|lower) }}"
-    - "{{ 'vars/vars_%s.yml'|format(ansible_os_family|d('*')|lower) }}"
-    - "vars/vars_default.yml"
-    skip: yes
-  loop_control:
-    loop_var: _include_vars_file
-  tags:
-  - logrotate
-  - logrotate-include-vars
+- block:
 
-- name: "logrotate | Install the logrotate."
-  include: "{{ _include_tasks_file }}"
-  with_first_found:
-  - files:
-    - "{{ 'tasks/tasks_%s-%s.yml'|format(
-          ansible_os_family|d('*')|lower,
-          ansible_distribution|d('*')|lower) }}"
-    - "{{ 'tasks/tasks_%s.yml'|format(ansible_os_family|d('*')|lower) }}"
-    - "tasks/tasks_default.yml"
-    skip: yes
-  loop_control:
-    loop_var: _include_tasks_file
+  - name: "logrotate | The path of this role."
+    command: echo {{ role_path|quote }}
+    register: from_role_path
+    changed_when: no
+    check_mode: no
+
+  - name: "logrotate | Platform specific initialization processing."
+    include_role:
+      name: platforms
+      tasks_from: setup
+
   tags:
   - logrotate
-  - logrotate-install
+  - logrotate-setup
 
 - name: "logrotate | Updating logrotate configuration."
   template:

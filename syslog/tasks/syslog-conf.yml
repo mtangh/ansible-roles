@@ -1,14 +1,15 @@
 ---
-# tasks file for syslog/syslog-conf
+# tasks file for syslog/syslog-con
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
-- name: syslog-conf | Updating syslog.conf
+- name: "syslog | syslog-conf | Updating syslog.conf"
   template:
     src: "etc/syslog.conf.j2"
-    dest: "{{ '%s%s'|format(prefix_dir|d(''),syslog_syslog_conf) }}"
-    owner: "{{ test_owner|d(syslog_syslog_conf_owner|d('root')) }}"
-    group: "{{ test_group|d(syslog_syslog_conf_group|d('root')) }}"
+    dest: "{{ '%s%s'|format(tests_prefix_dir|d(''),syslog_syslog_conf) }}"
+    owner: "{{ tests_owner|d(syslog_syslog_conf_owner|d('root')) }}"
+    group: "{{ tests_group|d(syslog_syslog_conf_group|d('root')) }}"
     mode: "{{ syslog_syslog_conf_mode|d('0644') }}"
-    backup: yes
+    backup: "{{ tests_run|d(false) == false }}"
   notify:
   - syslog-start-syslog
   tags:

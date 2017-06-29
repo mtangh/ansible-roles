@@ -5,3 +5,8 @@
 vars_for_platforms:
   default: yes
 
+combine_vars_for_platforms:
+  from_platforms_default: yes
+
+force_overwrite_vars_for_platforms: from_platform_default
+

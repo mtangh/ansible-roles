@@ -1,5 +1,5 @@
 ---
-# meta file for logrotate
+# meta file for sudo
 # vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
 galaxy_info:
@@ -10,7 +10,7 @@ galaxy_info:
   #
   # Specify the ansible version to support.
   #
-  min_ansible_version: 1.9
+  min_ansible_version: 2.2
 
   #
   # If this a Container Enabled role, provide the minimum Ansible

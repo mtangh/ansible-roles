@@ -1,0 +1,50 @@
+---
+# tasks/setup.yml
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
+
+- block:
+
+  - name: "platforms | setup | Include platform-specific vars tasks."
+    include: 'tasks/vars.yml'
+    when: ('%s/vars'|format(__from_role_path))|is_dir
+    vars:
+      platforms_vars:
+        path: "{{ 
+          '%s/vars'|format(__from_role_path) }}"
+        exports: "{{
+          platforms_setup.vars_exports|d(true)
+          if ansible_os_family|d('')|string|length > 0
+          else false }}"
+        combine: "{{
+          platforms_setup.vars_combine|d(false)|bool
+          if ansible_os_family|d('')|string|length > 0
+          else false }}"
+        force: "{{
+          platforms_setup.vars_force|d(false)|bool
+          if ansible_os_family|d('')|string|length > 0
+          else false }}"
+
+  - name: "platforms | setup | Include platform-specific tasks."
+    include: 'tasks/tasks.yml'
+    when: ('%s/tasks'|format(__from_role_path))|is_dir
+    vars:
+      platforms_tasks:
+        path: "{{
+          '%s/tasks'|format(__from_role_path) }}"
+
+  when: __from_role_path|is_dir
+        and (ansible_os_family|d(''))|string|length > 0
+  vars:
+    __from_role_path: "{{
+      platforms_setup.role_from
+      if platforms_setup.role_from|d(none) is string
+      and platforms_setup.role_from|trim|length > 0
+      else from_role_path.stdout
+      if from_role_path.stdout|d(none) is string
+      and from_role_path.stdout|trim|length > 0
+      else from_role_path
+      if from_role_path|d(none) is string
+      and from_role_path|trim|length > 0
+      else '' }}"
+
+

@@ -1,0 +1,12 @@
+---
+# tasks file for role5
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
+
+- name: "{{ tests_casename }} | {{ tests_rolename }} | task for {{ test_pattern.name|d('???') }}"
+  blockinfile:
+    path: "{{ '%s/%s.%s'|format(tests_prefix_dir|d(''),tests_rolename,test_pattern.name) }}"
+    state: present
+    create: yes
+    content: |
+      {{ test_pattern.name }}
+

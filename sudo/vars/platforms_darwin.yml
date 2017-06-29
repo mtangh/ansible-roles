@@ -5,7 +5,7 @@
 sudo_install_packages: false
 
 # SUDOers Admin group
-sudo_administrator_group: "admin"
+sudo_administrator_group: 'admin'
 
 # SUDOers Drop-in dir
 sudo_sudoers_dropin_dir:

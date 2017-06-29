@@ -1,3 +1,11 @@
 ---
 # vars file for platforms
 # vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
+
+# Initialize vars
+platforms_setup: {}
+platforms_tasks: {}
+platforms_vars: {}
+platforms_vars_file: ''
+platforms_vars_vars: {}
+

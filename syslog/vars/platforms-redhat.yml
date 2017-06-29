@@ -1,0 +1,57 @@
+---
+# defaults file for syslog of "redhat"
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
+
+# syslog install packages
+syslog_install_packages:
+  - syslog
+
+# syslog service name
+syslog_service_name: syslog
+
+# syslog conf
+syslog_syslog_conf: /etc/syslog.conf
+
+# syslog rules
+syslog_conf_rules:
+- selectors: "kern.*"
+  destination: "/var/log/kern.log"
+  comment: |
+    Log all kernel messages to the console.
+    Logging much else clutters up the screen.
+  enabled: false
+- selectors:
+  - "kern.*"
+  - "kern.!=debug"
+  destination: "/var/log/kern.log"
+  comment: |
+    Log all kernel messages.
+- selectors: "*.emerg"
+  destination: "*"
+  comment: Everybody gets emergency messages.
+- selectors:
+  - "*.info"
+  - "authpriv,cron,daemon,mail.none"
+  destination: "-/var/log/messages"
+  comment: |
+    Log anything (except mail) of level info or higher.
+    Don't log private authentication messages!
+- selectors: "authpriv.*"
+  destination: "-/var/log/secure"
+  comment: "The authpriv file has restricted access."
+- selectors: "cron.*"
+  destination: "-/var/log/cron"
+  comment: "Log cron stuff"
+- selectors: "daemon.*"
+  destination: "-/var/log/daemon.log"
+  comment: "daemon"
+- selectors: "mail.*"
+  destination: "-/var/log/maillog"
+  comment: "Log all the mail messages in one place."
+- selectors: "uucp,news.crit"
+  destination: "-/var/log/spooler"
+  comment: "Save news errors of level crit and higher in a special file."
+- selectors: "local7.*"
+  destination: "-/var/log/boot.log"
+  comment: "Save boot messages also to boot.log."
+

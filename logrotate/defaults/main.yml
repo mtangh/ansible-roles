@@ -15,106 +15,56 @@ logrotate_conf_file: /etc/logrotate.conf
 # logrotate include dirrectory
 logrotate_include_dir: /etc/logrotate.d
 
+#
+# Attributes for the 'logrotate_conf_default' and 'logrotate_logfiles'
+#
+#   cycle:            daily|weekly|monthly|yearly
+#   size:             size[K|M|G]
+#   minsize:          size[K|M|G]
+#   rotate:           count
+#   start:            count
+#   extension:        extension-string
+#   dateext:          yes|no
+#   dateformat:       date-format
+#   olddir:           path|no
+#   create:           yes|no or { mode:,owner:,group: }
+#   copy:             yes|no
+#   copytruncate:     yes|no
+#   shred:            yes|no
+#   shredcycles:      count
+#   compress:         yes|no
+#   compresscmd:      command-path
+#   uncompresscmd:    command-path
+#   compressoptions:  options
+#   compressext:      extension-string
+#   delaycompress:    yes|no
+#   missingok:        yes|no
+#   ifempty:          yes|no
+#   mail:             e-mail address|no
+#   mailfirst:        yes
+#   maillast:         yes
+#   maxage:           count
+#   sharedscripts:    yes|no
+#   firstaction:      scripts list
+#   lastaction:       scripts list
+#   prerotate:        scripts list
+#   postrotate:       scripts list
+#
+
 # logrotate default config
-logrotate_conf_default:
-  cycle: weekly
-  rotate: 4
-  create: yes
-
-  # logrotate log files in logrotate.conf
-  logfiles:
-
-  - name: wtmp
-    logfiles: /var/log/wtmp
-    cycle: monthly
-    minsize: 1M
-    rotate: 3
-    create:
-      owner: root
-      group: utmp
-      mode: '0644'
-
-  - name: btmp
-    logfiles: /var/log/btmp
-    cycle: monthly
-    minsize: 1M
-    rotate: 3
-    create:
-      owner: root
-      group: utmp
-      mode: '0600'
+#
+# logrotate_conf_default:
+#    :
+#   logfiles:         []
+#
+logrotate_conf_default: {}
 
 # logrotate log files
 #
-# logrotate_logfiles
-#   {includes|packagename}
-#   - name:             string
-#     logfiles:         log-file-path
-#     cycle:            daily|weekly|monthly|yearly
-#     size:             size[K|M|G]
-#     minsize:          size[K|M|G]
-#     rotate:           count
-#     start:            count
-#     extension:        extension-string
-#     dateext:          yes|no
-#     dateformat:       date-format
-#     olddir:           path|no
-#     create:           yes|no or { mode:,owner:,group: }
-#     copy:             yes|no
-#     copytruncate:     yes|no
-#     shred:            yes|no
-#     shredcycles:      count
-#     compress:         yes|no
-#     compresscmd:      command-path
-#     uncompresscmd:    command-path
-#     compressoptions:  options
-#     compressext:      extension-string
-#     delaycompress:    yes|no
-#     missingok:        yes|no
-#     ifempty:          yes|no
-#     mail:             e-mail address|no
-#     mailfirst:        yes
-#     maillast:         yes
-#     maxage:           count
-#     sharedscripts:    yes|no
-#     firstaction:      scripts list
-#     lastaction:       scripts list
-#     prerotate:        scripts list
-#     postrotate:       scripts list
+# logrotate_logfiles:
+# - name:             string
+#   logfiles:         log-file-path
+#    :
 #
-
-# logrotate log files under the include directory
-logrotate_logfiles:
-
-- name: syslog
-  logfiles:
-  - /var/log/kern.log
-  - /var/log/messages
-  - /var/log/daemon.log
-  - /var/log/secure
-  - /var/log/maillog
-  - /var/log/spooler
-  - /var/log/boot.log
-  - /var/log/cron
-  sharedscripts: yes
-  postrotate:
-  - /bin/kill -HUP `cat /var/run/syslogd.pid 2>/dev/null` 2>/dev/null ||true
-  - /bin/kill -HUP `cat /var/run/rsyslogd.pid 2>/dev/null` 2>/dev/null ||true
-
-- name: rpm
-  logfiles: /var/log/rpmpkgs
-  cycle: weekly
-  missingok: yes
-  ifempty: no
-
-- name: yum
-  logfiles: /var/log/yum.log
-  cycle: yearly
-  size: 30k
-  create:
-    owner: root
-    group: root
-    mode: '0600'
-  missingok: yes
-  ifempty: no
+logrotate_logfiles: []
 

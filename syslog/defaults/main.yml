@@ -1,20 +1,23 @@
 ---
 # defaults file for syslog
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
-# Includes OS Spec defaults
-syslog_vars: |
-  {{ lookup('file','./defaults/%s.yml'|
-     format(os_spec_os_family|d('default')))|from_yaml }}
+# Meta data for this role.
+sudo_meta: |
+    {{ lookup('file',('%s/meta/main.yml'|format(role_path))|from_yaml }}
+
+# If necessary,
+# define a default value with a variable name beginning with "syslog_" here.
 
 # syslog install packages
-syslog_install_packages: "{{ syslog_vars.syslog_install_packages|d([]) }}"
+syslog_install_packages: []
 
 # syslog service name
-syslog_service_name: "{{ syslog_vars.syslog_service_name|d('') }}"
+syslog_service_name: ''
 
 # syslog conf
-syslog_syslog_conf: "{{ syslog_vars.syslog_syslog_conf|d('') }}"
+syslog_syslog_conf: ''
 
 # syslog rules
-syslog_conf_rules: "{{ syslog_vars.syslog_conf_rules|d([]) }}"
+syslog_conf_rules: []
 

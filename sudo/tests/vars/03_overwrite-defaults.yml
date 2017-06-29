@@ -1,11 +1,11 @@
 ---
-# vars file for test case 03_overwrite-defaults.yml
+# tests/vars/03_overwrite-defaults.yml
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
-# os-spec for darwin/macosx
-os_spec_os_family: darwin
-os_spec_os_distribution: maxosx
-os_spec_os_version: "10.11.1"
-os_spec_os_major_version: 10
+ansible_os_family: Darwin
+ansible_distribution: MacOSX
+ansible_distribution_major_version: "10"
+ansible_distribution_version: "10.11.1"
 
 # SUDOers Drop-in dir
 sudo_sudoers_dropin_dir: '/etc/sudoers.dropins.d'

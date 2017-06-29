@@ -1,3 +1,4 @@
 ---
-# vars file for syslog
+# tasks file for syslog (default setup task)
 # vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
+

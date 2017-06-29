@@ -1,30 +1,27 @@
 ---
 # tasks file for syslog
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
-- name: syslog | Include OS/Distribution specific variables.
-  include_vars: "{{ item }}"
-  ignore_errors: yes
-  with_first_found:
-  - "{{ '%s-%s.yml'|format(os_spec_os_family,os_spec_os_distribution) }}"
-  - "{{ '%s.yml'|format(os_spec_os_family) }}"
-  - "default.yml"
+- block:
+
+  - name: "syslog | The path of this role."
+    command: echo {{ role_path|quote }}
+    register: from_role_path
+    changed_when: no
+    check_mode: no
+
+  - name: "syslog | Platform specific initialization processing."
+    include_role:
+      name: platforms
+      tasks_from: setup
+
   tags:
   - syslog
-  - syslog-include-vars
+  - syslog-setup
 
-- name: "syslog | Install package"
-  include: "{{ item }}"
-  with_first_found:
-  - "{{ '%s-%s.yml'|format(os_spec_os_family,os_spec_os_distribution) }}"
-  - "{{ '%s.yml'|format(os_spec_os_family) }}"
-  - "default.yml"
-  tags:
-  - syslog
-  - syslog-syslog-install
-
-- name: "syslog | Updating {{ syslog_syslog_conf }}"
+- name: "syslog | Updating {{ syslog_syslog_conf|d('???') }}"
   include: syslog-conf.yml
-  when: syslog_syslog_conf|d(none) is string
+  when: syslog_syslog_conf|d('')|string|trim|length > 0
   tags:
   - syslog
   - syslog-conf

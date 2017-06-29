@@ -1,5 +1,5 @@
 ---
-# tests/test04.yml
+# tests/test05.yml
 # vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
 - name: "{{ testcase }}"
@@ -13,49 +13,27 @@
   - "{{ testcase }}"
 
   vars:
-    testcase: 04_platforms-vars-loader
+    testcase: 05_platforms-tasks-loader
 
   roles:
   - test-setup
-  - role: role4
+  - role: role5
     test_pattern:
       name: redhat_centos_6
       family: RedHat
       dist: centos
       major: '6'
-      combine:
-      force:
-  - role: role4
+  - role: role5
     test_pattern:
       name: redhat_fedora
       family: RedHat
       dist: Fedora
       major:
-      combine:
-      force:
-  - role: role4
+  - role: role5
     test_pattern:
       name: debian
       family: Debian
       dist: Ubuntu
       major:
-      combine:
-      force:
-  - role: role4
-    test_pattern:
-      name: platforms_default
-      family: Darwin
-      dist: MacOSX
-      major:
-      combine: yes
-      force: yes
-  - role: role4
-    test_pattern:
-      name: role_defaults
-      family:
-      dist:
-      major:
-      combine:
-      force:
   - test-teardown
 

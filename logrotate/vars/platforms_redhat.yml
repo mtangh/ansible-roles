@@ -1,24 +1,22 @@
 ---
-# tests/vars/02_set-logrotate-config.yml
+# vars file for RedHat of the logrotate
 # vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
 
+# logrotate conf file path
+logrotate_conf_file: /etc/logrotate.conf
+
+# logrotate include dirrectory
+logrotate_include_dir: /etc/logrotate.d
+
+# logrotate default config
 logrotate_conf_default:
   cycle: weekly
-  rotate: 8
-  size: 1024M
-  minsize: 1M
-  dateext: yes
-  dateformat: '%Y%m%d'
-  compress: yes
-  compressext: .gz
-  delaycompress: yes
-  missingok: yes
-  ifempty: yes
-  create:
-    mode: 0644
-    owner: root
-    group: wheel
+  rotate: 4
+  create: yes
+
+  # logrotate log files in logrotate.conf
   logfiles:
+
   - name: wtmp
     logfiles: /var/log/wtmp
     cycle: monthly
@@ -28,6 +26,7 @@ logrotate_conf_default:
       owner: root
       group: utmp
       mode: '0644'
+
   - name: btmp
     logfiles: /var/log/btmp
     cycle: monthly
@@ -38,6 +37,7 @@ logrotate_conf_default:
       group: utmp
       mode: '0600'
 
+# logrotate log files under the include directory
 logrotate_logfiles:
 
 - name: syslog
@@ -71,11 +71,4 @@ logrotate_logfiles:
     mode: '0600'
   missingok: yes
   ifempty: no
-
-- name: httpd
-  logfiles: '/var/log/httpd/*log'
-  missingok: yes
-  ifempty: no
-  sharedscripts: yes
-  postrotate: '/sbin/service httpd reload >/dev/null 2>/dev/null ||true'
 
