@@ -9,7 +9,7 @@ sudo_install_packages:
 sudo_administrator_group: "wheel"
 
 # SUDOers Drop-in dir
-sudo_sudoers_dropin_dir: false
+sudo_sudoers_dropins_dir: false
 
 # SUDOers validate command
 sudo_sodoers_validate_command: "visudo -c -f %s"

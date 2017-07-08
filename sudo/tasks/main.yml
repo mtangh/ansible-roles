@@ -21,28 +21,46 @@
 
 - block:
 
-  - name: "sudo | Updating '/etc/sudoers'."
+  - name: "sudo | Updating '{{ _sudoers_file }}'."
     template:
       src: "etc/sudoers.j2"
-      dest: "{{ '%s%s'|format(tests_prefix_dir|d(''),sudo_sudoers_file|d('/etc/sudoers')) }}"
-      owner: "{{ tests_owner|d(sudo_sudoers_file_owner|d('root')) }}"
-      group: "{{ tests_group|d(sudo_sudoers_file_group|d('wheel')) }}"
-      mode: "{{ sudo_sudoers_file_mode|d('0440') }}"
+      dest: "{{ _sudoers_file }}"
+      owner: "{{ _sudoers_file_owner }}"
+      group: "{{ _sudoers_file_group }}"
+      mode: "{{ _sudoers_file_mode }}"
       backup: "{{ tests_run|d(false) == false }}"
       validate: "{{ _validate_command }}"
     tags:
     - sudo-sudores
 
-  - name: "sudo | Process {{ sudo_sudoers_dir }}."
+  - name: "sudo | Process {{ sudo_sudoers_dropins_dir|d('/etc/sudoers.d')) }}."
     include: 'dropins.yml'
     static: yes
-    with_items: "{{ sudo_sudoers_dropins|d([]) }}"
+    with_items: "{{
+      sudo_sudoers_dropins|d([])
+      if sudo_sudoers_dropins_dir|d('')|is_dir
+      else [] }}"
     loop_control:
-      loop_var: sudo_sudoers_dropin
+      loop_var: sudo_sudoers_dropin_file
+    when: sudo_sudoers_dropin_file.name|d(none) is string
+          and sudo_sudoers_dropin_file.name|trim|length > 0
     tags:
     - sudo-dropins
 
   vars:
+    _sudoers_file: "{{
+      '%s%s'|format(tests_prefix_dir|d(''),
+      sudo_sudoers_file.path|d(
+      sudo_sudoers_file|d('/etc/sudoers'))) }}"
+    _sudoers_file;owner: "{{
+      tests_owner|d(sudo_sudoers_file.owner|d(
+      sudo_sudoers_file_owner|d('root'))) }}"
+    _sudoers_file_group: "{{
+      tests_group|d(sudo_sudoers_file.group|d(
+      sudo_sudoers_file_group|d('wheel'))) }}"
+    _sudoers_file_mode: "{{
+      sudo_sudoers_file.mode|d(
+      sudo_sudoers_file_mode|d('0440')) }}"
     _validate_command: "{{
       sudo_sodoers_validate_command|d(omit)
       if tests_run|d(false) == false

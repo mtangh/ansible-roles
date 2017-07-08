@@ -16,7 +16,7 @@ sudo_install_packages:
 sudo_administrator_group: "wheel"
 
 # SUDOers Drop-in dir
-sudo_sudoers_dropin_dir:
+sudo_sudoers_dropins_dir:
 
 # SUDOers Host aliases
 sudo_sudoers_host_aliases: []
@@ -34,5 +34,16 @@ sudo_sudoers_cmnd_aliases: []
 sudo_sudoers_defaults: []
 
 # SUDOers rules
+#
+# - users: "%wheel"
+#   hosts: "ALL"
+#   runas: "ALL"
+#   nopasswd: no
+#   commands: "ALL"
+#   comment:
+#
 sudo_sudoers_rules: []
+
+# SUDOers Dropin items
+sudo_sudoers_dropins: []
 
