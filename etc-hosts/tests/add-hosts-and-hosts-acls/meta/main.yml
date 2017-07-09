@@ -4,5 +4,4 @@
 
 dependencies:
 - role: etc-hosts
-  run_once: yes
 
