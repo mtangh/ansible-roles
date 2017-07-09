@@ -1,0 +1,28 @@
+---
+# tasks 'add-hosts-and-hosts-acls' file
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
+
+- name: "add-hosts-and-hosts-acls | etc-hosts/add-hosts"
+  include_role:
+    name: etc-hosts
+    tasks_from: add-hosts
+  vars:
+    etc_hosts_hosts:
+    - add-hosts-and-hosts-acls / add-hosts
+    - 192.168.44.1: add-host-server1
+    - 192.168.44.2: add-host-server2
+
+- name: "add-hosts-and-hosts-acls | etc-hosts/add-hosts-acls"
+  include_role:
+    name: etc-hosts
+    tasks_from: add-hosts-acls
+  vars:
+    etc_hosts_hosts_acls:
+      allow:
+      - ALL:
+        - 192.168.44.1
+        - 192.168.44.2
+      deny:
+      - sshd:
+        - 192.168.44.2
+

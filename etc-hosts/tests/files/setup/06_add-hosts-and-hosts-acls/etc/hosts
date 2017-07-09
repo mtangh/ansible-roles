@@ -1,0 +1,40 @@
+# /etc/hosts
+# Ansible managed: test
+
+# Loopback
+127.0.0.1           unittest unittest.tests.com localhost localhost.localdomain localhost4 localhost4.localdomain4
+
+# The following lines are desirable for IPv6 capable hosts
+::1                 unittest unittest.tests.com localhost localhost.localdomain localhost6 localhost6.localdomain6
+fe00::0             ip6-localnet
+ff00::0             ip6-mcastprefix
+ff02::1             ip6-allnodes
+ff02::2             ip6-allrouters
+ff02::3             ip6-allhosts
+
+# Entries for all IP addresses of this host are as follows:
+## IPv4
+192.168.1.1         unittest unittest.tests.com
+192.168.1.2         unittest unittest.tests.com
+## IPv6
+2017:0618:1538:0:192:168:1:1            unittest unittest.tests.com
+2017:0618:1548:0:192:168:1:2            unittest unittest.tests.com
+
+# The host name database is as follows:
+
+192.168.12.1        server1
+192.168.12.2        server2
+192.168.12.3        server3
+
+# Multi name server
+192.168.12.45       server4 server5
+# Disabled
+#192.168.12.6        server6
+
+# IPv6
+2001:2e8:632:0:2:1:0:11                 serverr-ipv6-1
+2001:2e8:632:0:2:1:0:12                 serverr-ipv6-2
+2001:2e8:632:0:2:1:0:13                 serverr-ipv6-3
+2001:2e8:632:0:2:1:0:14                 serverr-ipv6-4
+
+# end-of-file

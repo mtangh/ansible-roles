@@ -101,3 +101,24 @@
   - test-setup
   - { role: ../.. }
   - test-teardown
+
+- name: "{{ testcase }}"
+  hosts: localhost
+  connection: local
+  remote_user: "{{ lookup('pipe','id -un') }}"
+
+  gather_facts: yes
+  gather_subset:
+  - network
+
+  tags:
+  - "{{ testcase }}"
+
+  vars:
+    testcase: 06_add-hosts-and-hosts-acls
+
+  roles:
+  - test-setup
+  - add-hosts-and-hosts-acls
+  - test-teardown
+
