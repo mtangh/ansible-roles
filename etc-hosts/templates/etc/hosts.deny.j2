@@ -14,11 +14,5 @@
 #       for information on rule syntax.
 #       See 'man tcpd' for information on tcp_wrappers
 #
-{%  import 'macros.hosts.j2' as m_hosts with context %}
-{%  if etc_hosts.deny|d(none) is iterable
-    and etc_hosts.deny is not string
-    and etc_hosts.deny|length > 0 %}
 
-{{  m_hosts.dump_acls( etc_hosts.deny ) }}
-{%  endif %}
-
+# end-of-file

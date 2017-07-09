@@ -1,6 +1,5 @@
 # /etc/hosts
 # {{ ansible_managed }}
-{%  import 'macros.hosts.j2' as m_hosts with context %}
 {%  set hostname_and_fqdn = '%s %s'|format(
       ( ansible_hostname|d('')
         if ansible_hostname|d('') not in ['localhost','localhost.localdomain',ansible_fqdn|d('')]
@@ -48,14 +47,7 @@ ff02::3             ip6-allhosts
 {%      endfor %}
 {%    endif %}
 {%  endif %}
-{%  if etc_hosts.hosts|d(none) is iterable
-    and etc_hosts.hosts is not string
-    and etc_hosts.hosts|length > 0 %}
 
 # The host name database is as follows:
-{{  m_hosts.dump(
-      etc_hosts.hosts|d([]),
-      ipv4_enabled=etc_hosts_using_ipv4|d(true),
-      ipv6_enabled=etc_hosts_using_ipv6|d(true) ) }}
-{%  endif %}
 
+# end-of-file

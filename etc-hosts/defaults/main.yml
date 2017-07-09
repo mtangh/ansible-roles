@@ -25,21 +25,29 @@ etc_hosts_using_hosts_allow: yes
 etc_hosts_using_hosts_deny: yes
 
 # Hosts entries
-etc_hosts_hosts:
-##  <targetname>:
-##    hosts:
-##    - <ipaddr>: name[ name...]
-##    allow:
-##    - <servicename>: entries
-##    deny:
-##    - <servicename>: entries
-##
-  default:
-    hosts: []
-    allow:
-    - ALL:
-      - 127.0.0.1
-    - sshd: ALL
-    deny:
-    - ALL: ALL
+#
+# etc_hosts_hosts:
+# - <ipaddr>: name[ name...]
+#
+etc_hosts_hosts: []
+
+# Hosts ACLs entries
+#
+# etc_hosts_hosts_acls:
+#   allow:
+#   - <service-name|ALL>: ...
+#   deny:
+#   - <service-name|ALL>: ...
+#
+etc_hosts_hosts_acls:
+  allow:
+  - ALL:
+    - 127.0.0.1
+  - sshd: ALL
+  deny:
+  - ALL: ALL
+
+# Hosts specific entries
+#
+etc_hosts_hosts_specific: {}
 

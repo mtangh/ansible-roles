@@ -20,3 +20,6 @@ ff02::3             ip6-allhosts
 2017:0618:1538:0:192:168:1:1            unittest unittest.tests.com
 2017:0618:1548:0:192:168:1:2            unittest unittest.tests.com
 
+# The host name database is as follows:
+
+# end-of-file

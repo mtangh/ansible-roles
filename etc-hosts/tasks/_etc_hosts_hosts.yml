@@ -1,0 +1,78 @@
+---
+# tasks '_etc_hosts_hosts' file for etc-hosts
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
+
+- block:
+
+  - name: "etc-hosts | hosts | Update hosts file."
+    blockinfile:
+      path: "{{ tests_prefix_dir|d('') }}/etc/hosts"
+      state: present
+      owner: "{{ tests_owner|d(
+                 (etc_hosts_file|d({})).owner|d(
+                 etc_hosts_file_owner|d('root'))) }}"
+      group: "{{ tests_group|d(
+                 (etc_hosts_file|d({})).group|d(
+                 etc_hosts_file_group|d('root'))) }}"
+      mode: "{{ '%04o'|format((etc_hosts_file|d({})).mode|d(etc_hosts_file_mode))
+                if (etc_hosts_file|d({})).mode|d(etc_hosts_file_mode|d(none)) is number
+                else (etc_hosts_file|d({})).mode|d(etc_hosts_file_mode|d('0644')) }}"
+      create: yes
+      backup: "{{ tests_run|d(false) == false }}"
+      insertbefore: "^# end-of-file$"
+      marker: ""
+      block: |
+        {%- set h_list = etc_hosts_entries|d([]) -%}
+        {%- set ipv4_enabled = etc_hosts_using_ipv4|d(true) -%}
+        {%- set ipv6_enabled = etc_hosts_using_ipv6|d(true) -%}
+        {%- for h_item in h_list
+                if h_item|d(none) is not none -%}
+        {%    if h_item is string %}
+        {{ '# %s'|format(h_item)|trim if h_item|match('^(-+|)$') == false else '' }}
+        {%    elif h_item is mapping %}
+        {%      set commented = ''
+                    if h_item.disabled|d(false) == false else '#' %}
+        {%      for ipaddr, name in h_item|dictsort(false)
+                    if ipaddr|ipaddr
+                    and name|d(none) is not none
+                    and ( (ipaddr|ipv4 and ipv4_enabled|d(true) == true)
+                       or (ipaddr|ipv6 and ipv6_enabled|d(true) == true) ) %}
+        {{ ('%s%-19s %s' if ipaddr|ipv4 else '%s%-39s %s')|format(
+           commented,ipaddr,(name if name is string else name|join(' ')))|trim }}
+        {%      endfor %}
+        {%    endif %}
+        {%- endfor -%}
+
+  when: etc_hosts_entries|d(none) is not none
+        and ((etc_hosts_hosts|d(none) is iterable
+          and etc_hosts_hosts is not string
+          and etc_hosts_hosts|length > 0)
+          or (etc_hosts_hosts_specific|d(none) is mapping
+          and etc_hosts_hosts_specific|dictsort|length > 0))
+        and (etc_hosts_using_ipv4|d(true) == true
+          or etc_hosts_using_ipv6|d(true) == true)
+  vars:
+    etc_hosts_entries: |-
+      {%  set o = { 'hosts':[] } %}
+      {%  set _hname = inventory_hostname_short|lower
+              if inventory_hostname_short|d('')|string|trim|length > 0
+              else inventory_hostname|d('')|string|lower %}
+      {%  set _h_src = etc_hosts_hosts_specific
+              if etc_hosts_hosts_specific|d(none) is mapping
+              else {} %}
+      {%  set _hents = _h_src[_hname]
+              if _h_src[_hname]|d(none) is iterable
+              and _h_src[_hname] is not string
+              else [] %}
+      {%  set _hdefs = etc_hosts_hosts
+              if etc_hosts_hosts|d(none) is iterable
+              and etc_hosts_hosts is not string
+              else [] %}
+      {%  for __grname in (group_names|d([])|sort)
+              if __grname|lower not in [ _hname, 'default', 'all' ]
+              and (_h_src[__grname|lower]|d({})).hosts|d(none) is iterable
+              and _h_src[__grname|lower].hosts is not string %}
+      {%    set _ = o.update({ 'hosts':(o.hosts + _h_src[__grname|lower].hosts) }) %}
+      {%  endfor %}
+      {%  set _ = o.update({ 'hosts':(_hents + o.hosts + _hdefs) }) %}
+      {{- o.hosts -}}

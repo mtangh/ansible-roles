@@ -1,0 +1,135 @@
+---
+# tasks '_etc_hosts_hosts-acls' file for etc-hosts
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
+
+- block:
+
+  - name: "etc-hosts | hosts-acls | Update hosts acl files."
+    blockinfile:
+      path: "{{ '%s/etc/%s'|format(tests_prefix_dir|d(''),etc_hosts_acls_file.name) }}"
+      state: present
+      owner: "{{ tests_owner|d(
+                 (etc_hosts_file|d({})).owner|d(
+                 etc_hosts_file_owner|d('root'))) }}"
+      group: "{{ tests_group|d(
+                 (etc_hosts_file|d({})).group|d(
+                 etc_hosts_file_group|d('root'))) }}"
+      mode: "{{ '%04o'|format((etc_hosts_file|d({})).mode|d(etc_hosts_file_mode))
+                if (etc_hosts_file|d({})).mode|d(etc_hosts_file_mode|d(none)) is number
+                else (etc_hosts_file|d({})).mode|d(etc_hosts_file_mode|d('0644')) }}"
+      create: yes
+      backup: "{{ tests_run|d(false) == false }}"
+      insertbefore: "^# end-of-file"
+      marker: ""
+      block: |
+        {%- set acls = etc_hosts_acls_file.acls -%}
+        {%- for acl in (acls if acls is iterable and acls is not string else [])
+                if acl|d(none) is mapping -%}
+        {%    for service, entries in acl|dictsort(false)
+                  if service|d('')|string|trim|length > 0 %}
+        {%      set entries = entries
+                    if entries|d(none) is iterable and entries is not string
+                    else ['ALL'] %}
+        {%      for entry in entries if entry is not none %}
+        {%        if entry is string %}
+        {{ '%-14s: %s'|format(service|trim,entry|trim)|trim }}
+        {%        elif entry.clientlist|d(none) is not none %}
+        {%          set clientlist = entry.clientlist|join(', ')|trim
+                        if entry.clientlist is iterable
+                        and entry.clientlist is not string
+                        else entry.clientlist|trim %}
+        {%          set line_cont = '\\'
+                        if entry.option|d(none) is not none
+                        else '' %}
+        {%          if line_cont|length > 0 and entry.option is string %}
+        {%            if clientlist|length <= 32 and entry.option|length <= 16 %}
+        {{ '%-14s: %-48s:%s'|format(service,clientlist,entry.option)|trim }}
+        {%            else %}
+        {{ '%-14s: %s %s'|format(service,clientlist,line_cont)|trim }}
+        {{ '%16s:%s'|format('',entry.option)|trim }}
+        {%            endif %}
+        {%          elif line_cont|length > 0 and entry.option is iterable %}
+        {{ '%-14s: %s %s'|format(service,clientlist,line_cont)|trim }}
+        {%            for option in entry.option if option|d(none) is not none %}
+        {%              set line_cont = '\\' if loop.index < loop.length else '' %}
+        {{ '%16s'|format('')}}{{ ':%s %s'|format(option,line_cont)|trim }}
+        {%            endfor %}
+        {%          endif %}
+        {%        endif %}
+        {%      endfor %}
+        {%    endfor %}
+        {%  else %}
+        {{ '# %s'|format(acl|string)|trim if acl|match('^-+$') == false else '' }}
+        {%- endfor -%}
+    with_items:
+    - name: "hosts.allow"
+      acls: "{{ etc_hosts_acls_entries.allow|d([])
+                if etc_hosts_using_hosts_allow|d(true) == true
+                else [] }}"
+    - name: "hosts.deny"
+      acls: "{{ etc_hosts_acls_entries.deny|d([])
+                if etc_hosts_using_hosts_deny|d(true) == true
+                else [] }}"
+    loop_control:
+      loop_var: etc_hosts_acls_file
+    when: etc_hosts_acls_file.acls|d(none) is iterable
+          and etc_hosts_acls_file.acls is not string
+          and etc_hosts_acls_file.acls|length > 0
+
+  when: etc_hosts_acls_entries|d(none) is not none
+        and ((etc_hosts_using_hosts_allow|d(true) == true
+          and etc_hosts_acls_entries.allow|d(none) is iterable
+          and etc_hosts_acls_entries.allow is not string
+          and etc_hosts_acls_entries.allow|length > 0)
+          or (etc_hosts_using_hosts_deny|d(true) == true
+          and etc_hosts_acls_entries.deny|d(none) is iterable
+          and etc_hosts_acls_entries.deny is not string
+          and etc_hosts_acls_entries.deny|length > 0)
+          or (etc_hosts_hosts_specific|d(none) is mapping
+          and etc_hosts_hosts_specific|dictsort|length > 0))
+  vars:
+    etc_hosts_acls_entries: |-
+      {%  set o = { 'allow':[], 'deny':[] } %}
+      {%  set _hname = inventory_hostname_short|lower
+              if inventory_hostname_short|d('')|string|trim|length > 0
+              else inventory_hostname|d('')|string|lower %}
+      {%  set _h_src = etc_hosts_hosts_specific
+              if etc_hosts_hosts_specific|d(none) is mapping
+              else {} %}
+      {%  set _hents_allow = _h_src[_hname].allow
+              if (_h_src[_hname]|d({})).allow|d(none) is iterable
+              and _h_src[_hname].allow is not string
+              else [] %}
+      {%  set _hents_deny = _h_src[_hname].deny
+              if (_h_src[_hname]|d({})).deny|d(none) is iterable
+              and _h_src[_hname].deny is not string
+              else [] %}
+      {%  set _hdefs_allow = etc_hosts_hosts_acls.allow
+              if etc_hosts_hosts_acls.allow|d(none) is iterable
+              and etc_hosts_hosts_acls.allow is not string
+              else [] %}
+      {%  set _hdefs_deny = etc_hosts_hosts_acls.deny
+              if etc_hosts_hosts_acls.deny|d(none) is iterable
+              and etc_hosts_hosts_acls.deny is not string
+              else [] %}
+      {%  for __grname in (group_names|d([])|sort)
+              if __grname|lower not in [ _hname, 'default', 'all' ]
+              and ((_h_src[__grname|lower]|d({})).allow|d(none) is iterable
+                or (_h_src[__grname|lower]|d({})).deny|d(none) is iterable) %}
+      {%    if _h_src[__grname|lower].allow|d(none) is iterable
+            and _h_src[__grname|lower].allow is not string %}
+      {%      set _ = o.update({ 'allow':(o.allow + _h_src[__grname|lower].allow) }) %}
+      {%    endif %}
+      {%    if _h_src[__grname|lower].deny|d(none) is iterable
+            and _h_src[__grname|lower].deny is not string %}
+      {%      set _ = o.update({ 'deny':(o.deny + _h_src[__grname|lower].deny) }) %}
+      {%    endif %}
+      {%  endfor %}
+      {%  set _ = o.update({
+                  'allow':(_hents_allow + o.allow + _hdefs_allow),
+                  'deny':(_hents_deny + o.deny + _hdefs_deny) }) %}
+      {{- o -}}
+  tags:
+  - etc-hosts-acl
+
+

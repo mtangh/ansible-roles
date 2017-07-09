@@ -95,7 +95,7 @@
   - "{{ testcase }}"
 
   vars:
-    testcase: 05_additional-hosts
+    testcase: 05_hosts-specific
 
   roles:
   - test-setup

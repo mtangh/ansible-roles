@@ -11,34 +11,36 @@ etc_hosts_using_hosts_allow: no
 etc_hosts_using_hosts_deny: no
 
 etc_hosts_hosts:
-  default:
-    hosts:
-    - 192.168.12.1: server1
-    - 192.168.12.2: server2
-    - 192.168.12.3: server3
-    - "-"
-    - "Multi name server"
-    - 192.168.12.45:
-      - server4
-      - server5
-    - "Disabled"
-    - 192.168.12.6: server6
-      disabled: yes
-    - "-"
-    - "IPv6"
-    - "2001:2e8:632:0:2:1:0:11": serverr-ipv6-1
-    - "2001:2e8:632:0:2:1:0:12": serverr-ipv6-2
-    - "2001:2e8:632:0:2:1:0:13": serverr-ipv6-3
-    - "2001:2e8:632:0:2:1:0:14": serverr-ipv6-4
-    allow:
-    - ALL:
-      - 127.0.0.1
-    - sshd:
-      - 192.168.12.1
-      - clientlist: 192.168.12.2
-        option:
-        - "spawn /bin/date"
-        - "allow"
-    deny:
-    - ALL: ALL
+- 192.168.12.1: server1
+- 192.168.12.2: server2
+- 192.168.12.3: server3
+- "-"
+- "Multi name server"
+- 192.168.12.45:
+  - server4
+  - server5
+- "Disabled"
+- 192.168.12.6: server6
+  disabled: yes
+- "-"
+- "IPv6"
+- "2001:2e8:632:0:2:1:0:11": serverr-ipv6-1
+- "2001:2e8:632:0:2:1:0:12": serverr-ipv6-2
+- "2001:2e8:632:0:2:1:0:13": serverr-ipv6-3
+- "2001:2e8:632:0:2:1:0:14": serverr-ipv6-4
+
+etc_hosts_hosts_acls:
+  allow:
+  - ALL:
+    - 127.0.0.1
+  - sshd:
+    - 192.168.12.1
+    - clientlist: 192.168.12.2
+      option:
+      - "spawn /bin/date"
+      - "allow"
+  deny:
+  - ALL: ALL
+
+etc_hosts_hosts_specific: {}
 

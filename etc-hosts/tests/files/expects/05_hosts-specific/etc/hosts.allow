@@ -19,3 +19,4 @@ sshd          : 192.168.12.2 \
                 :spawn /bin/date \
                 :allow
 
+# end-of-file

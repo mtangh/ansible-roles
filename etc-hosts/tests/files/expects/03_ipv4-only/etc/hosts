@@ -10,6 +10,7 @@
 192.168.1.2         unittest unittest.tests.com
 
 # The host name database is as follows:
+
 192.168.12.1        server1
 192.168.12.2        server2
 192.168.12.3        server3
@@ -21,3 +22,4 @@
 
 # IPv6
 
+# end-of-file
