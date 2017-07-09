@@ -1,0 +1,54 @@
+---
+# tasks 'logrotate-dropin-file' file for logrotate
+# vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
+
+- block:
+
+  - name: "logrotate | logrotate-dropin-file | Create include directory '{{ _dropins_dir }}'."
+    file:
+      path: "{{ '%s%s'|format(tests_prefix_dir|d(''),_dropins_dir) }}"
+      state: directory
+      owner: "{{ tests_owner|d(_dropins_dir_owner) }}"
+      group: "{{ tests_group|d(_dropins_dir_group) }}"
+      mode: "{{ _dropins_dir_mode }}"
+
+  - name: "logrotate | logrotate-dropin-file | Create logrotate file under the '{{ _dropins_dir }}'."
+    template:
+      src: "etc/logrotate.include.conf.j2"
+      dest: "{{
+          '%s%s/%s'|format(tests_prefix_dir|d(''),
+          _dropins_dir,logrotate_dropin_file.name) }}"
+      owner: "{{ 
+          tests_owner|d(
+          logrotate_dropin_file.owner|d(
+          _dropins_dir_owner)) }}"
+      owner: "{{
+          tests_group|d(
+          logrotate_dropin_file.group|d(
+          _dropins_dir_group)) }}"
+      mode: "{{ 
+          '%04o'|format(
+          (logrotate_dropin_file.mode|d('0644'))|int(base=8)) }}"
+
+  when: logrotate_dropin_file|d(none) is mapping
+        and logrotate_dropin_file.name|d(none) is string
+        and logrotate_dropin_file.name|trim|length > 0
+        and logrotate_dropin_file.logfiles|d(none) is string
+        and logrotate_dropin_file.logfiles|trim|length > 0
+  vars:
+    _dropins_dir: "{{
+        (logrotate_dropin_dir|d({})).path|d(
+        logrotate_dropin_dir|d('/etc/logrotate.d')) }}"
+    _dropins_dir_owner: "{{
+        (logrotate_dropin_dir|d({})).owner|d(
+        logrotate_dropin_dir_owner|d('root')) }}"
+    _dropins_dir_group: "{{
+        (logrotate_dropin_dir|d({})).group|d(
+        logrotate_dropin_dir_group|d('root')) }}"
+    _dropins_dir_mode: "{{
+        '%04o'|format(
+        (logrotate_dropin_dir|d({})).mode|d(
+        logrotate_dropin_dir_mode|d('0755'))|int(base=8)) }}"
+  tags:
+  - logrotate-dropin-file
+

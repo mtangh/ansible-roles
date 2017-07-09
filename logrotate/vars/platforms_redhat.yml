@@ -6,7 +6,7 @@
 logrotate_conf_file: /etc/logrotate.conf
 
 # logrotate include dirrectory
-logrotate_include_dir: /etc/logrotate.d
+logrotate_dropin_dir: /etc/logrotate.d
 
 # logrotate default config
 logrotate_conf_default:
@@ -38,7 +38,7 @@ logrotate_conf_default:
       mode: '0600'
 
 # logrotate log files under the include directory
-logrotate_logfiles:
+logrotate_dropin_files:
 
 - name: syslog
   logfiles:

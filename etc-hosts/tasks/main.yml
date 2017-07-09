@@ -14,9 +14,9 @@
       group: "{{ tests_group|d(
                  (etc_hosts_file|d({})).group|d(
                  etc_hosts_file_group|d('root'))) }}"
-      mode: "{{ '%04o'|format((etc_hosts_file|d({})).mode|d(etc_hosts_file_mode))
-                if (etc_hosts_file|d({})).mode|d(etc_hosts_file_mode|d(none)) is number
-                else (etc_hosts_file|d({})).mode|d(etc_hosts_file_mode|d('0644')) }}"
+      mode: "{{ '%04o'|format(
+                (etc_hosts_file|d({})).mode|d(
+                etc_hosts_file_mode|d(0644))|integer) }}"
       backup: "{{ tests_run|d(false) == false }}"
     with_items:
     - "{{ 'hosts'

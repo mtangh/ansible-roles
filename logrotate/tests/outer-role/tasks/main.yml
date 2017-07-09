@@ -6,13 +6,13 @@
   debug:
     var: outer_role_logrotate_logfiles
 
-- name: "outer-role | logrotate-logfile."
+- name: "outer-role | logrotate-dropin-files."
   include_role:
     name:  logrotate
-    tasks_from: logrotate-include-file
+    tasks_from: logrotate-dropin-file
   with_items: "{{ outer_role_logrotate_logfiles|d([]) }}"
   loop_control:
-    loop_var: logrotate_include_file
-  when: logrotate_include_file.name|d(none) is not none
-        and logrotate_include_file.logfiles|d(none) is not none
+    loop_var: logrotate_dropin_file
+  when: logrotate_dropin_file.name|d(none) is not none
+        and logrotate_dropin_file.logfiles|d(none) is not none
 

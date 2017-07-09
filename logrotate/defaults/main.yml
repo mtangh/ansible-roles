@@ -13,10 +13,10 @@ logrotate_meta: |
 logrotate_conf_file: /etc/logrotate.conf
 
 # logrotate include dirrectory
-logrotate_include_dir: /etc/logrotate.d
+logrotate_dropin_dir: /etc/logrotate.d
 
 #
-# Attributes for the 'logrotate_conf_default' and 'logrotate_logfiles'
+# Attributes for the 'logrotate_conf_default' and 'logrotate_dropin_files'
 #
 #   cycle:            daily|weekly|monthly|yearly
 #   size:             size[K|M|G]
@@ -61,10 +61,10 @@ logrotate_conf_default: {}
 
 # logrotate log files
 #
-# logrotate_logfiles:
+# logrotate_dropin_files:
 # - name:             string
 #   logfiles:         log-file-path
 #    :
 #
-logrotate_logfiles: []
+logrotate_dropin_files: []
 

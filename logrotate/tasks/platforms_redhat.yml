@@ -7,7 +7,7 @@
     name: "{{ item }}"
     state: latest
   with_items: "{{ logrotate_install_packages|d(['logrotate']) }}"
-  when: tests_run|d(false) == false
+  when: tests_run|d(false)|bool == false
         and (item|d(none) is not none and item|length > 0)
   tags:
   - logrotate

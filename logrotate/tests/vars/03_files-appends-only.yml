@@ -38,7 +38,7 @@ logrotate_conf_default:
       group: utmp
       mode: '0600'
 
-logrotate_logfiles:
+logrotate_dropin_files:
 
 - name: syslog
   logfiles:
