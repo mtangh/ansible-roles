@@ -7,7 +7,7 @@
   - name: "etc-hosts | add-hosts-acls | Update '/etc/hosts.{allow|deny}'."
     include: '_etc_hosts_hosts-acls.yml'
 
-  when: platforms_supported|d(false) == true
+  when: platforms_supported|d(false)|bool == true
         and etc_hosts_acls_entries|d(none) is not none
         and ((etc_hosts_using_hosts_allow|d(true) == true
           and etc_hosts_acls_entries.allow|d(none) is iterable

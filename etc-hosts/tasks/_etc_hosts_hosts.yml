@@ -14,17 +14,18 @@
       group: "{{ tests_group|d(
                  (etc_hosts_file|d({})).group|d(
                  etc_hosts_file_group|d('root'))) }}"
-      mode: "{{ '%04o'|format((etc_hosts_file|d({})).mode|d(etc_hosts_file_mode))
-                if (etc_hosts_file|d({})).mode|d(etc_hosts_file_mode|d(none)) is number
-                else (etc_hosts_file|d({})).mode|d(etc_hosts_file_mode|d('0644')) }}"
+      mode: "{{ 
+          '%04o'|format(
+          (etc_hosts_file|d({})).mode|d(
+          etc_hosts_file_mode|d('0644'))|int(base=8)) }}"
       create: yes
-      backup: "{{ tests_run|d(false) == false }}"
+      backup: "{{ tests_run|d(false)|bool == false }}"
       insertbefore: "^# end-of-file$"
       marker: ""
       block: |
         {%- set h_list = etc_hosts_entries|d([]) -%}
-        {%- set ipv4_enabled = etc_hosts_using_ipv4|d(true) -%}
-        {%- set ipv6_enabled = etc_hosts_using_ipv6|d(true) -%}
+        {%- set ipv4_enabled = etc_hosts_using_ipv4|d(true)|bool -%}
+        {%- set ipv6_enabled = etc_hosts_using_ipv6|d(true)|bool -%}
         {%- for h_item in h_list
                 if h_item|d(none) is not none -%}
         {%    if h_item is string %}
@@ -49,8 +50,8 @@
           and etc_hosts_hosts|length > 0)
           or (etc_hosts_hosts_specific|d(none) is mapping
           and etc_hosts_hosts_specific|dictsort|length > 0))
-        and (etc_hosts_using_ipv4|d(true) == true
-          or etc_hosts_using_ipv6|d(true) == true)
+        and (etc_hosts_using_ipv4|d(true)|bool == true
+          or etc_hosts_using_ipv6|d(true)|bool == true)
   vars:
     etc_hosts_entries: |-
       {%  set o = { 'hosts':[] } %}
