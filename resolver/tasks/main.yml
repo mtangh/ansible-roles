@@ -5,17 +5,34 @@
 - name: "resolver| Updating /etc/resolv.conf"
   template:
     src: "etc/resolv.conf.j2"
-    dest: "{{ tests_prefix_dir|d('') }}/etc/resolv.conf"
-    owner: "{{ tests_owner|d('root') }}"
-    group: "{{ tests_group|d('root') }}"
-    mode: "0644"
-    backup: "{{ tests_run|d(false) == false }}"
-  when: platforms_supported|d(false) == true
-        and ( (resolver_domain|d(none) is string and resolver_domain|length > 0)
-           or (resolver_search|d(none) is string and search_domain|length > 0)
-           or (resolver_nameservers|d(none) is iterable and resolver_nameservers|length > 0)
-           or (resolver_sortlist|d(none) is iterable and resolver_sortlist|length > 0)
-           or (resolver_options|d(none) is iterable and resolver_options|length > 0) )
+    dest: "{{
+        '%s%s'|format(tests_prefix_dir|d(''),
+        (resolver_resolv_conf_file|d({})).path|d(
+        resolver_resolv_conf_file|d('/etc/resolv.conf'))) }}"
+    owner: "{{
+        tests_owner|d(
+        (resolver_resolv_conf_file|d({})).owner|d(
+        resolver_resolv_conf_file_owner|d('root'))) }}"
+    group: "{{
+        tests_owner|d(
+        (resolver_resolv_conf_file|d({})).group|d(
+        resolver_resolv_conf_file_group|d('root'))) }}"
+    mode: "{{
+        '%04o'|format(
+        (resolver_resolv_conf_file|d({})).mode|d(
+        resolver_resolv_conf_file_mode|d('0644'))|int(base=8)) }}"
+    backup: "{{ tests_run|d(false)|bool == false }}"
+  when: platforms_supported|d(false)|bool == true
+        and ( (resolver_domain|d(none) is string
+           and resolver_domain|trim|length > 0)
+           or (resolver_search_domain|d(none) is string
+           and resolver_search_domain|trim|length > 0)
+           or (resolver_nameservers|d(none) is iterable
+           and resolver_nameservers|length > 0)
+           or (resolver_sortlist|d(none) is iterable
+           and resolver_sortlist|length > 0)
+           or (resolver_options|d(none) is iterable
+           and resolver_options|length > 0) )
   tags:
   - resolver
 

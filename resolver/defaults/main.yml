@@ -13,7 +13,7 @@ resolver_meta: |
 resolver_domain:
 
 # Resolver: Search domain
-resolver_search:
+resolver_search_domain:
 
 # Resolver: Nameservers
 resolver_nameservers: []

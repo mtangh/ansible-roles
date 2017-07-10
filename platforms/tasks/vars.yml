@@ -46,12 +46,14 @@
       loop_var: _defaults_file
 
   - name: "platforms | vars | Export platform-specific vars."
-    set_fact: "{{ item.key }}={{ item.value }}"
+    set_fact: "{{ _export_vars_item.key }}={{ _export_vars_item.value }}"
     with_dict: "{{
       platforms_vars_vars
       if _exports|bool == true and platforms_vars_vars|d(none) is not none
       else {} }}"
-    when: item.key|d(none) is not none
+    loop_control:
+      loop_var: _export_vars_item
+    when: _export_vars_item.key|d(none) is not none
 
   when: (platforms_vars.path|d(path|d('')))|is_dir
         and (ansible_os_family|d(''))|string|length > 0

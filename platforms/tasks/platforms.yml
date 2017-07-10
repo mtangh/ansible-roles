@@ -16,7 +16,7 @@
          and (__p_dist_ver if __p_dist_ver|string|trim|length > 0
              else '0')|version_compare(__p_ver_max,'<=') )
         else false }}"
-    no_log: "{{ true if ansible_check_mode|d(false) == false else false }}"
+    no_log: "{{ ansible_check_mode|d(false)|bool == false }}"
 
   - name: "Does the role support this platform ?"
     fail:
@@ -26,7 +26,7 @@
            (__p_conds|d({})|string)) }}
     when: platforms_supported|d(false) == false
           and __p_no_errors|d(true) == false
-    no_log: "{{ true if ansible_check_mode|d(false) == false else false }}"
+    no_log: "{{ ansible_check_mode|d(false)|bool == false }}"
 
   when: platforms|d(none) is not none
   vars:

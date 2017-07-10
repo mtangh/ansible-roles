@@ -8,15 +8,18 @@
     template:
       src: "etc/{{ etc_hosts_file_name }}.j2"
       dest: "{{ tests_prefix_dir|d('') }}/etc/{{ etc_hosts_file_name }}"
-      owner: "{{ tests_owner|d(
-                 (etc_hosts_file|d({})).owner|d(
-                 etc_hosts_file_owner|d('root'))) }}"
-      group: "{{ tests_group|d(
-                 (etc_hosts_file|d({})).group|d(
-                 etc_hosts_file_group|d('root'))) }}"
-      mode: "{{ '%04o'|format(
-                (etc_hosts_file|d({})).mode|d(
-                etc_hosts_file_mode|d(0644))|int(base=8)) }}"
+      owner: "{{
+          tests_owner|d(
+          (etc_hosts_file|d({})).owner|d(
+          etc_hosts_file_owner|d('root'))) }}"
+      group: "{{
+          tests_group|d(
+          (etc_hosts_file|d({})).group|d(
+          etc_hosts_file_group|d('root'))) }}"
+      mode: "{{
+          '%04o'|format(
+          (etc_hosts_file|d({})).mode|d(
+          etc_hosts_file_mode|d(0644))|int(base=8)) }}"
       backup: "{{ tests_run|d(false)|bool == false }}"
     with_items:
     - "{{ 'hosts'
@@ -40,11 +43,22 @@
     include: '_etc_hosts_hosts.yml'
     when: (etc_hosts_using_ipv4|d(true)|bool == true
           or etc_hosts_using_ipv6|d(true)|bool == true)
+    vars:
+      etc_hosts_hosts_add_hosts: |-
+        {%- set o = etc_hosts_hosts_specific
+                if etc_hosts_hosts_specific|d(none) is mapping
+                else {} -%}
+        {%- set _ = o.update({ 'default':etc_hosts_hosts|d([]) }) -%}
+        {{- o -}}
 
   - name: "etc-hosts | Update '/etc/hosts.{allow|deny}'."
     include: '_etc_hosts_hosts-acls.yml'
     when: (etc_hosts_using_hosts_allow|d(true)|bool == true
           or etc_hosts_using_hosts_deny|d(true)|bool == true)
+    vars:
+      etc_hosts_hosts_add_hosts_acls: |-
+        {%- set o = etc_hosts_hosts_acls -%}
+        {{- o -}}
 
   when: platforms_supported|d(false)|bool == true
   tags:
