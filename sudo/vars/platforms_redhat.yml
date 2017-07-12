@@ -6,7 +6,7 @@ sudo_install_packages:
 - "sudo"
 
 # SUDOers Admin group
-sudo_administrator_group: "wheel"
+sudo_administrators_group: "wheel"
 
 # SUDOers Drop-in dir
 sudo_sudoers_dropins_dir: false
@@ -82,7 +82,7 @@ sudo_sudoers_defaults:
 # SUDOers rules
 sudo_sudoers_rules:
 - "-"
-- users: "%wheel"
+- users: "%{{ sudo_administrators_group|d('wheel') }}"
   hosts: "ALL"
   runas: "ALL"
   nopasswd: no

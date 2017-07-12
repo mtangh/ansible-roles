@@ -7,46 +7,79 @@
   - name: "sudo | Dropin '{{ sudo_sudoers_dropin_file.name|d('???') }}' to '{{ _dropin_dir_path }}'."
     template:
       src: "etc/sudoers.dropin.j2"
-      dest: "{{ '%s/%s'|format(_dropin_dir_path,
-                sudo_sudoers_dropin_file.name) }}"
-      owner: "{{ tests_owner|d(
-                 sudo_sudoers_dropin_file.owner|d(
-                 sudo_sudoers_dropin_file_owner|d(
-                 _dropin_file_owner))) }}"
-      group: "{{ tests_group|d(
-                 sudo_sudoers_dropin_file.group|d(
-                 sudo_sudoers_dropin_file_group|d(
-                 _dropin_file_group))) }}"
-      mode: "{{ sudo_sudoers_dropin_file.mode|d(
-                sudo_sudoers_dropin_file_mode|d(
-                _dropin_file_mode)) }}"
-      backup: "{{ tests_run|d(false) == false }}"
-      validate: "{{ _validate_command }}"
+      dest: "{{ '%s%s/%s'|format(tests_prefix_dir|d(''),
+                _dropin_dir_path,sudo_sudoers_dropin_file.name) }}"
+      owner: "{{ tests_owner|d(_dropins_file_owner) }}"
+      group: "{{ tests_group|d(_dropins_file_group) }}"
+      mode: "{{ _dropins_file_mode }}"
+      backup: "{{ tests_run|d(false)|bool == false }}"
+      validate: "{{ _dropins_validate }}"
     tags:
     - sudo-sudores
 
   vars:
-    _dropin_dir_path: "{{
-      '%s%s'|format(tests_prefix_dir|d(''),
-      sudo_sudoers_dropins_dir.path|d(
-      sudo_sudoers_dropins_dir|d('/etc/sudoers.d'))) }}"
-    _dropin_file_owner: "{{
-      sudo_sudoers_dropins_dir.owner|d(
-      sudo_sudoers_dropins_dir_owner|d(
-      sudo_sudoers_file.owner|d(
-      sudo_sudoers_file_owner|d('root')))) }}"
-    _dropin_file_group: "{{
-      sudo_sudoers_dropins_dir.group|d(
-      sudo_sudoers_dropins_dir_group|d(
-      sudo_sudoers_file.group|d(
-      sudo_sudoers_file_group|d('wheel')))) }}"
-    _dropin_file_mode: "{{
-      sudo_sudoers_file.mode|d(
-      sudo_sudoers_file_mode|d('0440')) }}"
-    _validate_command: "{{
-      sudo_sodoers_validate_command|d(omit)
-      if tests_run|d(false) == false
-      and sudo_sodoers_validate_command|d('')|string|trim|length > 0
+    _dropins_dir: "{{
+      sudo_sudoers_dropins_dir.path|trim
+      if sudo_sudoers_dropins_dir|d(none) is mapping
+      and sudo_sudoers_dropins_dir.path|d(none) is string
+      and sudo_sudoers_dropins_dir.path|trim|length > 0
+      else sudo_sudoers_dropins_dir|trim
+      if sudo_sudoers_dropins_dir|d(none) is string
+      and sudo_sudoers_dropins_dir|trim|length > 0
+      else '/etc/sudoers.d' }}"    
+    _dropins_file_owner: "{{
+      sudo_sudoers_dropin_file.owner|trim
+      if sudo_sudoers_dropin_file|d(none) is mapping
+      and sudo_sudoers_dropin_file.owner|d(none) is string
+      and sudo_sudoers_dropin_file.owner|trim|length > 0
+      else sudo_sudoers_dropins_dir.owner|trim
+      if sudo_sudoers_dropins_dir|d(none) is mapping
+      and sudo_sudoers_dropins_dir.owner|d(none) is string
+      and sudo_sudoers_dropins_dir.owner|trim|length > 0
+      else sudo_sudoers_file.owner|trim
+      if sudo_sudoers_file|d(none) is mapping
+      and sudo_sudoers_file.owner|d(none) is string
+      and sudo_sudoers_file.owner|trim|length > 0
+      else sudo_sudoers_file_owner|trim
+      if sudo_sudoers_file_owner|d(none) is string
+      and sudo_sudoers_file_owner|trim|length > 0
+      else 'root' }}"
+    _dropins_file_group: "{{
+      sudo_sudoers_dropin_file.group|trim
+      if sudo_sudoers_dropin_file|d(none) is mapping
+      and sudo_sudoers_dropin_file.group|d(none) is string
+      and sudo_sudoers_dropin_file.group|trim|length > 0
+      else sudo_sudoers_dropins_dir.group|trim
+      if sudo_sudoers_dropins_dir|d(none) is mapping
+      and sudo_sudoers_dropins_dir.group|d(none) is string
+      and sudo_sudoers_dropins_dir.group|trim|length > 0
+      else sudo_sudoers_file.group|trim
+      if sudo_sudoers_file|d(none) is mapping
+      and sudo_sudoers_file.group|d(none) is string
+      and sudo_sudoers_file.group|trim|length > 0
+      else sudo_sudoers_file_group|trim
+      if sudo_sudoers_file_group|d(none) is string
+      and sudo_sudoers_file_group|trim|length > 0
+      else sudo_administrators_group|d('wheel') }}"
+    _dropins_file_mode: "{{
+      '%04o'|format(
+      sudo_sudoers_dropin_file.mode|int(base=8)
+      if sudo_sudoers_dropin_file|d(none) is mapping
+      and sudo_sudoers_dropin_file.mode|d(none) is string
+      and sudo_sudoers_dropin_file.mode|trim|length > 0
+      else sudo_sudoers_file.mode|int(base=8)
+      if sudo_sudoers_file|d(none) is mapping
+      and sudo_sudoers_file.mode|d(none) is not none
+      and sudo_sudoers_file.mode|string|trim|length > 0
+      else sudo_sudoers_file_mode|int(base=8)
+      if sudo_sudoers_file_mode|d(none) is not none
+      and sudo_sudoers_file_mode|string|trim|length > 0
+      else '0440'|int(base=8)) }}"
+    _dropins_validate: "{{
+      sudo_sodoers_validate_command|trim
+      if tests_run|d(false)|bool == false
+      and sudo_sodoers_validate_command|d(none) is string
+      and sudo_sodoers_validate_command|trim|length > 0
       else omit }}"
   tags:
   - sudo

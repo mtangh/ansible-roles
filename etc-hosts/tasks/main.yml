@@ -6,25 +6,23 @@
 
   - name: "etc-hosts | Create or replace hosts files."
     template:
-      src: "etc/{{ etc_hosts_file_name }}.j2"
-      dest: "{{ tests_prefix_dir|d('') }}/etc/{{ etc_hosts_file_name }}"
-      owner: "{{
-          tests_owner|d(
-          (etc_hosts_file|d({})).owner|d(
-          etc_hosts_file_owner|d('root'))) }}"
-      group: "{{
-          tests_group|d(
-          (etc_hosts_file|d({})).group|d(
-          etc_hosts_file_group|d('root'))) }}"
-      mode: "{{
-          '%04o'|format(
-          (etc_hosts_file|d({})).mode|d(
-          etc_hosts_file_mode|d(0644))|int(base=8)) }}"
+      src: "etc/{{ _etc_hosts_file_name }}.j2"
+      dest: "{{
+        '%s%s'|format(tests_prefix_dir|d(''),
+        etc_hosts_files.paths[_etc_hosts_file_name]
+        if etc_hosts_files|d(none) is mapping
+        and etc_hosts_files.paths|d(none) is mapping
+        and etc_hosts_files.paths[_etc_hosts_file_name]|d(none) is string
+        and etc_hosts_files.paths[_etc_hosts_file_name]|trim|length > 0
+        else ('/etc/%s'|format(_etc_hosts_file_name))) }}"
+      owner: "{{ _etc_hosts_files_owner }}"
+      group: "{{ _etc_hosts_files_group }}"
+      mode: "{{ _etc_hosts_files_mode }}"
       backup: "{{ tests_run|d(false)|bool == false }}"
     with_items:
     - "{{ 'hosts'
           if (etc_hosts_using_ipv4|d(true)|bool == true
-           or etc_hosts_using_ipv6|d(true)|bool == true)
+          or etc_hosts_using_ipv6|d(true)|bool == true)
           else '' }}"
     - "{{ 'hosts.allow'
           if etc_hosts_using_hosts_allow|d(true)|bool == true
@@ -33,34 +31,70 @@
           if etc_hosts_using_hosts_deny|d(true)|bool == true
           else '' }}"
     loop_control:
-      loop_var: etc_hosts_file_name
-    when: etc_hosts_file_name|d(none) is string
-          and etc_hosts_file_name|trim|length > 0
+      loop_var: _etc_hosts_file_name
+    when: _etc_hosts_file_name|d(none) is string
+          and _etc_hosts_file_name|trim|length > 0
     tags:
     - etc-hosts-files
 
-  - name: "etc-hosts | Update '/etc/hosts'."
-    include: '_etc_hosts_hosts.yml'
-    when: (etc_hosts_using_ipv4|d(true)|bool == true
+  - name: "etc-hosts | Include tasks files."
+    include: "{{ _etc_hosts_include_tasks }}"
+    with_items:
+    - "{{ '_etc_hosts_hosts.yml'
+          if (etc_hosts_using_ipv4|d(true)|bool == true
           or etc_hosts_using_ipv6|d(true)|bool == true)
-    vars:
-      etc_hosts_hosts_add_hosts: |-
-        {%- set o = etc_hosts_hosts_specific
-                if etc_hosts_hosts_specific|d(none) is mapping
-                else {} -%}
-        {%- set _ = o.update({ 'default':etc_hosts_hosts|d([]) }) -%}
-        {{- o -}}
-
-  - name: "etc-hosts | Update '/etc/hosts.{allow|deny}'."
-    include: '_etc_hosts_hosts-acls.yml'
-    when: (etc_hosts_using_hosts_allow|d(true)|bool == true
+          else '' }}"
+    - "{{ '_etc_hosts_hosts-acls.yml'
+          if (etc_hosts_using_hosts_allow|d(true)|bool == true
           or etc_hosts_using_hosts_deny|d(true)|bool == true)
+          else '' }}"
+    loop_control:
+      loop_var: _etc_hosts_include_tasks
+    when: _etc_hosts_include_tasks|d(none) is string
+          and _etc_hosts_include_tasks|trim|length > 0
     vars:
-      etc_hosts_hosts_add_hosts_acls: |-
-        {%- set o = etc_hosts_hosts_acls -%}
+      etc_hosts_hosts_items: |-
+        {%- set o = etc_hosts_hosts_for_hosts
+                if etc_hosts_hosts_for_hosts|d(none) is mapping
+                else {} -%}
+        {%- set _ = o.update({
+                'default':(etc_hosts_hosts
+                if etc_hosts_hosts|d(none) is iterable
+                and etc_hosts_hosts is not string
+                else []) }) -%}
         {{- o -}}
+      etc_hosts_hosts_acl_items: |-
+        {%- set o = etc_hosts_hosts_acls_for_hosts
+                if etc_hosts_hosts_for_hosts|d(none) is mapping
+                else {} -%}
+        {%- set _ = o.update({
+                'default':{
+                  'allow':(etc_hosts_hosts_acls
+                    if etc_hosts_hosts_acls|d(none) is mapping
+                    and etc_hosts_hosts_acls.allow|d(none) is iterable
+                    else []),
+                  'deny':(etc_hosts_hosts_acls
+                    if etc_hosts_hosts_acls|d(none) is mapping
+                    and etc_hosts_hosts_acls.deny|d(none) is iterable
+                    else []) } }) -%}
+        {{- o -}}
+    tags:
+    - etc-hosts-files
+    - etc-hosts-items
 
   when: platforms_supported|d(false)|bool == true
+  vars:
+    _etc_hosts_files_owner: "{{
+      tests_owner|d(etc_hosts_files.owner
+      if etc_hosts_files|d(none) is mapping
+      else etc_hosts_files_owner|d('root')) }}"
+    _etc_hosts_files_group: "{{
+      tests_group|d(etc_hosts_files.group
+      if etc_hosts_files|d(none) is mapping
+      else etc_hosts_files_group|d('root')) }}"
+    _etc_hosts_files_mode: "{{
+      '%04o'|format(etc_hosts_files.mode|d(
+      etc_hosts_files_mode|d('0644'))|int(base=8)) }}"
   tags:
   - etc-hosts
 

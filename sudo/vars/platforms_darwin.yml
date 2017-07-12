@@ -5,7 +5,7 @@
 sudo_install_packages: false
 
 # SUDOers Admin group
-sudo_administrator_group: 'admin'
+sudo_administrators_group: 'admin'
 
 # SUDOers Drop-in dir
 sudo_sudoers_dropins_dir:
@@ -84,8 +84,8 @@ sudo_sudoers_defaults:
 # SUDOers rules
 sudo_sudoers_rules:
 - "-"
-- users: "%admin"
-  hosts: "ALL"
+- users: "%{{ sudo_administrators_groupu|d('admin') }}"
+  dhosts: "ALL"
   runas: "ALL"
   nopasswd: no,
   commands: "ALL"

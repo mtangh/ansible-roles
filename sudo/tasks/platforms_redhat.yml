@@ -4,12 +4,24 @@
 
 - name: "sudo | redhat | Install the sudo"
   yum:
-    name: "{{ item }}"
-    state: latest
+    name: "{{
+        _sudo_package.name|trim
+        if _sudo_package|d(none) is mapping
+        and _sudo_package.name|d(none) is string
+        and _sudo_package.name|trim|length > 0
+        else _sudo_package|trim }}"
+    state: "{{
+        _sudo_package.state|trim
+        if _sudo_package|d(none) is mapping
+        and _sudo_package.state|d(none) is string
+        and _sudo_package.state|trim|length > 0
+        else 'latest' }}"
   with_items: "{{ sudo_install_packages|d(['sudo']) }}"
-  when: tests_run|d(false) == false
-        and item|d(none) is not none
-        and item|string|trim|length > 0
+  loop_control:
+    loop_var: _sudo_package
+  when: tests_run|d(false)|bool == false
+        and _sudo_package|d(none) is not none
+        and _sudo_package|string|trim|length > 0
   tags:
   - sudo
   - sudo-install
@@ -18,12 +30,49 @@
 
 - name: "sudo | redhat | Create a dropins dir."
   file:
-    path: "{{ '%s%s'|format(tests_prefix_dir|d(''),
-              sudo_sudoers_dropin_dir|d('/etc/sudoers.d')) }}"
+    path: "{{ '%s%s'|format(tests_prefix_dir|d(''),_dropins_dir) }}"
     state: directory
-    owner: "{{ tests_owner|d(sudo_sudoers_file_owner|d('root')) }}"
-    group: "{{ tests_group|d(sudo_sudoers_file_group|d('wheel')) }}"
-    mode: "{{ sudo_sudoers_file_mode|d('0775') }}"
+    owner: "{{ tests_owner|d(_dropins_dir_owner) }}"
+    group: "{{ tests_group|d(_dropins_dir_group) }}"
+    mode: "{{ _dropins_dir_mode }}"
+  vars:
+    _dropins_dir: "{{
+      sudo_sudoers_dropins_dir.path|trim
+      if sudo_sudoers_dropins_dir|d(none) is mapping
+      and sudo_sudoers_dropins_dir.path|d(none) is string
+      and sudo_sudoers_dropins_dir.path|trim|length > 0
+      else sudo_sudoers_dropins_dir|trim
+      if sudo_sudoers_dropins_dir|d(none) is string
+      and sudo_sudoers_dropins_dir|trim|length > 0
+      else '/etc/sudoers.d' }}"    
+    _dropins_dir_owner: "{{
+      sudo_sudoers_dropins_dir.owner|trim
+      if sudo_sudoers_dropins_dir|d(none) is mapping
+      and sudo_sudoers_dropins_dir.owner|d(none) is string
+      and sudo_sudoers_dropins_dir.owner|trim|length > 0
+      else sudo_sudoers_dropins_dir_owner|trim
+      if sudo_sudoers_dropins_dir_owner|d(none) is string
+      and sudo_sudoers_dropins_dir_owner|trim|length > 0
+      else 'root' }}"
+    _dropins_dir_group: "{{
+      sudo_sudoers_dropins_dir.group|trim
+      if sudo_sudoers_dropins_dir|d(none) is mapping
+      and sudo_sudoers_dropins_dir.group|d(none) is string
+      and sudo_sudoers_dropins_dir.group|trim|length > 0
+      else sudo_sudoers_dropins_dir_group|trim
+      if sudo_sudoers_dropins_dir_group|d(none) is string
+      and sudo_sudoers_dropins_dir_group|trim|length > 0
+      else sudo_administrators_group|d('wheel') }}"
+    _dropins_dir_mode: "{{
+      '%04o'|format(
+      sudo_sudoers_dropins_dir.mode|int(base=8)
+      if sudo_sudoers_dropins_dir|d(none) is mapping
+      and sudo_sudoers_dropins_dir.mode|d(none) is string
+      and sudo_sudoers_dropins_dir.mode|trim|length > 0
+      else sudo_sudoers_dropins_dir_mode|int(base=8)
+      if sudo_sudoers_dropins_dir_mode|d(none) is not none
+      and sudo_sudoers_dropins_dir_mode|string|trim|length > 0
+      else '0770'|int(base=8)) }}"
   tags:
   - sudo
   - sudo-install

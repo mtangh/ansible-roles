@@ -227,12 +227,12 @@ root            ALL=(ALL) ALL
 {%  for rule in sudo_sudoers_rules|d([])
         if rule is not none %}
 {%    set r = {
-        'u': (rule.users|trim if rule.users|d(none) is not none
-               else (rule|trim if rule is string else none)),
+        'u': (rule.users|trim if rule.users|d(none) is not none else
+             (rule|trim if rule is string else none)),
         'h': (rule.hosts|trim if rule.hosts|d(none) is not none else 'ALL'),
         'ra':(rule.runas|trim if rule.runas|d(none) is not none else 'ALL'),
         'np':('NOPASSWD: ' if rule.nopasswd|d(none) is not none
-                             and rule.nopasswd|bool
+                           and rule.nopasswd|bool
                            else '') } %}
 {%    set r_cmd = rule.commands|join(', ')
         if rule.commands|d(none) is not none
@@ -255,19 +255,24 @@ root            ALL=(ALL) ALL
 {%    endif %}
 {%  endfor %}
 {%  endif %}
-{%  if sudo_sudoers_dropin_dir|d(none) is not none %}
-{%    set dropin_dir_enabled = true
-          if sudo_sudoers_dropin_dir|string|trim|lower|
-             match('^(no|false)$') == false
-          else false %}
+{%  set _dropins_dir =
+        sudo_sudoers_dropins_dir.path|trim
+        if sudo_sudoers_dropins_dir|d(none) is mapping
+        and sudo_sudoers_dropins_dir.path|d(none) is string
+        and sudo_sudoers_dropins_dir.path|trim|length > 0
+        else sudo_sudoers_dropins_dir|trim
+        if sudo_sudoers_dropins_dir|d(none) is string
+        and sudo_sudoers_dropins_dir|trim|length > 0
+        and not(sudo_sudoers_dropins_dir|trim|lower|match('^(no|false)$'))
+        else none %}
 
 ##
-# Read drop-in files from {{ sudo_sudoers_dropin_dir if dropin_dir_enabled == true else '/etc/sudoers.d' }}
-{%    if dropin_dir_enabled == false %}
+# Read drop-in files from {{ _dropins_dir if _dropins_dir is not none else '/etc/sudoers.d' }}
+{%    if _dropins_dir is none %}
 # (the # here does not mean a comment)
 {%    endif %}
 ##
-{% if dropin_dir_enabled == false %}#{% endif -%}
-includedir {{ sudo_sudoers_dropin_dir if dropin_dir_enabled == true else '/etc/sudoers.d' }}
+{%  if _dropins_dir is none %}#{% endif -%}
+includedir {{ _dropins_dir if _dropins_dir is not none else '/etc/sudoers.d' }}
 {%  endif %}
 
