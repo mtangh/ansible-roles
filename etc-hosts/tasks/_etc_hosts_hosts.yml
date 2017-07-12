@@ -8,8 +8,8 @@
     blockinfile:
       path: "{{ _etc_hosts_files_path }}"
       state: present
-      owner: "{{ _etc_hosts_files_owner }}"
-      group: "{{ _etc_hosts_files_group }}"
+      owner: "{{ tests_owner|d(_etc_hosts_files_owner) }}"
+      group: "{{ tests_group|d(_etc_hosts_files_group) }}"
       mode: "{{ _etc_hosts_files_mode }}"
       backup: "{{ tests_run|d(false)|bool == false }}"
       insertbefore: "^# end-of-file$"
@@ -66,21 +66,38 @@
       {%  set _ = o.update({ 'hosts':(_hents + o.hosts + _hdefs) }) %}
       {{- o.hosts -}}
     _etc_hosts_files_path: "{{
-        '%s%s'|format(tests_prefix_dir|d(''),
-        etc_hosts_files.paths['hosts']
-        if etc_hosts_files|d(none) is mapping
-        and etc_hosts_files.paths|d(none) is mapping
-        and etc_hosts_files.paths['hosts']|d(none) is string
-        and etc_hosts_files.paths['hosts']|trim|length > 0
-        else '/etc/hosts') }}"
+      '%s%s'|format(tests_prefix_dir|d(''),
+      etc_hosts_files.paths['hosts']
+      if etc_hosts_files|d(none) is mapping
+      and etc_hosts_files.paths|d(none) is mapping
+      and etc_hosts_files.paths['hosts']|d(none) is string
+      and etc_hosts_files.paths['hosts']|trim|length > 0
+      else '/etc/hosts') }}"
     _etc_hosts_files_owner: "{{
-      tests_owner|d(etc_hosts_files.owner
+      etc_hosts_files.owner|trim
       if etc_hosts_files|d(none) is mapping
-      else etc_hosts_files_owner|d('root')) }}"
+      and etc_hosts_files.owner|d(none) is string
+      and etc_hosts_files.owner|trim|length > 0
+      else etc_hosts_files_owner|trim
+      if etc_hosts_files_owner|d(none) is string
+      and etc_hosts_files_owner|trim|length > 0
+      else 'root' }}"
     _etc_hosts_files_group: "{{
-      tests_group|d(etc_hosts_files.group
+      etc_hosts_files.group|trim
       if etc_hosts_files|d(none) is mapping
-      else etc_hosts_files_group|d('root')) }}"
+      and etc_hosts_files.group|d(none) is string
+      and etc_hosts_files.group|trim|length > 0
+      else etc_hosts_files_group|trim
+      if etc_hosts_files_group|d(none) is string
+      and etc_hosts_files_group|trim|length > 0
+      else 'root' }}"
     _etc_hosts_files_mode: "{{
-      '%04o'|format(etc_hosts_files.mode|d(
-      etc_hosts_files_mode|d('0644'))|int(base=8)) }}"
+      '%04o'|format(
+      etc_hosts_files.mode|int(base=8)
+      if etc_hosts_files|d(none) is mapping
+      and etc_hosts_files.mode|d(none) is not none
+      and etc_hosts_files.mode|string|trim|length > 0
+      else etc_hosts_files_mode|int(base=8)
+      if etc_hosts_files_mode|d(none) is not none
+      and etc_hosts_files_mode|string|trim|length > 0
+      else '0644'|int(base=8)) }}"

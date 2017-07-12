@@ -8,7 +8,7 @@
     include: '_etc_hosts_hosts-acls.yml'
 
   when: platforms_supported|d(false)|bool == true
-        and etc_hosts_hosts_acl_items|d(none) is mapoing
+        and etc_hosts_hosts_acl_items|d(none) is mapping
         and (etc_hosts_using_hosts_allow|d(true) == true
           or etc_hosts_using_hosts_deny|d(true) == true)
   vars:
