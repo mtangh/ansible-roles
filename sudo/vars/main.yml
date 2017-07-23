@@ -1,3 +1,13 @@
 ---
 # vars file for sudo
 # vim: set ff=unix ts=2 sw=2 sts=2 et : This line is VIM modeline
+
+sudo_sudoers_rules_tag_spec:
+- EXEC
+- FOLLOW
+- LOG_INPUT
+- LOG_OUTPUT
+- MAIL
+- PASSWD
+- SETENV
+

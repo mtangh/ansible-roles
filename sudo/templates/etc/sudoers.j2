@@ -1,7 +1,7 @@
 # SUDOers
 # {{ ansible_managed }}
 # Do NOT modify this file directly.
-
+{%  import 'macros.sudoers.j2' as m with context %}
 #
 # sudoers file.
 #
@@ -22,33 +22,7 @@
 # Host_Alias     FILESERVERS = fs1, fs2
 # Host_Alias     MAILSERVERS = smtp, smtp2
 #
-{%  if sudo_sudoers_host_aliases|d(none) is not none %}
-{%  for e in sudo_sudoers_host_aliases|d([])
-        if e is not none and e|string|length > 0 %}
-{%    set alias = '%s = %s'|format(e.name,(
-          e.value|join(', ')
-          if e.value|d(none) is not none 
-          and e.value is iterable and e.value is not string
-          else (
-          e.value|trim
-          if e.value|d(none) is not none and e.value is string
-          else '' )))
-          if e.name|d(none) is not none else e|string|trim %}
-{%    set cmnts = e.comment
-          if e.comment|d(none) is not none
-          and e.comment is iterable and e.comment is not string
-          else (e.comment.split('\n') if e.comment|d(none) is string else []) %}
-{%    if alias|d(none) is not none and alias in ['-','#'] %}
-{{ '#' if alias == '#' else '' }}
-{%    endif %}
-{%    for c in cmnts if c is not none and c|length > 0 %}
-{{ '# %s'|format(c)|trim }}
-{%    endfor %}
-{%    if alias|d(none) is not none and alias not in ['-','#'] %}
-Host_Alias  {{ alias }}
-{%    endif %}
-{%  endfor %}
-{%  endif %}
+{{  m.make_aliases_from('Host_Alias',sudo_sudoers_host_aliases) }}
 
 ##
 # User alias specification
@@ -60,64 +34,12 @@ Host_Alias  {{ alias }}
 #
 # User_Alias ADMINS = jsmith, mikem
 #
-{%  if sudo_sudoers_user_aliases|d(none) is not none %}
-{%  for e in sudo_sudoers_user_aliases|d([])
-        if e is not none and e|string|length > 0 %}
-{%    set alias = '%s = %s'|format(e.name,(
-          e.value|join(', ')
-          if e.value|d(none) is not none 
-          and e.value is iterable and e.value is not string
-          else (
-          e.value|trim
-          if e.value|d(none) is not none and e.value is string
-          else '' )))
-          if e.name|d(none) is not none else e|string|trim %}
-{%    set cmnts = e.comment
-          if e.comment|d(none) is not none
-          and e.comment is iterable and e.comment is not string
-          else (e.comment.split('\n') if e.comment|d(none) is string else []) %}
-{%    if alias|d(none) is not none and alias in ['-','#'] %}
-{{ '#' if alias == '#' else '' }}
-{%    endif %}
-{%    for c in cmnts if c is not none and c|length > 0 %}
-{{ '# %s'|format(c)|trim }}
-{%    endfor %}
-{%    if alias|d(none) is not none and alias not in ['-','#'] %}
-User_Alias  {{ alias }}
-{%    endif %}
-{%  endfor %}
-{%  endif %}
+{{  m.make_aliases_from('User_Alias',sudo_sudoers_user_aliases) }}
 
 ##
 # Runas alias specification
 ##
-{%  if sudo_sudoers_runas_aliases|d(none) is not none %}
-{%  for e in sudo_sudoers_runas_aliases|d([])
-        if e is not none and e|string|length > 0 %}
-{%    set alias = '%s = %s'|format(e.name,(
-          e.value|join(', ')
-          if e.value|d(none) is not none 
-          and e.value is iterable and e.value is not string
-          else (
-          e.value|trim
-          if e.value|d(none) is not none and e.value is string
-          else '' )))
-          if e.name|d(none) is not none else e|string|trim %}
-{%    set cmnts = e.comment
-          if e.comment|d(none) is not none
-          and e.comment is iterable and e.comment is not string
-          else (e.comment.split('\n') if e.comment|d(none) is string else []) %}
-{%    if alias|d(none) is not none and alias in ['-','#'] %}
-{{ '#' if alias == '#' else '' }}
-{%    endif %}
-{%    for c in cmnts if c is not none and c|length > 0 %}
-{{ '# %s'|format(c)|trim }}
-{%    endfor %}
-{%    if alias|d(none) is not none and alias not in ['-','#'] %}
-Runas_Alias {{ alias }}
-{%    endif %}
-{%  endfor %}
-{%  endif %}
+{{  m.make_aliases_from('Runas_Alias',sudo_sudoers_runas_aliases) }}
 
 ##
 # Command alias specification
@@ -142,33 +64,7 @@ Runas_Alias {{ alias }}
 # - Drivers
 #   Cmnd_Alias DRIVERS = /sbin/modprobe
 #
-{%  if sudo_sudoers_cmnd_aliases|d(none) is not none %}
-{%  for e in sudo_sudoers_cmnd_aliases|d([])
-        if e is not none and e|string|length > 0 %}
-{%    set alias = '%s = %s'|format(e.name,(
-          e.value|join(', ')
-          if e.value|d(none) is not none 
-          and e.value is iterable and e.value is not string
-          else (
-          e.value|trim
-          if e.value|d(none) is not none and e.value is string
-          else '' )))
-          if e.name|d(none) is not none else e|string|trim %}
-{%    set cmnts = e.comment
-          if e.comment|d(none) is not none
-          and e.comment is iterable and e.comment is not string
-          else (e.comment.split('\n') if e.comment|d(none) is string else []) %}
-{%    if alias|d(none) is not none and alias in ['-','#'] %}
-{{ '#' if alias == '#' else '' }}
-{%    endif %}
-{%    for c in cmnts if c is not none and c|length > 0 %}
-{{ '# %s'|format(c)|trim }}
-{%    endfor %}
-{%    if alias|d(none) is not none and alias not in ['-','#'] %}
-Cmnd_Alias  {{ alias }}
-{%    endif %}
-{%  endfor %}
-{%  endif %}
+{{  m.make_aliases_from('Cmnd_Alias',sudo_sudoers_cmnd_aliases) }}
 
 ##
 # Defaults specification

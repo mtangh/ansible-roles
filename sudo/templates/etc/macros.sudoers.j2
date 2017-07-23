@@ -1,0 +1,51 @@
+{#----------------------------------------------------------------------
+ #  name: macros.sudoers.j2
+ #---------------------------------------------------------------------#}
+
+{%- macro make_aliases_from( alias_name, aliases = [] ) -%}
+{%    set _alias = '%s_Alias'|format(alias_name|lower|regex_replase(
+          '^[ ]*([A-Za-z]+)(_alias|)[ ]*$','\\1')|capitalize)
+          if alias_name|d(none) is string
+          and alias_name|lower|match(
+          '^[ ]*(host|user|runas|cmnd)(_alias|)[ ]*$')
+          else none %}
+{%    set _entries = aliases
+          if _alias is not none
+          and aliases|d(none) is iterable
+          and aliases is not string
+          and aliases|length > 0 else [] %}
+{%    for _entry in _entries
+          if _entry is not none
+          and _entry|string|trim|length > 0 %}
+{%      set _comments =
+            _entry.comment
+            if _entry is mapping
+            and _entry.comment|d(none) is iterable
+            and _entry.comment is not string
+            and _entry.comment|length > 0
+            else
+            _entry.comment.split('\n')
+            if _entry is mapping
+            and _entry.comment|d(none) is string
+            and _entry.comment|trim|length > 0
+            else [] %}
+{%      for _comment in _comments
+            if _comment is string and _comment|length > 0 %}
+{{ '# %s'|format(_comment)|trim }}
+{%      endfor %}
+{%      if _entry is mapping 
+        and _entry.name|d(none) is string
+        and _entry.name|trim|length > 0
+        and _entry.value|d(none) is iterable
+        and _entry.value|string|trim|length > 0 %}
+{{ '%s%-11s %s = %s'|format(
+  ('#' if _entry.disabled|d(false)|bool else ''),
+  (_alias), (_entry.name|trim),
+  (_entry.value|trim
+  if _entry.value is string
+  else _entry.value|join(', '))|trim }}
+{%      elif _entry is string and _entry|trim||length > 0 %}
+{{ '%-11s %s'|format(_alias,_entry|trim) }}
+{%      endif %}
+{%    endfor %}
+{%  endmacro -%}

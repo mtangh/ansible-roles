@@ -38,7 +38,6 @@ sudo_sudoers_defaults: []
 # - users: "%wheel"
 #   hosts: "ALL"
 #   runas: "ALL"
-#   nopasswd: no
 #   commands: "ALL"
 #   comment:
 #
