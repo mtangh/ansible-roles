@@ -22,7 +22,7 @@
 # Host_Alias     FILESERVERS = fs1, fs2
 # Host_Alias     MAILSERVERS = smtp, smtp2
 #
-{{  m.make_aliases_from('Host_Alias',sudo_sudoers_host_aliases) }}
+{{  m.make_aliases_from( 'Host_Alias', (sudoers_aliases|d({})).host|d([]) ) }}
 
 ##
 # User alias specification
@@ -34,12 +34,12 @@
 #
 # User_Alias ADMINS = jsmith, mikem
 #
-{{  m.make_aliases_from('User_Alias',sudo_sudoers_user_aliases) }}
+{{  m.make_aliases_from( 'User_Alias', (sudoers_aliases|d({})).user|d([]) ) }}
 
 ##
 # Runas alias specification
 ##
-{{  m.make_aliases_from('Runas_Alias',sudo_sudoers_runas_aliases) }}
+{{  m.make_aliases_from( 'Runas_Alias', (sudoers_aliases|d({})).runas|d([]) ) }}
 
 ##
 # Command alias specification
@@ -64,7 +64,7 @@
 # - Drivers
 #   Cmnd_Alias DRIVERS = /sbin/modprobe
 #
-{{  m.make_aliases_from('Cmnd_Alias',sudo_sudoers_cmnd_aliases) }}
+{{  m.make_aliases_from( 'Cmnd_Alias', (sudoers_aliases|d({})).command|d([]) ) }}
 
 ##
 # Defaults specification
@@ -72,35 +72,7 @@
 #
 # Override built-in defaults
 #
-{%  if sudo_sudoers_defaults|d(none) is not none %}
-{%  for e in sudo_sudoers_defaults|d([])
-        if e|d(none) is not none %}
-{%    set dflts = e.default
-          if e.default|d(none) is not none
-          and e.default is iterable and e.default is not string
-          else ([e.default|trim] if e.default|d(none) is string
-                and e.default|d(none) not in ['-','#']
-          else (e.default if e.default|d(none) in ['-','#'] 
-          else ([e|trim] if e|d(none) is string
-                and e|d(none) not in ['-','#']
-          else (e if e|d(none) in ['-','#'] else none)))) %}
-{%    set cmnts = e.comment
-          if e.comment|d(none) is not none
-          and e.comment is iterable and e.comment is not string
-          else (e.comment.split('\n') if e.comment|d(none) is string else []) %}
-{%    if dflts|d(none) is not none and dflts in ['-','#'] %}
-{{ '#' if dflts == '#' else '' }}
-{%    endif %}
-{%    for c in cmnts if c is not none and c|length > 0 %}
-{{ '# %s'|format(c)|trim }}
-{%    endfor %}
-{%    if dflts|d(none) is not none and dflts not in ['-','#'] %}
-{%      for dv in dflts|d([]) if dflts|d(none) is not none and dv|length > 0 %}
-Defaults    {{ dv|trim }}
-{%      endfor %}
-{%    endif %}
-{%  endfor %}
-{%  endif %}
+{{  m.make_defaults_from( sudoers_defaults|d([]) ) }}
 
 ##
 # User privilege specification
@@ -119,56 +91,16 @@ root            ALL=(ALL) ALL
 #%users          ALL=/sbin/mount /cdrom,/sbin/umount /cdrom
 #%users          localhost=/sbin/shutdown -h now
 #
-{%  if sudo_sudoers_rules|d(none) is not none %}
-{%  for rule in sudo_sudoers_rules|d([])
-        if rule is not none %}
-{%    set r = {
-        'u': (rule.users|trim if rule.users|d(none) is not none else
-             (rule|trim if rule is string else none)),
-        'h': (rule.hosts|trim if rule.hosts|d(none) is not none else 'ALL'),
-        'ra':(rule.runas|trim if rule.runas|d(none) is not none else 'ALL'),
-        'np':('NOPASSWD: ' if rule.nopasswd|d(none) is not none
-                           and rule.nopasswd|bool
-                           else '') } %}
-{%    set r_cmd = rule.commands|join(', ')
-        if rule.commands|d(none) is not none
-        and (rule.commands is iterable and rule.commands is not string)
-        else (rule.commands|trim
-              if rule.commands|d(none) is string else 'ALL') %}
-{%    set r_cmnts = rule.comment
-        if rule.comment|d(none) is not none
-        and (rule.comment is iterable and rule.comment is not string)
-        else (rule.comment.split('\n')
-              if rule.comment|d(none) is string else []) %}
-{%    if r.u|d(none) is not none and r.u in ['-','#'] %}
-{{ '#' if r.u == '#' else '' }}
-{%    endif %}
-{%    for c in r_cmnts if c is not none and c|length > 0 %}
-{{ '# %s'|format(c|trim) }}
-{%    endfor %}
-{%    if r.u|d(none) is not none and r.u not in ['-','#'] %}
-{{ '%-15s %s=(%s) %s%s'|format(r.u,r.h,r.ra,r.np,r_cmd)|trim }}
-{%    endif %}
-{%  endfor %}
-{%  endif %}
-{%  set _dropins_dir =
-        sudo_sudoers_dropins_dir.path|trim
-        if sudo_sudoers_dropins_dir|d(none) is mapping
-        and sudo_sudoers_dropins_dir.path|d(none) is string
-        and sudo_sudoers_dropins_dir.path|trim|length > 0
-        else sudo_sudoers_dropins_dir|trim
-        if sudo_sudoers_dropins_dir|d(none) is string
-        and sudo_sudoers_dropins_dir|trim|length > 0
-        and not(sudo_sudoers_dropins_dir|trim|lower|match('^(no|false)$'))
-        else none %}
+{{  m.make_defaults_from( sudoers_rules|d([]) ) }}
+{%  set _dropins_dir = sudoers_dropins_dir|d('')|string|trim %}
 
 ##
-# Read drop-in files from {{ _dropins_dir if _dropins_dir is not none else '/etc/sudoers.d' }}
-{%    if _dropins_dir is none %}
+# Read drop-in files from {{ _dropins_dir if _dropins_dir|length >= 0 else '/etc/sudoers.d' }}
+{%  if _dropins_dir|length <= 0 %}
 # (the # here does not mean a comment)
-{%    endif %}
+{%  endif %}
 ##
-{%  if _dropins_dir is none %}#{% endif -%}
-includedir {{ _dropins_dir if _dropins_dir is not none else '/etc/sudoers.d' }}
+{%  if _dropins_dir|length <= 0 %}#{% endif -%}
+includedir {{ _dropins_dir if _dropins_dir|length >= 0 else '/etc/sudoers.d' }}
 {%  endif %}
 

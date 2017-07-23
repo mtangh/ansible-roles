@@ -30,6 +30,15 @@
       mode: "{{ _sudoers_file_mode }}"
       backup: "{{ tests_run|d(false)|bool == false }}"
       validate: "{{ _sudoers_validate }}"
+    vars:
+      sudoers_defaults: "{{ sudo_sudoers_defaults|d([]) }}"
+      sudoers_rules: "{{ sudo_sudoers_rules|d([]) }}"
+      sudoers_aliases:
+        host: "{{ sudo_sudoers_host_aliases|d([]) }}"
+        user: "{{ sudo_sudoers_user_aliases|d([]) }}"
+        runas: "{{ sudo_sudoers_runas_aliases|d([]) }}"
+        command: "{{ sudo_sudoers_cmnd_aliases|d([]) }}"
+      sudoers_dropins_dir: "{{ _sudoers_dropins_dir }}"
     tags:
     - sudo-sudores
 
@@ -38,11 +47,13 @@
     static: yes
     with_items: "{{
       sudo_sudoers_dropins|d([])
-      if sudo_sudoers_dropins_dir|d('')|is_dir
+      if _sudoers_dropins_dir|d('')|is_dir
       else [] }}"
     loop_control:
       loop_var: sudo_sudoers_dropin_file
-    when: sudo_sudoers_dropin_file is mapping
+    when: sudo_sudoers_dropins_dir|d('')|string|
+          trim|lower|match('^(no|false)$') == false
+          and sudo_sudoers_dropin_file is mapping
           and sudo_sudoers_dropin_file.name is string
           and sudo_sudoers_dropin_file.name|trim|length > 0
     tags:
@@ -94,7 +105,13 @@
       else sudo_sudoers_dropins_dir|trim
       if sudo_sudoers_dropins_dir|d(none) is string
       and sudo_sudoers_dropins_dir|trim|length > 0
-      else '/etc/sudoers.d' }}"    
+      and sudo_sudoers_dropins_dir|
+          trim|lower|match('^(no|false)$') == false
+      else '/etc/sudoers.d'
+      if sudo_sudoers_dropins_dir|d(none) is none
+      or sudo_sudoers_dropins_dir|string
+         trim|lower|match('^(no|false)$') == false
+      else '' }}"
     _sudoers_validate: "{{
       sudo_sodoers_validate_command|trim
       if tests_run|d(false)|bool == false

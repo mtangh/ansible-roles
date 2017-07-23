@@ -1,0 +1,21 @@
+# {{ sudoers_dropin_file_path }}
+# {{ ansible_managed }}
+{%  import 'macros.sudoers.j2' as m with context %}
+{% if ((sudoers_dropin_aliases|d({})).host|d([]))|length > 0 -%}
+# Host alias specification{% endif %}
+{{  m.make_aliases_from( 'Host_Alias', (sudoers_dropin_aliases|d({})).host|d([]) ) }}
+{% if ((sudoers_dropin_aliases|d({})).user|d([]))|length > 0 -%}
+# User alias specification{% endif %}
+{{  m.make_aliases_from( 'User_Alias', (sudoers_dropin_aliases|d({})).user|d([]) ) }}
+{% if ((sudoers_dropin_aliases|d({})).runas|d([]))|length > 0 -%}
+# Runas alias specification{% endif %}
+{{  m.make_aliases_from( 'Runas_Alias', (sudoers_dropin_aliases|d({})).runas|d([]) ) }}
+{% if ((sudoers_dropin_aliases|d({})).command|d([]))|length > 0 -%}
+# Command alias specification{% endif %}
+{{  m.make_aliases_from( 'Cmnd_Alias', (sudoers_dropin_aliases|d({})).command|d([]) ) }}
+{% if (sudoers_dropin_defaults|d([]))|length > 0 -%}
+# Defaults specification{% endif %}
+{{  m.make_defaults_from( sudoers_dropin_defaults|d([]) ) }}
+{% if (sudoers_dropin_rules|d([]))|length > 0 -%}
+# User privilege specification{% endif %}
+{{  m.make_defaults_from( sudoers_dropin_rules|d([]) ) }}

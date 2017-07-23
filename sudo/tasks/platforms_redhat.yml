@@ -44,7 +44,9 @@
       else sudo_sudoers_dropins_dir|trim
       if sudo_sudoers_dropins_dir|d(none) is string
       and sudo_sudoers_dropins_dir|trim|length > 0
-      else '/etc/sudoers.d' }}"    
+      and sudo_sudoers_dropins_dir|
+          trim|lower|match('^(no|false)$') == false
+      else '/etc/sudoers.d' }}"
     _dropins_dir_owner: "{{
       sudo_sudoers_dropins_dir.owner|trim
       if sudo_sudoers_dropins_dir|d(none) is mapping
@@ -78,4 +80,3 @@
   - sudo-install
   - sudo-redhat
   - sudo-redhat-install
-  

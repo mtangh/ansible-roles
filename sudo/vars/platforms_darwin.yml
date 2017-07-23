@@ -77,7 +77,7 @@ sudo_sudoers_defaults:
   - "env_keep += \"BLOCKSIZE\""
   - "env_keep += \"COLORFGBG COLORTERM\""
   - "env_keep += \"__CF_USER_TEXT_ENCODING\""
-  comment: 
+  comment:
   - Environment variables to be preserved in the user\'s environment when
   - the env_reset option is in effect.
 
@@ -87,7 +87,7 @@ sudo_sudoers_rules:
 - users: "%{{ sudo_administrators_groupu|d('admin') }}"
   dhosts: "ALL"
   runas: "ALL"
-  nopasswd: no,
+  nopasswd: no
   commands: "ALL"
   comment: "Allows people in group admin to run all commands."
 

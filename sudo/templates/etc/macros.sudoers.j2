@@ -2,50 +2,281 @@
  #  name: macros.sudoers.j2
  #---------------------------------------------------------------------#}
 
-{%- macro make_aliases_from( alias_name, aliases = [] ) -%}
-{%    set _alias = '%s_Alias'|format(alias_name|lower|regex_replase(
+{# make_alias_from ----------------------------------------------------#}
+{%- macro make_aliases_from( in_alias_name, in_aliases = [] ) -%}
+{%    set _alias = '%s_Alias'|format(in_alias_name|lower|regex_replase(
           '^[ ]*([A-Za-z]+)(_alias|)[ ]*$','\\1')|capitalize)
-          if alias_name|d(none) is string
-          and alias_name|lower|match(
+          if in_alias_name|d(none) is string
+          and in_alias_name|lower|match(
           '^[ ]*(host|user|runas|cmnd)(_alias|)[ ]*$')
           else none %}
-{%    set _entries = aliases
+{%    set _aliases = in_aliases
           if _alias is not none
-          and aliases|d(none) is iterable
-          and aliases is not string
-          and aliases|length > 0 else [] %}
-{%    for _entry in _entries
-          if _entry is not none
-          and _entry|string|trim|length > 0 %}
+          and in_aliases|d(none) is iterable
+          and in_aliases is not string
+          and in_aliases|length > 0 else [] %}
+{%    for _alias in _aliases
+          if _alias is not none and _alias|string|trim|length > 0 %}
 {%      set _comments =
-            _entry.comment
-            if _entry is mapping
-            and _entry.comment|d(none) is iterable
-            and _entry.comment is not string
-            and _entry.comment|length > 0
+            _alias.comment
+            if _alias is mapping
+            and _alias.comment|d(none) is iterable
+            and _alias.comment is not string
+            and _alias.comment|length > 0
             else
-            _entry.comment.split('\n')
-            if _entry is mapping
-            and _entry.comment|d(none) is string
-            and _entry.comment|trim|length > 0
+            _alias.comment.split('\n')
+            if _alias is mapping
+            and _alias.comment|d(none) is string
+            and _alias.comment|trim|length > 0
             else [] %}
 {%      for _comment in _comments
             if _comment is string and _comment|length > 0 %}
 {{ '# %s'|format(_comment)|trim }}
 {%      endfor %}
-{%      if _entry is mapping 
-        and _entry.name|d(none) is string
-        and _entry.name|trim|length > 0
-        and _entry.value|d(none) is iterable
-        and _entry.value|string|trim|length > 0 %}
+{%      if _alias is mapping
+        and _alias.name|d(none) is string
+        and _alias.name|trim|length > 0
+        and _alias.value|d(none) is iterable
+        and _alias.value|string|trim|length > 0 %}
 {{ '%s%-11s %s = %s'|format(
-  ('#' if _entry.disabled|d(false)|bool else ''),
-  (_alias), (_entry.name|trim),
-  (_entry.value|trim
-  if _entry.value is string
-  else _entry.value|join(', '))|trim }}
-{%      elif _entry is string and _entry|trim||length > 0 %}
-{{ '%-11s %s'|format(_alias,_entry|trim) }}
+  ('#' if _alias.disabled|d(false)|bool else ''),
+  (_alias), (_alias.name|trim),
+  (_alias.value|trim
+  if _alias.value is string
+  else _alias.value|join(', '))|trim }}
+{%      elif _alias is string and _alias|trim||length > 0 %}
+{{ '%-11s %s'|format(_alias,_alias|trim) }}
 {%      endif %}
 {%    endfor %}
-{%  endmacro -%}
+{%- endmacro -%}
+
+{# make_defaults_from -------------------------------------------------#}
+{%- macro make_defaults_from( in_defaults = [] ) -%}
+{%    set _defaults = in_defaults
+          if in_defaults|d(none) is iterable
+          and in_defaults is not string
+          and in_defaults|string|trim|length > 0 else [] %}
+{%    for _default in _defaults|d([])
+          if _default is not none and _default|string|trim|length > 0 %}
+{%      set _comments =
+            _default.comment
+            if _default is mapping
+            and _default.comment|d(none) is iterable
+            and _default.comment is not string
+            and _default.comment|length > 0
+            else
+            _default.comment.split('\n')
+            if _default is mapping
+            and _default.comment|d(none) is string
+            and _default.comment|trim|length > 0
+            else [] %}
+{%      for _comment in _comments
+            if _comment is string and _comment|length > 0 %}
+{{ '# %s'|format(_comment)|trim }}
+{%      endfor %}
+{%      if _default is mapping
+        and _default.default|d(none) is iterable
+        and _default.default|string|trim|length > 0 %}
+{%        set _default_types = [] %}
+{%        if _default.type|d(none) is mapping
+          and _default.type.hosts|d(none) is iterable
+          and _default.type.hosts|string|trim|length > 0 %}
+{%          set _ = _default_types.append( '@%s'|format(
+                (_default.type.hosts)|join(',')|trim
+                if _default.type.hosts is iterable
+                and _default.type.hosts is not string
+                else _default.type.hosts|trim) ) %}
+{%        endif %}
+{%        if _default.type|d(none) is mapping
+          and _default.type.users|d(none) is iterable
+          and _default.type.users|string|trim|length > 0 %}
+{%          set _ = _default_types.append( ':%s'|format(
+                (_default.type.users)|join(',')|trim
+                if _default.type.users is iterable
+                and _default.type.users is not string
+                else _default.type.users|trim) ) %}
+{%        endif %}
+{%        if _default.type|d(none) is mapping
+          and _default.type.runas|d(none) is iterable
+          and _default.type.runas|string|trim|length > 0 %}
+{%          set _ = _default_types.append( '>%s'|format(
+                (_default.type.runas)|join(',')|trim
+                if _default.type.runas is iterable
+                and _default.type.runas is not string
+                else _default.type.runas|trim) ) %}
+{%        endif %}
+{%        if _default.type|d(none) is mapping
+          and _default.type.commands|d(none) is iterable
+          and _default.type.commands|string|trim|length > 0 %}
+{%          set _ = _default_types.append( '!%s'|format(
+                (_default.type.commands)|join(',')|trim
+                if _default.type.commands is iterable
+                and _default.type.commands is not string
+                else _default.type.commands|trim) ) %}
+{%        endif %}
+{%        if _default.type|d(none) is string
+          and _default.type|trim|match('^[@:>!].+') =- true %}
+{%          set _ = _default_types.append( _default.type|trim ) %}
+{%        elif _default_types|length <= 0 %}
+{%          set _ = _default_types.append('') %}
+{%        endif %}
+{%        for _default_type in _default_types %}
+{%          set _default_params = _default.default
+                if _default.default is iterable
+                and _default.default is not string
+                else [_default.default|trim] ) %}
+{%          for _default_param in _default_params
+               if _default_param|string|trim|length > 0 %}
+{%            set _disabled = '#'
+                  if _default.disabled|d(false)|bool == true else '' %}
+{%            if _default_type|trim|length > 0 %}
+{{ _disabled }}Defaults{{ _default_type|trim }} \
+{{ _disabled }}          {{ _default_param|trim }}
+{%            else %}
+{{ _disabled }}Defaults  {{ _default_param|trim }}
+{%            endif %}
+{%          endfor %}
+{%        endfor %}
+{%      elif _default is string and _default|trim|length > 0
+         and _default|trim not in ['-','#'] %}
+Defaults    {{ _default|trim }}
+{%      elif _default is string and _default|trim|length > 0
+         and _default|trim in ['-','#'] %}
+{{ '#' if _default|trim == '#' else '' }}
+{%      endif %}
+{%    endfor %}
+{%- endmacro -%}
+
+{# make_sudoer_rules --------------------------------------------------#}
+{%- macro make_sudoer_rules( in_rules = [] ) -%}
+{%    set _rules = in_rules
+          if in_rules|d(none) is iterable
+          and in_rules is not string
+          and in_rules|string|trim|length > 0 else [] %}
+{%    for _rule in _rules
+          if _rule is not none and _rule|string|trim|length > 0 %}
+{%      set _disabled = '#'
+            if _rule is mapping
+            and _rule.disabled|d(false)|bool == true
+            else '' %}
+{%      set _comments =
+            _rule.comment
+            if _rule is mapping
+            and _rule.comment|d(none) is iterable
+            and _rule.comment is not string
+            and _rule.comment|length > 0
+            else
+            _rule.comment.split('\n')
+            if _rule is mapping
+            and _rule.comment|d(none) is string
+            and _rule.comment|trim|length > 0
+            else [] %}
+{%      for _comment in _comments
+            if _comment is string and _comment|length > 0 %}
+{{ '# %s'|format(_comment)|trim }}
+{%      endfor %}
+{%      set _user_spec = { 'users':none, 'rules':[] } %}
+{%      if _rule is mapping
+        and _rule.users|d(none) is not none
+        and _rule.users|string|trim|length > 0 %}
+{%        set _ = _user_spec.update({ 'users':(
+              (_rule.users).join(',')|trim
+              if _rule.users is iterable and _entry.users is not string
+              else _rule.users|trim ) }) %}
+{%        set _rule_specs = _rule.rules
+              if _rule.rules|d(none) is iterable
+              and _rule.rules is not string
+              and _rule.rules|length > 0
+              else [] %}
+{%        if _rule_specs|length <= 0 %}
+{%          set _rule_spec = { 'hosts':'ALL',
+                'runas':'ALL', 'tags':'', 'commands':'ALL' } %}
+{%          if _rule.hosts|d(none) is iterable %}
+{%            set _ = _rule_spec.update({ 'hosts':(_rule.hosts) }) %}
+{%          endif %}
+{%          if _rule.runas|d(none) is iterable %}
+{%            set _ = _rule_spec.update({ 'runas':(_rule.hosts) }) %}
+{%          endif %}
+{%          if _rule.tags|d(none) is iterable %}
+{%            set _ = _rule_spec.update({ 'tags':(_rule.hosts) }) %}
+{%          endif %}
+{%          if _rule.commands|d(none) is iterable %}
+{%            set _ = _rule_spec.update({ 'commands':(_rule.hosts) }) %}
+{%          endif %}
+{%          set _ = _rule_specs.append( _rule_spec ) %}
+{%        endif %}
+{%        for _rule_spec_item in _rule_specs
+              if _rule_spec_item|string|trim|length > 0 %}
+{%          set _rule_spec = { 'hosts':'ALL',
+                'runas':'ALL', 'tags':'', 'commands':'ALL' } %}
+{%          if _rule_spec_item.hosts|d(none) is not none %}
+{%            set _ = _rule_spec.update({ 'hosts':(
+                 (_rule_spec_item.hosts).join(',')|trim
+                 if _rule_spec_item.hosts|d(none) is iterable
+                 and _rule_spec_item.hosts is not string
+                 and _rule_spec_item.hosts|length > 0
+                 else _rule_spec_item.hosts|trim ) }) %}
+{%          else %}
+{%            set _ = _rule_spec.update({ 'hosts':'ALL' }) %}
+{%          endif %}
+{%          if _rule_spec_item.runas|d(none) is not none %}
+{%            set _ = _rule_spec.update({ 'runas':(
+                 (_rule_spec_item.runas).join(',')|trim
+                 if _rule_spec_item.runas|d(none) is iterable
+                 and _rule_spec_item.runas is not string
+                 and _rule_spec_item.runas|length > 0
+                 else _rule_spec_item.runas|trim ) }) %}
+{%          else %}
+{%            set _ = _rule_spec.update({ 'runas':'ALL' }) %}
+{%          endif %}
+{%          if _rule_spec_item.tags|d(none) is iterable
+            and _rule_spec_item.tags is not string
+            and _rule_spec_item.tags|length > 0 %}
+{%            set _valid_tags = [] %}
+{%            for _tag in _rule_spec_item.tags
+                  if _tag|upper in (sudo_sudoers_rules_tag_spec|d([])) %}
+{%              set _ = _valid_tags.append( _tag|upper|trim ) %}
+{%            endfor %}
+{%            set _ = _rule_spec.update({ 'tags':(
+                  '%s:'|format(_valid_tags.join(':')) ) }) %}
+{%          else %}
+{%            set _ = _rule_spec.update({ 'tags':'' }) %}
+{%          endif %}
+{%          if _rule_spec_item.commands|d(none) is not none %}
+{%            set _ = _rule_spec.update({ 'commands':(
+                 (_rule_spec_item.commands).join(',')|trim
+                 if _rule_spec_item.commands|d(none) is iterable
+                 and _rule_spec_item.commands is not string
+                 and _rule_spec_item.commands|length > 0
+                 else _rule_spec_item.commands|trim ) }) %}
+{%          else %}
+{%            set _ = _rule_spec.update({ 'commands':'ALL' }) %}
+{%          endif %}
+{%          set _ = (_user_spec.rules).append( _rule_spec ) %}
+{%        endfor %}
+{%        for _user_spec_rules in user_spec.rules|d([])
+              if _user_spec.users|d(none) is not none
+              and _user_spec_rules|length > 0 %}
+{%          if _user_spec.users|trim|length >= 16 %}
+{{ '%s%s \\\n'|format(
+    _disabled, _user_spec.users|trim ) }}
+{{ '%s%-16s%s = (%s) %s%s'|format(
+    _disabled, '',
+    _user_spec_rules.hosts|trim, _user_spec_rules.runas|trim,
+    _user_spec_rules.tags|trim, _user_spec_rules.commands|trim ) }}
+{%          else %}
+{{ '%s%-16s%s = (%s) %s%s'|format(
+    _disabled, _user_spec.users|trim,
+    _user_spec_rules.hosts|trim, _user_spec_rules.runas|trim,
+    _user_spec_rules.tags|trim, _user_spec_rules.commands|trim ) }}
+{%          endif %}
+{%        endfor %}
+{%      elif _rule is string and _rule|trim|length > 0
+         and _rule|trim not in ['-','#'] %}
+{{ _rule|trim }}
+{%      elif _rule is string and _default|trim|length > 0
+         and _rule|trim in ['-','#'] %}
+{{ '#' if _rule|trim == '#' else '' }}
+{%      endif %}
+{%    endfor %}
+{%- endmacro -%}

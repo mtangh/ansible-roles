@@ -4,16 +4,25 @@
 
 - block:
 
-  - name: "sudo | Dropin '{{ sudo_sudoers_dropin_file.name|d('???') }}' to '{{ _dropin_dir_path }}'."
+  - name: "sudo | Dropin '{{ sudo_sudoers_dropin_file.name|d('???') }}' to '{{ _dropin_dir }}'."
     template:
       src: "etc/sudoers.dropin.j2"
-      dest: "{{ '%s%s/%s'|format(tests_prefix_dir|d(''),
-                _dropin_dir_path,sudo_sudoers_dropin_file.name) }}"
+      dest: "{{ %s%s'|format(tests_prefix_dir|d(''),sudoers_dropin_file_path) }}"
       owner: "{{ tests_owner|d(_dropins_file_owner) }}"
       group: "{{ tests_group|d(_dropins_file_group) }}"
       mode: "{{ _dropins_file_mode }}"
       backup: "{{ tests_run|d(false)|bool == false }}"
       validate: "{{ _dropins_validate }}"
+    vars:
+      sudoers_dropin_file_path: "{{
+        '%s%s/%s'|format(_dropin_dir,sudo_sudoers_dropin_file.name) }}"
+      sudoers_dropin_defaults: "{{ (sudo_sudoers_dropin_file|d({})).defaults|d([]) }}"
+      sudoers_dropin_rules: "{{ (sudo_sudoers_dropin_file|d({})).rules|d([]) }}"
+      sudoers_dropin_aliases:
+        host: "{{ ((sudo_sudoers_dropin_file|d({})).aliases|d({})).host|d([]) }}"
+        user: "{{ ((sudo_sudoers_dropin_file|d({})).aliases|d({})).user|d([]) }}"
+        runas: "{{ ((sudo_sudoers_dropin_file|d({})).aliases|d({})).runas|d([]) }}"
+        command: "{{ ((sudo_sudoers_dropin_file|d({})).aliases|d({})).command|d([]) }}"
     tags:
     - sudo-sudores
 
@@ -26,7 +35,9 @@
       else sudo_sudoers_dropins_dir|trim
       if sudo_sudoers_dropins_dir|d(none) is string
       and sudo_sudoers_dropins_dir|trim|length > 0
-      else '/etc/sudoers.d' }}"    
+      and sudo_sudoers_dropins_dir|
+          trim|lower|match('^(no|false)$') == false
+      else '/etc/sudoers.d' }}"
     _dropins_file_owner: "{{
       sudo_sudoers_dropin_file.owner|trim
       if sudo_sudoers_dropin_file|d(none) is mapping
