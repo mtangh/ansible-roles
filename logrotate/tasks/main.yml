@@ -19,41 +19,73 @@
   - logrotate
   - logrotate-setup
 
-- name: "logrotate | Updating logrotate configuration."
-  template:
-    src: "etc/logrotate.conf.j2"
-    dest: "{{ '%s%s'|format(tests_prefix_dir|d(''),
-              (logrotate_conf_file|d({})).path|d(
-              logrotate_conf_file|d('/etc/logrotate.conf'))) }}"
-    owner: "{{ tests_owner|d(
-               (logrotate_conf_file|d({})).owner|d(
-               logrotate_conf_file_owner|d('root'))) }}"
-    group: "{{ tests_group|d(
-               (logrotate_conf_file|d({})).group|d(
-               logrotate_conf_file_group|d('root'))) }}"
-    mode: "{{ '%04o'|format(
-              (logrotate_conf_file|d({})).mode|d(
-              logrotate_conf_file_mode|d('0644'))|int(base=8)) }}"
-    backup: "{{ tests_run|d(false)|bool == false }}"
-  tags:
-  - logrotate
-  - logrotate-conf
-
 - block:
+
+  - name: "logrotate | Updating logrotate configuration."
+    template:
+      src: "etc/logrotate.conf.j2"
+      dest: "{{ '%s%s'|format(tests_prefix_dir|d(''),_logrotate_conf_file) }}"
+      owner: "{{ tests_owner|d(_logrotate_conf_file_owner) }}"
+      group: "{{ tests_group|d(_logrotate_conf_file_group) }}"
+      mode: "{{ '%04o'|format(_logrotate_conf_file_mode) }}"
+      backup: "{{ tests_run|d(false)|bool == false }}"
+    tags:
+    - logrotate-conf
 
   - name: "logrotate | Updating dropin files."
     include: logrotate-dropin-file.yml
-    with_items: "{{ logrotate_dropin_files|d(logrotate_include_files|d([])) }}"
+    with_items: "{{
+      logrotate_dropin_files|d(logrotate_include_files|d([]))
+      if logrotate_dropin_dir|d(logrotate_include_dir|d(none)) is not none
+      and (logrotate_dropin_dir|d(logrotate_include_dir)|string|lower)|
+           match('^[ ]*(no|false)[ ]*$') == false
+      else [] }}"
     loop_control:
       loop_var: logrotate_dropin_file
     when: logrotate_dropin_file|d(none) is mapping 
           and logrotate_dropin_file.name|d(none) is string
           and logrotate_dropin_file.logfiles|d(none) is string
+    tags:
+    - logrotate-dropin-files
 
-  when: logrotate_dropin_dir|d(logrotate_include_dir|d(none)) is not none
-        and (logrotate_dropin_dir|d(logrotate_include_dir)|string|lower)|
-             match('^[ ]*(no|false)[ ]*$') == false
+  vars:
+    _logrotate_conf_file: "{{
+      p.path|trim
+      if logrotate_conf_file|d(none) is mapping
+      and logrotate_conf_file.path|d(none) is string
+      and logrotate_conf_file.path|trim|length > 0
+      else logrotate_conf_file|trim
+      if logrotate_conf_file|d(none) is string
+      and logrotate_conf_file|trim|length > 0
+      else '/etc/logrotate.conf' }}"
+    _logrotate_conf_file_owner: "{{
+      logrotate_conf_file.owner|trim
+      if logrotate_conf_file|d(none) is mapping
+      and logrotate_conf_file.owner|d(none) is string
+      and logrotate_conf_file.owner|trim|length > 0
+      else logrotate_conf_file_owner|trim
+      if logrotate_conf_file_owner|d(none) is string
+      and logrotate_conf_file_owner|trim|length > 0
+      else 'root' }}"
+    _logrotate_conf_file_group: "{{
+      logrotate_conf_file.group|trim
+      if logrotate_conf_file|d(none) is mapping
+      and logrotate_conf_file.group|d(none) is string
+      and logrotate_conf_file.group|trim|length > 0
+      else logrotate_conf_file_group|trim
+      if logrotate_conf_file_group|d(none) is string
+      and logrotate_conf_file_group|trim|length > 0
+      else 'root' }}"
+    _logrotate_conf_file_mode: "{{
+      '%04o'|format(
+      logrotate_conf_file.mode|int(base=8)
+      if logrotate_conf_file|d(none) is mapping
+      and logrotate_conf_file.mode|d(none) is not none
+      and logrotate_conf_file.mode|string|trim|length > 0
+      else logrotate_conf_file_mode|int(base=8)
+      if logrotate_conf_file_mode|d(none) is not none
+      and logrotate_conf_file_mode|string|trim|length > 0
+      else '0644'|int(base=8)) }}"
   tags:
   - logrotate
-  - logrotate-dropin-files
 
