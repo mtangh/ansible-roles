@@ -5,22 +5,10 @@
 - name: "resolver| Updating /etc/resolv.conf"
   template:
     src: "etc/resolv.conf.j2"
-    dest: "{{
-        '%s%s'|format(tests_prefix_dir|d(''),
-        (resolver_resolv_conf_file|d({})).path|d(
-        resolver_resolv_conf_file|d('/etc/resolv.conf'))) }}"
-    owner: "{{
-        tests_owner|d(
-        (resolver_resolv_conf_file|d({})).owner|d(
-        resolver_resolv_conf_file_owner|d('root'))) }}"
-    group: "{{
-        tests_owner|d(
-        (resolver_resolv_conf_file|d({})).group|d(
-        resolver_resolv_conf_file_group|d('root'))) }}"
-    mode: "{{
-        '%04o'|format(
-        (resolver_resolv_conf_file|d({})).mode|d(
-        resolver_resolv_conf_file_mode|d('0644'))|int(base=8)) }}"
+    dest: "{{ '%s%s'|format(tests_prefix_dir|d(''),_resolver_file) }}"
+    owner: "{{ tests_owner|d(_resolver_file_owner) }}"
+    group: "{{ tests_owner|d(_resolver_file_group) }}"
+    mode: "{{ _resolver_file_mode }}"
     backup: "{{ tests_run|d(false)|bool == false }}"
   when: platforms_supported|d(false)|bool == true
         and ( (resolver_domain|d(none) is string
@@ -33,6 +21,44 @@
            and resolver_sortlist|length > 0)
            or (resolver_options|d(none) is iterable
            and resolver_options|length > 0) )
+  vars:
+    _resolver_file: "{{
+      reaolver_resolv_conf_file.path|trim
+      if reaolver_resolv_conf_file|d(none) is mapping
+      and reaolver_resolv_conf_file.path|d(none) is string
+      and reaolver_resolv_conf_file.path|trim|length > 0
+      else reaolver_resolv_conf_file|trim
+      if reaolver_resolv_conf_file|d(none) is string
+      and reaolver_resolv_conf_file|trim|length > 0
+      else '/etc/resolv.conf' }}"
+    _resolver_file_owner: "{{
+      reaolver_resolv_conf_file.owner|trim
+      if reaolver_resolv_conf_file|d(none) is mapping
+      and reaolver_resolv_conf_file.owner|d(none) is string
+      and reaolver_resolv_conf_file.owner|trim|length > 0
+      else reaolver_resolv_conf_file_owner|trim
+      if reaolver_resolv_conf_file_owner|d(none) is string
+      and reaolver_resolv_conf_file_owner|trim|length > 0
+      else 'root' }}"
+    _resolver_file_group: "{{
+      reaolver_resolv_conf_file.hroup|trim
+      if reaolver_resolv_conf_file|d(none) is mapping
+      and reaolver_resolv_conf_file.group|d(none) is string
+      and reaolver_resolv_conf_file.group|trim|length > 0
+      else reaolver_resolv_conf_file_group|trim
+      if reaolver_resolv_conf_file_group|d(none) is string
+      and reaolver_resolv_conf_file_group|trim|length > 0
+      else 'root' }}"
+    _resolver_file_mode: "{{
+      '%04o'|format(
+      reaolver_resolv_conf_file.mode|int(base=8)
+      if reaolver_resolv_conf_file|d(none) is mapping
+      and reaolver_resolv_conf_file.mode|d(none) is not none
+      and reaolver_resolv_conf_file.mode|string|trim|length > 0
+      else reaolver_resolv_conf_file_mode|int(base=8)
+      if reaolver_resolv_conf_file_mode|d(none) is not none
+      and reaolver_resolv_conf_file_mode|string|trim|length > 0
+      else '0644'|int(base=8)) }}"
   tags:
   - resolver
 
