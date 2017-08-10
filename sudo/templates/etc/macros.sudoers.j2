@@ -181,7 +181,7 @@ Defaults    {{ _default|trim }}
         and _rule.users|string|trim|length > 0 %}
 {%        set _ = _user_spec.update({ 'users':(
               (_rule.users).join(',')|trim
-              if _rule.users is iterable and _entry.users is not string
+              if _rule.users is iterable and _rule.users is not string
               else _rule.users|trim ) }) %}
 {%        set _rule_specs = _rule.rules
               if _rule.rules|d(none) is iterable
@@ -255,7 +255,7 @@ Defaults    {{ _default|trim }}
 {%          set _ = (_user_spec.rules).append( _rule_spec ) %}
 {%        endfor %}
 {%        for _user_spec_rules in user_spec.rules|d([])
-              if _user_spec.users|d(none) is not none
+              if _user_spec_rules|d(none) is not none
               and _user_spec_rules|length > 0 %}
 {%          if _user_spec.users|trim|length >= 16 %}
 {{ '%s%s \\\n'|format(
@@ -274,7 +274,7 @@ Defaults    {{ _default|trim }}
 {%      elif _rule is string and _rule|trim|length > 0
          and _rule|trim not in ['-','#'] %}
 {{ _rule|trim }}
-{%      elif _rule is string and _default|trim|length > 0
+{%      elif _rule is string and _rule|trim|length > 0
          and _rule|trim in ['-','#'] %}
 {{ '#' if _rule|trim == '#' else '' }}
 {%      endif %}

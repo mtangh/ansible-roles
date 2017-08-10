@@ -44,7 +44,6 @@
 
   - name: "sudo | Process {{ _sudoers_dropins_dir }}."
     include: 'dropins.yml'
-    static: yes
     with_items: "{{
       sudo_sudoers_dropins|d([])
       if _sudoers_dropins_dir|d('')|is_dir
@@ -96,7 +95,7 @@
       else sudo_sudoers_file_mode|int(base=8)
       if sudo_sudoers_file_mode|d(none) is not none
       and sudo_sudoers_file_mode|string|trim|length > 0
-      else '0440'|int(base=8)) }}"
+      else '0440'|int(base=8) ) }}"
     _sudoers_dropins_dir: "{{
       sudo_sudoers_dropins_dir.path|trim
       if sudo_sudoers_dropins_dir|d(none) is mapping
@@ -106,11 +105,11 @@
       if sudo_sudoers_dropins_dir|d(none) is string
       and sudo_sudoers_dropins_dir|trim|length > 0
       and sudo_sudoers_dropins_dir|
-          trim|lower|match('^(no|false)$') == false
+        trim|lower|match('^(no|false)$') == false
       else '/etc/sudoers.d'
       if sudo_sudoers_dropins_dir|d(none) is none
-      or sudo_sudoers_dropins_dir|string
-         trim|lower|match('^(no|false)$') == false
+      or sudo_sudoers_dropins_dir|string|
+        trim|lower|match('^(no|false)$') == false
       else '' }}"
     _sudoers_validate: "{{
       sudo_sodoers_validate_command|trim

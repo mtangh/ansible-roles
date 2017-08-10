@@ -22,7 +22,7 @@
 # Host_Alias     FILESERVERS = fs1, fs2
 # Host_Alias     MAILSERVERS = smtp, smtp2
 #
-{{  m.make_aliases_from( 'Host_Alias', (sudoers_aliases|d({})).host|d([]) ) }}
+{{  m.make_aliases_from( 'Host_Alias', (sudoers_aliases|d({})).host|d([]) ) -}}
 
 ##
 # User alias specification
@@ -34,12 +34,12 @@
 #
 # User_Alias ADMINS = jsmith, mikem
 #
-{{  m.make_aliases_from( 'User_Alias', (sudoers_aliases|d({})).user|d([]) ) }}
+{{  m.make_aliases_from( 'User_Alias', (sudoers_aliases|d({})).user|d([]) ) -}}
 
 ##
 # Runas alias specification
 ##
-{{  m.make_aliases_from( 'Runas_Alias', (sudoers_aliases|d({})).runas|d([]) ) }}
+{{  m.make_aliases_from( 'Runas_Alias', (sudoers_aliases|d({})).runas|d([]) ) -}}
 
 ##
 # Command alias specification
@@ -64,7 +64,7 @@
 # - Drivers
 #   Cmnd_Alias DRIVERS = /sbin/modprobe
 #
-{{  m.make_aliases_from( 'Cmnd_Alias', (sudoers_aliases|d({})).command|d([]) ) }}
+{{  m.make_aliases_from( 'Cmnd_Alias', (sudoers_aliases|d({})).command|d([]) ) -}}
 
 ##
 # Defaults specification
@@ -72,7 +72,7 @@
 #
 # Override built-in defaults
 #
-{{  m.make_defaults_from( sudoers_defaults|d([]) ) }}
+{{  m.make_defaults_from( sudoers_defaults|d([]) ) -}}
 
 ##
 # User privilege specification
@@ -91,7 +91,7 @@ root            ALL=(ALL) ALL
 #%users          ALL=/sbin/mount /cdrom,/sbin/umount /cdrom
 #%users          localhost=/sbin/shutdown -h now
 #
-{{  m.make_defaults_from( sudoers_rules|d([]) ) }}
+{{  m.make_sudoer_rules( sudoers_rules|d([]) ) -}}
 {%  set _dropins_dir = sudoers_dropins_dir|d('')|string|trim %}
 
 ##
@@ -100,7 +100,7 @@ root            ALL=(ALL) ALL
 # (the # here does not mean a comment)
 {%  endif %}
 ##
-{%  if _dropins_dir|length <= 0 %}#{% endif -%}
+{%  if _dropins_dir|length > 0 %}
 includedir {{ _dropins_dir if _dropins_dir|length >= 0 else '/etc/sudoers.d' }}
 {%  endif %}
 
